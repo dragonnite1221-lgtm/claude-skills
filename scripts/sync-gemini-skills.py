@@ -75,8 +75,9 @@ def find_skills(repo_root: Path) -> List[Dict]:
     skills = []
     seen_names = set()
 
-    # 1. Find all SKILL.md files recursively
-    for skill_md in repo_root.rglob("SKILL.md"):
+    # 1. Find all SKILL.md files recursively. Keep the scan order stable so
+    # duplicate skill names get the same generated mirror names on every host.
+    for skill_md in iter_skill_files(repo_root):
         # Skip internal .gemini directory
         if ".gemini" in skill_md.parts:
             continue
@@ -126,6 +127,14 @@ def find_skills(repo_root: Path) -> List[Dict]:
 
     skills.sort(key=lambda s: (s["category"], s["name"]))
     return skills
+
+
+def iter_skill_files(repo_root: Path) -> List[Path]:
+    """Return SKILL.md files in deterministic repository-relative order."""
+    return sorted(
+        repo_root.rglob("SKILL.md"),
+        key=lambda path: path.relative_to(repo_root).as_posix(),
+    )
 
 
 def extract_skill_description(skill_md_path: Path) -> Optional[str]:

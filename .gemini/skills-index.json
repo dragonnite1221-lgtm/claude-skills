@@ -294,6 +294,11 @@
       "description": "Use when a security incident has been detected or declared and needs classification, triage, escalation path determination, and forensic evidence collection. Covers SEV1-SEV4 classification, false positive filtering, incident taxonomy, and NIST SP 800-61 lifecycle."
     },
     {
+      "name": "init",
+      "category": "engineering",
+      "description": "Set up Playwright in a project. Use when user says \"set up playwright\", \"add e2e tests\", \"configure playwright\", \"testing setup\", \"init playwright\", or \"add test infrastructure\"."
+    },
+    {
       "name": "migrate",
       "category": "engineering",
       "description": "Migrate from Cypress or Selenium to Playwright. Use when user mentions \"cypress\", \"selenium\", \"migrate tests\", \"convert tests\", \"switch to playwright\", \"move from cypress\", or \"replace selenium\"."
@@ -331,7 +336,7 @@
     {
       "name": "review",
       "category": "engineering",
-      "description": "Analyze auto-memory for promotion candidates, stale entries, consolidation opportunities, and health metrics."
+      "description": "Review Playwright tests for quality. Use when user says \"review tests\", \"check test quality\", \"audit tests\", \"improve tests\", \"test code review\", or \"playwright best practices check\"."
     },
     {
       "name": "security-pen-testing",
@@ -342,11 +347,6 @@
       "name": "self-improving-agent",
       "category": "engineering",
       "description": "Curate Claude Code's auto-memory into durable project knowledge. Analyze MEMORY.md for patterns, promote proven learnings to CLAUDE.md and .claude/rules/, extract recurring solutions into reusable skills. Use when: (1) reviewing what Claude has learned about your project, (2) graduating a pattern from notes to enforced rules, (3) turning a debugging solution into a skill, (4) checking memory health and capacity."
-    },
-    {
-      "name": "self-improving-agent-skills-status",
-      "category": "engineering",
-      "description": "Memory health dashboard showing line counts, topic files, capacity, stale entries, and recommendations."
     },
     {
       "name": "senior-architect",
@@ -414,19 +414,19 @@
       "description": "Security engineering toolkit for threat modeling, vulnerability analysis, secure architecture, and penetration testing. Includes STRIDE analysis, OWASP guidance, cryptography patterns, and security scanning tools. Use when the user asks about security reviews, threat analysis, vulnerability assessments, secure coding practices, security audits, attack surface analysis, CVE remediation, or security best practices."
     },
     {
-      "name": "skills-init",
-      "category": "engineering",
-      "description": "Set up Playwright in a project. Use when user says \"set up playwright\", \"add e2e tests\", \"configure playwright\", \"testing setup\", \"init playwright\", or \"add test infrastructure\"."
-    },
-    {
       "name": "skills-review",
       "category": "engineering",
-      "description": "Review Playwright tests for quality. Use when user says \"review tests\", \"check test quality\", \"audit tests\", \"improve tests\", \"test code review\", or \"playwright best practices check\"."
+      "description": "Analyze auto-memory for promotion candidates, stale entries, consolidation opportunities, and health metrics."
     },
     {
       "name": "snowflake-development",
       "category": "engineering",
       "description": "Use when writing Snowflake SQL, building data pipelines with Dynamic Tables or Streams/Tasks, using Cortex AI functions, creating Cortex Agents, writing Snowpark Python, configuring dbt for Snowflake, or troubleshooting Snowflake errors."
+    },
+    {
+      "name": "status",
+      "category": "engineering",
+      "description": "Memory health dashboard showing line counts, topic files, capacity, stale entries, and recommendations."
     },
     {
       "name": "stripe-integration-expert",
@@ -482,6 +482,11 @@
       "name": "autoresearch-agent",
       "category": "engineering-advanced",
       "description": "Autonomous experiment loop that optimizes any file by a measurable metric. Inspired by Karpathy's autoresearch. The agent edits a target file, runs a fixed evaluation, keeps improvements (git commit), discards failures (git reset), and loops indefinitely. Use when: user wants to optimize code speed, reduce bundle/image size, improve test pass rate, optimize prompts, improve content quality (headlines, copy, CTR), or run any measurable improvement loop. Requires: a target file, an evaluation command that outputs a metric, and a git repo."
+    },
+    {
+      "name": "autoresearch-agent-skills-status",
+      "category": "engineering-advanced",
+      "description": "Show experiment dashboard with results, active loops, and progress."
     },
     {
       "name": "behuman",
@@ -579,11 +584,6 @@
       "description": "Helm chart development agent skill and plugin for Claude Code, Codex, Gemini CLI, Cursor, OpenClaw \u2014 chart scaffolding, values design, template patterns, dependency management, security hardening, and chart testing. Use when: user wants to create or improve Helm charts, design values.yaml files, implement template helpers, audit chart security (RBAC, network policies, pod security), manage subcharts, or run helm lint/test."
     },
     {
-      "name": "init",
-      "category": "engineering-advanced",
-      "description": "Create a new AgentHub collaboration session with task, agent count, and evaluation criteria."
-    },
-    {
       "name": "interview-system-designer",
       "category": "engineering-advanced",
       "description": "This skill should be used when the user asks to \"design interview processes\", \"create hiring pipelines\", \"calibrate interview loops\", \"generate interview questions\", \"design competency matrices\", \"analyze interviewer bias\", \"create scoring rubrics\", \"build question banks\", or \"optimize hiring systems\". Use for designing role-specific interview loops, competency assessments, and hiring calibration systems."
@@ -666,7 +666,7 @@
     {
       "name": "run",
       "category": "engineering-advanced",
-      "description": "Run a single experiment iteration. Edit the target file, evaluate, keep or discard."
+      "description": "One-shot lifecycle command that chains init \u2192 baseline \u2192 spawn \u2192 eval \u2192 merge in a single invocation."
     },
     {
       "name": "runbook-generator",
@@ -704,9 +704,14 @@
       "description": "Skill Tester"
     },
     {
+      "name": "skills-init",
+      "category": "engineering-advanced",
+      "description": "Create a new AgentHub collaboration session with task, agent count, and evaluation criteria."
+    },
+    {
       "name": "skills-run",
       "category": "engineering-advanced",
-      "description": "One-shot lifecycle command that chains init \u2192 baseline \u2192 spawn \u2192 eval \u2192 merge in a single invocation."
+      "description": "Run a single experiment iteration. Edit the target file, evaluate, keep or discard."
     },
     {
       "name": "skills-status",
@@ -732,11 +737,6 @@
       "name": "statistical-analyst",
       "category": "engineering-advanced",
       "description": "Run hypothesis tests, analyze A/B experiment results, calculate sample sizes, and interpret statistical significance with effect sizes. Use when you need to validate whether observed differences are real, size an experiment correctly before launch, or interpret test results with confidence."
-    },
-    {
-      "name": "status",
-      "category": "engineering-advanced",
-      "description": "Show experiment dashboard with results, active loops, and progress."
     },
     {
       "name": "tc-tracker",
