@@ -85,13 +85,10 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
+      - name: Set up Tessl CLI
+        uses: tesslio/setup-tessl@v2
         with:
-          node-version: 20
-
-      - name: Install Tessl CLI
-        run: npm install -g tessl
+          token: ${{ secrets.TESSL_TOKEN }}
 
       - name: Review changed skills
         id: review
