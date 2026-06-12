@@ -666,7 +666,7 @@
     {
       "name": "run",
       "category": "engineering-advanced",
-      "description": "One-shot lifecycle command that chains init \u2192 baseline \u2192 spawn \u2192 eval \u2192 merge in a single invocation."
+      "description": "Run a single experiment iteration. Edit the target file, evaluate, keep or discard."
     },
     {
       "name": "runbook-generator",
@@ -706,12 +706,12 @@
     {
       "name": "skills-run",
       "category": "engineering-advanced",
-      "description": "Run a single experiment iteration. Edit the target file, evaluate, keep or discard."
+      "description": "One-shot lifecycle command that chains init \u2192 baseline \u2192 spawn \u2192 eval \u2192 merge in a single invocation."
     },
     {
       "name": "skills-status",
       "category": "engineering-advanced",
-      "description": "Show experiment dashboard with results, active loops, and progress."
+      "description": "Show DAG state, agent progress, and branch status for an AgentHub session."
     },
     {
       "name": "spawn",
@@ -736,7 +736,7 @@
     {
       "name": "status",
       "category": "engineering-advanced",
-      "description": "Show DAG state, agent progress, and branch status for an AgentHub session."
+      "description": "Show experiment dashboard with results, active loops, and progress."
     },
     {
       "name": "tc-tracker",

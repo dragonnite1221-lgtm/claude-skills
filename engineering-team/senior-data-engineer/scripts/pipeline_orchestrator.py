@@ -23,6 +23,7 @@ except ImportError:
     HAS_YAML = False
 import logging
 import argparse
+import ast
 from pathlib import Path
 from typing import Dict, List, Optional, Any
 from datetime import datetime, timedelta
@@ -462,7 +463,7 @@ with DAG(
 
         # Try to parse the code
         try:
-            compile(code, '<string>', 'exec')
+            ast.parse(code)
         except SyntaxError as e:
             issues.append(f"Syntax error: {e}")
 
@@ -574,7 +575,7 @@ if __name__ == "__main__":
             issues.append("No tasks defined with @task decorator")
 
         try:
-            compile(code, '<string>', 'exec')
+            ast.parse(code)
         except SyntaxError as e:
             issues.append(f"Syntax error: {e}")
 
@@ -704,7 +705,7 @@ def {config.name.replace('-', '_')}_job():
             issues.append("No ops defined with @op decorator")
 
         try:
-            compile(code, '<string>', 'exec')
+            ast.parse(code)
         except SyntaxError as e:
             issues.append(f"Syntax error: {e}")
 
