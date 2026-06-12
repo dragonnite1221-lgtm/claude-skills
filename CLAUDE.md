@@ -29,6 +29,10 @@ This repository uses **modular documentation**. For domain-specific guidance, se
 | **Standards Library** | [standards/CLAUDE.md](standards/CLAUDE.md) | Communication, quality, git, security standards |
 | **Templates** | [templates/CLAUDE.md](templates/CLAUDE.md) | Template system usage |
 
+For overlap between `engineering-team/` and `engineering/`, use the
+[Engineering Skill Matrix](documentation/ENGINEERING_SKILL_MATRIX.md). Keep the
+folders stable and add routing guidance instead of moving skills between them.
+
 ## Architecture Overview
 
 ### Repository Structure
