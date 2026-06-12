@@ -1,153 +1,8 @@
 {
   "version": "1.0.0",
   "name": "gemini-cli-skills",
-  "total_skills": 297,
+  "total_skills": 239,
   "skills": [
-    {
-      "name": "README",
-      "category": "agent",
-      "description": "Agent from personas"
-    },
-    {
-      "name": "TEMPLATE",
-      "category": "agent",
-      "description": "One paragraph describing what this agent does, who it's for, and when to activate it."
-    },
-    {
-      "name": "content-strategist",
-      "category": "agent",
-      "description": "Builds content engines that rank, convert, and compound. Thinks in systems \u2014 topic clusters, not individual posts. Every piece earns its place or gets killed."
-    },
-    {
-      "name": "cs-agile-product-owner",
-      "category": "agent",
-      "description": "Agile product owner agent for epic breakdown, sprint planning, backlog refinement, and INVEST-compliant user story generation"
-    },
-    {
-      "name": "cs-ceo-advisor",
-      "category": "agent",
-      "description": "Strategic leadership advisor for CEOs covering vision, strategy, board management, investor relations, and organizational culture"
-    },
-    {
-      "name": "cs-content-creator",
-      "category": "agent",
-      "description": "AI-powered content creation specialist for brand voice consistency, SEO optimization, and multi-platform content strategy"
-    },
-    {
-      "name": "cs-cto-advisor",
-      "category": "agent",
-      "description": "Technical leadership advisor for CTOs covering technology strategy, team scaling, architecture decisions, and engineering excellence"
-    },
-    {
-      "name": "cs-demand-gen-specialist",
-      "category": "agent",
-      "description": "Demand generation and customer acquisition specialist for lead generation, conversion optimization, and multi-channel acquisition campaigns"
-    },
-    {
-      "name": "cs-engineering-lead",
-      "category": "agent",
-      "description": "Engineering Team Lead agent for coordinating QA, security, data engineering, ML, and frontend/backend teams. Orchestrates engineering-team skills for team-level technical decisions. Spawn when users need team coordination, tech stack evaluation, incident response, or cross-functional engineering work."
-    },
-    {
-      "name": "cs-financial-analyst",
-      "category": "agent",
-      "description": "Financial Analyst agent for DCF valuation, financial modeling, budgeting, forecasting, and SaaS metrics (ARR, MRR, churn, CAC, LTV, NRR). Orchestrates finance skills. Spawn when users need financial analysis, valuation models, budget planning, ratio analysis, SaaS health checks, or unit economics projections."
-    },
-    {
-      "name": "cs-growth-strategist",
-      "category": "agent",
-      "description": "Growth Strategist agent for revenue operations, sales engineering, customer success, and business development. Orchestrates business-growth skills. Spawn when users need pipeline analysis, churn prevention, expansion scoring, sales demos, or proposal writing."
-    },
-    {
-      "name": "cs-karpathy-reviewer",
-      "category": "agent",
-      "description": "Reviews staged git changes against Karpathy's 4 coding principles. Runs complexity_checker on changed files, diff_surgeon on the diff, and produces a verdict with specific fix recommendations. Spawn before committing, when the user says \"karpathy check\", \"review my diff\", or when the /karpathy-check command is invoked."
-    },
-    {
-      "name": "cs-product-analyst",
-      "category": "agent",
-      "description": "Product analytics agent for KPI definition, dashboard setup, experiment design, and test result interpretation."
-    },
-    {
-      "name": "cs-product-manager",
-      "category": "agent",
-      "description": "Product management agent for feature prioritization, customer discovery, PRD development, and roadmap planning using RICE framework"
-    },
-    {
-      "name": "cs-product-strategist",
-      "category": "agent",
-      "description": "Product strategy agent for quarterly OKR planning, competitive landscape analysis, product vision development, and strategy pivot evaluation"
-    },
-    {
-      "name": "cs-project-manager",
-      "category": "agent",
-      "description": "Project Manager agent for sprint planning, Jira/Confluence workflows, Scrum ceremonies, and stakeholder reporting. Orchestrates project-management skills."
-    },
-    {
-      "name": "cs-quality-regulatory",
-      "category": "agent",
-      "description": "Quality & Regulatory agent for ISO 13485 QMS, MDR compliance, FDA submissions, GDPR/DSGVO, and ISMS audits. Orchestrates ra-qm-team skills. Spawn when users need regulatory strategy, audit preparation, CAPA management, risk management, or compliance documentation."
-    },
-    {
-      "name": "cs-senior-engineer",
-      "category": "agent",
-      "description": "Senior Engineer agent for architecture decisions, code review, DevOps, and API design. Orchestrates engineering and engineering-team skills for technical implementation work. Spawn when users need system design, code quality review, CI/CD pipeline setup, or infrastructure decisions."
-    },
-    {
-      "name": "cs-ux-researcher",
-      "category": "agent",
-      "description": "UX research agent for research planning, persona generation, journey mapping, and usability test analysis"
-    },
-    {
-      "name": "cs-wiki-ingestor",
-      "category": "agent",
-      "description": "Dispatched sub-agent that ingests a new source into an LLM Wiki vault. Reads the source, proposes TL;DR and key claims, identifies which entity/concept/synthesis pages will be touched, flags contradictions with existing pages, and \u2014 after user confirmation \u2014 writes the source summary, updates cross-references across 5-15 pages, regenerates the index, and appends a standardized log entry. Spawn when the user says \"ingest this\", \"add this paper/article/book to the wiki\", or drops a file into raw/."
-    },
-    {
-      "name": "cs-wiki-librarian",
-      "category": "agent",
-      "description": "Dispatched sub-agent that answers queries against an LLM Wiki vault. Reads index.md first, drills into 3-10 relevant pages across categories, synthesizes an answer with inline [[wikilink]] citations, and offers to file the answer back into the wiki as a new comparison or synthesis page. Spawn when the user asks a substantive question the wiki might answer, says \"what does the wiki say about X\", \"compare A and B across my sources\", or wants to explore a topic."
-    },
-    {
-      "name": "cs-wiki-linter",
-      "category": "agent",
-      "description": "Dispatched sub-agent that runs a periodic health check on an LLM Wiki vault. Runs mechanical checks via scripts (orphans, broken links, stale pages, missing frontmatter, duplicate titles, log gaps), does semantic checks (contradictions, stale claims, cross-reference gaps, concepts missing their own page), and produces a markdown report with suggested actions. Spawn weekly, after batch ingests, or when the user says \"check the wiki\" / \"lint my wiki\" / \"audit the vault\"."
-    },
-    {
-      "name": "cs-workspace-admin",
-      "category": "agent",
-      "description": "Google Workspace administration agent using the gws CLI. Orchestrates workspace setup, Gmail/Drive/Sheets/Calendar automation, security audits, and recipe execution. Spawn when users need Google Workspace automation, gws CLI help, or workspace administration."
-    },
-    {
-      "name": "devops-engineer",
-      "category": "agent",
-      "description": "Builds infrastructure that scales without babysitting. Automates everything worth automating. Monitors before it breaks. Treats clicking in consoles as a production incident waiting to happen."
-    },
-    {
-      "name": "finance-lead",
-      "category": "agent",
-      "description": "Startup CFO who builds models that survive contact with reality. Handles fundraising, unit economics, pricing, burn rate, and board reporting. Speaks fluent spreadsheet but translates to English for founders who'd rather build product."
-    },
-    {
-      "name": "growth-marketer",
-      "category": "agent",
-      "description": "Growth marketing specialist for bootstrapped startups and indie hackers. Builds content engines, optimizes funnels, runs launch sequences, and finds scalable acquisition channels \u2014 all on a budget that makes enterprise marketers cry."
-    },
-    {
-      "name": "product-manager",
-      "category": "agent",
-      "description": "Ships outcomes, not features. Writes specs engineers actually read. Prioritizes ruthlessly. Kills darlings when the data says so. Operates at the intersection of user needs, business goals, and engineering reality."
-    },
-    {
-      "name": "solo-founder",
-      "category": "agent",
-      "description": "Your co-founder who doesn't exist yet. Covers product, engineering, marketing, and strategy for one-person startups \u2014 because nobody's stopping you from making bad decisions and somebody should."
-    },
-    {
-      "name": "startup-cto",
-      "category": "agent",
-      "description": "Technical co-founder who's been through two startups and learned what actually matters. Makes architecture decisions, selects tech stacks, builds engineering culture, and prepares for technical due diligence \u2014 all while shipping fast with a small team."
-    },
     {
       "name": "business-growth-bundle",
       "category": "business-growth",
@@ -344,151 +199,6 @@
       "description": "/em -stress-test \u2014 Business Assumption Stress Testing"
     },
     {
-      "name": "changelog",
-      "category": "command",
-      "description": "Generate changelogs from git history and validate conventional commits. Usage: /changelog <generate|lint> [options]"
-    },
-    {
-      "name": "cmd-a11y-audit",
-      "category": "command",
-      "description": "Scan a frontend project for WCAG 2.2 accessibility violations and fix them. Usage: /a11y-audit [path]"
-    },
-    {
-      "name": "cmd-code-to-prd",
-      "category": "command",
-      "description": "Reverse-engineer a frontend codebase into a PRD. Usage: /code-to-prd [path]"
-    },
-    {
-      "name": "cmd-focused-fix",
-      "category": "command",
-      "description": "Deep-dive feature repair \u2014 systematically fix an entire feature/module across all its files and dependencies. Usage: /focused-fix <feature-path>"
-    },
-    {
-      "name": "competitive-matrix",
-      "category": "command",
-      "description": "Build competitive analysis matrices with scoring and gap analysis. Usage: /competitive-matrix <analyze> [options]"
-    },
-    {
-      "name": "financial-health",
-      "category": "command",
-      "description": "Run financial ratio analysis, DCF valuation, budget variance analysis, and rolling forecasts. Usage: /financial-health <ratios|dcf|budget|forecast> <data.json>"
-    },
-    {
-      "name": "google-workspace",
-      "category": "command",
-      "description": "Google Workspace CLI operations: setup diagnostics, security audit, recipe discovery, and output analysis. Usage: /google-workspace <setup|audit|recipe|analyze> [options]"
-    },
-    {
-      "name": "karpathy-check",
-      "category": "command",
-      "description": "Run Karpathy's 4-principle review on staged changes or the last commit. Checks complexity, diff noise, hidden assumptions, and goal verification. Usage /karpathy-check [--last-commit]"
-    },
-    {
-      "name": "okr",
-      "category": "command",
-      "description": "Generate OKR cascades from company strategy to team objectives. Usage: /okr generate <strategy>"
-    },
-    {
-      "name": "persona",
-      "category": "command",
-      "description": "Generate data-driven user personas for UX research and product design. Usage: /persona generate [options]"
-    },
-    {
-      "name": "pipeline",
-      "category": "command",
-      "description": "Detect stack and generate CI/CD pipeline configs. Usage: /pipeline <detect|generate> [options]"
-    },
-    {
-      "name": "plugin-audit",
-      "category": "command",
-      "description": "|"
-    },
-    {
-      "name": "prd",
-      "category": "command",
-      "description": "Quick PRD generation command. Usage: /prd <feature-or-problem>"
-    },
-    {
-      "name": "project-health",
-      "category": "command",
-      "description": "Portfolio health dashboard and risk matrix analysis. Usage: /project-health <dashboard|risk> [options]"
-    },
-    {
-      "name": "retro",
-      "category": "command",
-      "description": "Analyze sprint retrospectives for patterns and action item tracking. Usage: /retro analyze <retro_data.json>"
-    },
-    {
-      "name": "rice",
-      "category": "command",
-      "description": "RICE feature prioritization with scoring and capacity planning. Usage: /rice prioritize <features.csv> [options]"
-    },
-    {
-      "name": "saas-health",
-      "category": "command",
-      "description": "Calculate SaaS health metrics (ARR, MRR, churn, CAC, LTV, NRR) and benchmark against industry standards. Usage: /saas-health <metrics|quick-ratio|simulate> [options]"
-    },
-    {
-      "name": "seo-auditor",
-      "category": "command",
-      "description": "|"
-    },
-    {
-      "name": "sprint-health",
-      "category": "command",
-      "description": "Sprint health scoring and velocity analysis for agile teams. Usage: /sprint-health <analyze|velocity> [options]"
-    },
-    {
-      "name": "sprint-plan",
-      "category": "command",
-      "description": "Sprint planning shortcut. Usage: /sprint-plan <goal> [capacity]"
-    },
-    {
-      "name": "tc",
-      "category": "command",
-      "description": "Track technical changes with structured records, a state machine, and session handoff. Usage: /tc <init|create|update|status|resume|close|export|dashboard> [args]"
-    },
-    {
-      "name": "tdd",
-      "category": "command",
-      "description": "Generate tests, analyze coverage, and run TDD workflows. Usage: /tdd <generate|coverage|validate> [options]"
-    },
-    {
-      "name": "tech-debt",
-      "category": "command",
-      "description": "Scan, prioritize, and report technical debt. Usage: /tech-debt <scan|prioritize|report> [options]"
-    },
-    {
-      "name": "user-story",
-      "category": "command",
-      "description": "Generate user stories with acceptance criteria and sprint planning. Usage: /user-story <generate|sprint> [options]"
-    },
-    {
-      "name": "wiki-ingest",
-      "category": "command",
-      "description": "Ingest a source file from raw/ into the LLM Wiki \u2014 read, discuss, write summary page, update cross-references across 5-15 pages, regenerate index, append to log. Usage /wiki-ingest <path-to-source>"
-    },
-    {
-      "name": "wiki-init",
-      "category": "command",
-      "description": "Bootstrap a fresh LLM Wiki vault with the three-layer structure, schema files, and starter templates. Usage /wiki-init <path> --topic \"<topic>\" [--tool all|claude-code|codex|cursor|antigravity]"
-    },
-    {
-      "name": "wiki-lint",
-      "category": "command",
-      "description": "Run a health check on the LLM Wiki vault \u2014 mechanical checks (orphans, broken links, stale pages, missing frontmatter, log gap, duplicates) plus semantic checks (contradictions, cross-reference gaps, concepts missing their own page). Outputs a markdown report with suggested actions. Usage /wiki-lint [--stale-days N] [--log-gap-days N]"
-    },
-    {
-      "name": "wiki-log",
-      "category": "command",
-      "description": "Show recent entries from the LLM Wiki log (wiki/log.md). Uses the standardized ## [YYYY-MM-DD] header format so grep + tail works. Usage /wiki-log [--last N] [--op ingest|query|lint|...]"
-    },
-    {
-      "name": "wiki-query",
-      "category": "command",
-      "description": "Query the LLM Wiki \u2014 reads index.md first, drills into 3-10 relevant pages, synthesizes an answer with inline [[wikilink]] citations, and offers to file the answer back as a new comparison or synthesis page. Usage /wiki-query \"<question>\""
-    },
-    {
       "name": "a11y-audit",
       "category": "engineering",
       "description": "Accessibility audit skill for scanning, fixing, and verifying WCAG 2.2 Level A and AA compliance across React, Next.js, Vue, Angular, Svelte, and plain HTML codebases. Use when auditing accessibility, fixing a11y violations, checking color contrast, generating compliance reports, or integrating accessibility checks into CI/CD pipelines."
@@ -516,7 +226,7 @@
     {
       "name": "browserstack",
       "category": "engineering",
-      "description": ">-"
+      "description": "Run tests on BrowserStack. Use when user mentions \"browserstack\", \"cross-browser\", \"cloud testing\", \"browser matrix\", \"test on safari\", \"test on firefox\", or \"browser compatibility\"."
     },
     {
       "name": "cloud-security",
@@ -531,7 +241,7 @@
     {
       "name": "coverage",
       "category": "engineering",
-      "description": ">-"
+      "description": "Analyze test coverage gaps. Use when user says \"test coverage\", \"what's not tested\", \"coverage gaps\", \"missing tests\", \"coverage report\", or \"what needs testing\"."
     },
     {
       "name": "email-template-builder",
@@ -546,7 +256,7 @@
     {
       "name": "epic-design",
       "category": "engineering",
-      "description": ">"
+      "description": "Build immersive, cinematic 2.5D interactive websites using scroll storytelling, parallax depth, text animations, and premium scroll effects \u2014 no WebGL required. Use this skill for any web design task: landing pages, product sites, hero sections, scroll animations, parallax, sticky sections, section overlaps, floating products between sections, clip-path reveals, text that flies in from sides, words that light up on scroll, curtain drops, iris opens, card stacks, bleed typography, and any site that should feel cinematic or premium. Trigger on phrases like \"make it feel alive\", \"Apple-style animation\", \"sections that overlap\", \"product rises between sections\", \"immersive\", \"scrollytelling\", or any scroll-driven visual effect. Covers 45+ techniques across 8 categories. Always inspects, judges, and plans assets before coding. Use aggressively for ANY web design task."
     },
     {
       "name": "extract",
@@ -556,7 +266,7 @@
     {
       "name": "fix",
       "category": "engineering",
-      "description": ">-"
+      "description": "Fix failing or flaky Playwright tests. Use when user says \"fix test\", \"flaky test\", \"test failing\", \"debug test\", \"test broken\", \"test passes sometimes\", or \"intermittent failure\"."
     },
     {
       "name": "gcp-cloud-architect",
@@ -566,7 +276,7 @@
     {
       "name": "generate",
       "category": "engineering",
-      "description": ">-"
+      "description": "Generate Playwright tests. Use when user says \"write tests\", \"generate tests\", \"add tests for\", \"test this component\", \"e2e test\", \"create test for\", \"test this page\", or \"test this feature\"."
     },
     {
       "name": "google-workspace-cli",
@@ -584,14 +294,9 @@
       "description": "Use when a security incident has been detected or declared and needs classification, triage, escalation path determination, and forensic evidence collection. Covers SEV1-SEV4 classification, false positive filtering, incident taxonomy, and NIST SP 800-61 lifecycle."
     },
     {
-      "name": "init",
-      "category": "engineering",
-      "description": ">-"
-    },
-    {
       "name": "migrate",
       "category": "engineering",
-      "description": ">-"
+      "description": "Migrate from Cypress or Selenium to Playwright. Use when user mentions \"cypress\", \"selenium\", \"migrate tests\", \"convert tests\", \"switch to playwright\", \"move from cypress\", or \"replace selenium\"."
     },
     {
       "name": "ms365-tenant-manager",
@@ -621,7 +326,7 @@
     {
       "name": "report",
       "category": "engineering",
-      "description": ">-"
+      "description": "Generate test report. Use when user says \"test report\", \"results summary\", \"test status\", \"show results\", \"test dashboard\", or \"how did tests go\"."
     },
     {
       "name": "review",
@@ -637,6 +342,11 @@
       "name": "self-improving-agent",
       "category": "engineering",
       "description": "Curate Claude Code's auto-memory into durable project knowledge. Analyze MEMORY.md for patterns, promote proven learnings to CLAUDE.md and .claude/rules/, extract recurring solutions into reusable skills. Use when: (1) reviewing what Claude has learned about your project, (2) graduating a pattern from notes to enforced rules, (3) turning a debugging solution into a skill, (4) checking memory health and capacity."
+    },
+    {
+      "name": "self-improving-agent-skills-status",
+      "category": "engineering",
+      "description": "Memory health dashboard showing line counts, topic files, capacity, stale entries, and recommendations."
     },
     {
       "name": "senior-architect",
@@ -704,19 +414,19 @@
       "description": "Security engineering toolkit for threat modeling, vulnerability analysis, secure architecture, and penetration testing. Includes STRIDE analysis, OWASP guidance, cryptography patterns, and security scanning tools. Use when the user asks about security reviews, threat analysis, vulnerability assessments, secure coding practices, security audits, attack surface analysis, CVE remediation, or security best practices."
     },
     {
+      "name": "skills-init",
+      "category": "engineering",
+      "description": "Set up Playwright in a project. Use when user says \"set up playwright\", \"add e2e tests\", \"configure playwright\", \"testing setup\", \"init playwright\", or \"add test infrastructure\"."
+    },
+    {
       "name": "skills-review",
       "category": "engineering",
-      "description": ">-"
+      "description": "Review Playwright tests for quality. Use when user says \"review tests\", \"check test quality\", \"audit tests\", \"improve tests\", \"test code review\", or \"playwright best practices check\"."
     },
     {
       "name": "snowflake-development",
       "category": "engineering",
       "description": "Use when writing Snowflake SQL, building data pipelines with Dynamic Tables or Streams/Tasks, using Cortex AI functions, creating Cortex Agents, writing Snowpark Python, configuring dbt for Snowflake, or troubleshooting Snowflake errors."
-    },
-    {
-      "name": "status",
-      "category": "engineering",
-      "description": "Memory health dashboard showing line counts, topic files, capacity, stale entries, and recommendations."
     },
     {
       "name": "stripe-integration-expert",
@@ -736,7 +446,7 @@
     {
       "name": "testrail",
       "category": "engineering",
-      "description": ">-"
+      "description": "Sync tests with TestRail. Use when user mentions \"testrail\", \"test management\", \"test cases\", \"test run\", \"sync test cases\", \"push results to testrail\", or \"import from testrail\"."
     },
     {
       "name": "threat-detection",
@@ -869,6 +579,11 @@
       "description": "Helm chart development agent skill and plugin for Claude Code, Codex, Gemini CLI, Cursor, OpenClaw \u2014 chart scaffolding, values design, template patterns, dependency management, security hardening, and chart testing. Use when: user wants to create or improve Helm charts, design values.yaml files, implement template helpers, audit chart security (RBAC, network policies, pod security), manage subcharts, or run helm lint/test."
     },
     {
+      "name": "init",
+      "category": "engineering-advanced",
+      "description": "Create a new AgentHub collaboration session with task, agent count, and evaluation criteria."
+    },
+    {
       "name": "interview-system-designer",
       "category": "engineering-advanced",
       "description": "This skill should be used when the user asks to \"design interview processes\", \"create hiring pipelines\", \"calibrate interview loops\", \"generate interview questions\", \"design competency matrices\", \"analyze interviewer bias\", \"create scoring rubrics\", \"build question banks\", or \"optimize hiring systems\". Use for designing role-specific interview loops, competency assessments, and hiring calibration systems."
@@ -981,7 +696,7 @@
     {
       "name": "skill-security-auditor",
       "category": "engineering-advanced",
-      "description": ">"
+      "description": "Security audit and vulnerability scanner for AI agent skills before installation. Use when: (1) evaluating a skill from an untrusted source, (2) auditing a skill directory or git repo URL for malicious code, (3) pre-install security gate for Claude Code plugins, OpenClaw skills, or Codex skills, (4) scanning Python scripts for dangerous patterns like os.system, eval, subprocess, network exfiltration, (5) detecting prompt injection in SKILL.md files, (6) checking dependency supply chain risks, (7) verifying file system access stays within skill boundaries. Triggers: \"audit this skill\", \"is this skill safe\", \"scan skill for security\", \"check skill before install\", \"skill security check\", \"skill vulnerability scan\"."
     },
     {
       "name": "skill-tester",
@@ -989,19 +704,9 @@
       "description": "Skill Tester"
     },
     {
-      "name": "skills-init",
-      "category": "engineering-advanced",
-      "description": "Create a new AgentHub collaboration session with task, agent count, and evaluation criteria."
-    },
-    {
       "name": "skills-run",
       "category": "engineering-advanced",
       "description": "Run a single experiment iteration. Edit the target file, evaluate, keep or discard."
-    },
-    {
-      "name": "skills-status",
-      "category": "engineering-advanced",
-      "description": "Show DAG state, agent progress, and branch status for an AgentHub session."
     },
     {
       "name": "skills-status",
@@ -1027,6 +732,11 @@
       "name": "statistical-analyst",
       "category": "engineering-advanced",
       "description": "Run hypothesis tests, analyze A/B experiment results, calculate sample sizes, and interpret statistical significance with effect sizes. Use when you need to validate whether observed differences are real, size an experiment correctly before launch, or interpret test results with confidence."
+    },
+    {
+      "name": "status",
+      "category": "engineering-advanced",
+      "description": "Show DAG state, agent progress, and branch status for an AgentHub session."
     },
     {
       "name": "tc-tracker",
@@ -1301,7 +1011,7 @@
     {
       "name": "code-to-prd",
       "category": "product",
-      "description": "|"
+      "description": "Reverse-engineer any codebase into a complete Product Requirements Document (PRD).\nAnalyzes routes, components, state management, API integrations, and user interactions to produce\nbusiness-readable documentation detailed enough for engineers or AI agents to fully reconstruct\nevery page and endpoint. Works with frontend frameworks (React, Vue, Angular, Svelte, Next.js, Nuxt),\nbackend frameworks (NestJS, Django, Express, FastAPI), and fullstack applications.\n\nTrigger when users mention: generate PRD, reverse-engineer requirements, code to documentation,\nextract product specs from code, document page logic, analyze page fields and interactions,\ncreate a functional inventory, write requirements from an existing codebase, document API endpoints,\nor analyze backend routes."
     },
     {
       "name": "competitive-teardown",
@@ -1490,10 +1200,6 @@
     }
   ],
   "categories": {
-    "agent": {
-      "count": 29,
-      "description": "Agent resources"
-    },
     "business-growth": {
       "count": 5,
       "description": "Business-growth resources"
@@ -1501,10 +1207,6 @@
     "c-level": {
       "count": 34,
       "description": "C-level resources"
-    },
-    "command": {
-      "count": 29,
-      "description": "Command resources"
     },
     "engineering": {
       "count": 51,
