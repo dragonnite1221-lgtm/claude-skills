@@ -822,7 +822,7 @@ def scan_filesystem(skill_path: Path, report: AuditReport):
         if item.name.startswith(".") and item.name not in (
             ".gitignore", ".gitkeep", ".editorconfig", ".prettierrc",
             ".eslintrc", ".pylintrc", ".flake8", ".security-audit-allowlist",
-            ".claude-plugin", ".codex", ".gemini", ".mcp.json",
+            ".claude-plugin", ".codex", ".gemini",
         ):
             severity = Severity.CRITICAL if item.name == ".env" else Severity.HIGH
             report.findings.append(
