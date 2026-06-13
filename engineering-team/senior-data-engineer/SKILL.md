@@ -7,43 +7,40 @@ description: Data engineering skill for building scalable data pipelines, ETL/EL
 
 Production-grade data engineering skill for building scalable, reliable data systems.
 
-## Table of Contents
-
-1. [Quick Start](#quick-start)
-2. [Workflows](#workflows)
-3. [Architecture Decision Framework](#architecture-decision-framework)
-4. [Tech Stack](#tech-stack)
-5. [Reference Documentation](#reference-documentation)
-6. [Troubleshooting](#troubleshooting)
-
----
-
 ## Quick Start
 
-### Core Tools
+Three CLI tools ship with this skill. Pick by task:
+
+| Task | Tool |
+|------|------|
+| Scaffold an Airflow/Prefect/Dagster pipeline | `scripts/pipeline_orchestrator.py` |
+| Validate a dataset against a schema and quality checks | `scripts/data_quality_validator.py` |
+| Profile a slow SQL/Spark job and get tuning recommendations | `scripts/etl_performance_optimizer.py` |
 
 ```bash
-# Generate pipeline orchestration config
+# Generate pipeline orchestration config (DAG file written to --output)
 python scripts/pipeline_orchestrator.py generate \
   --type airflow \
   --source postgres \
   --destination snowflake \
   --schedule "0 5 * * *"
 
-# Validate data quality
+# Validate data quality (exit code 1 on failed checks — safe for CI gates)
 python scripts/data_quality_validator.py validate \
   --input data/sales.parquet \
   --schema schemas/sales.json \
   --checks freshness,completeness,uniqueness
 
-# Optimize ETL performance
+# Optimize ETL performance (--recommend prints prioritized fixes)
 python scripts/etl_performance_optimizer.py analyze \
   --query queries/daily_aggregation.sql \
   --engine spark \
   --recommend
 ```
 
----
+All tools run on the Python standard library. `pipeline_orchestrator.py`
+accepts JSON config files everywhere; YAML configs work too when PyYAML is
+installed (optional, auto-detected).
 
 ## Workflows
 
@@ -80,91 +77,22 @@ Great Expectations + dbt tests + data contracts.
 4. **Validation gate:** enforce data contracts on schema changes (fail closed on breaking change)
 5. Publish a quality dashboard for freshness and failure trends
 
----
+## Architecture Decisions
 
-## Architecture Decision Framework
-
-### Batch vs Streaming
-
-```
-Is real-time insight required?
-├── Yes → Use streaming
-│   └── Is exactly-once semantics needed?
-│       ├── Yes → Kafka + Flink/Spark Structured Streaming
-│       └── No → Kafka + consumer groups
-└── No → Use batch
-    └── Is data volume > 1TB daily?
-        ├── Yes → Spark/Databricks
-        └── No → dbt + warehouse compute
-```
-
-Batch is cheaper and easier to reprocess; choose streaming only when latency
-in seconds-to-minutes genuinely changes a decision downstream.
-
-### Lambda vs Kappa Architecture
-
-**When to choose Lambda:**
-- Need to train ML models on historical data
-- Complex batch transformations not feasible in streaming
-- Existing batch infrastructure
-
-**When to choose Kappa:**
-- Event-sourced architecture
-- All processing can be expressed as stream operations
-- Starting fresh without legacy systems
-
-### Data Warehouse vs Data Lakehouse
-
-**When to choose a warehouse (Snowflake/BigQuery):** BI and SQL analytics
-dominate, mature BI tooling matters, schema-on-write is acceptable.
-
-**When to choose a lakehouse (Delta/Iceberg):** ML workloads and unstructured
-data, open storage formats for cost control, schema-on-read flexibility.
-
----
-
-## Tech Stack
-
-| Category | Technologies |
-|----------|--------------|
-| **Languages** | Python, SQL, Scala |
-| **Orchestration** | Airflow, Prefect, Dagster |
-| **Transformation** | dbt, Spark, Flink |
-| **Streaming** | Kafka, Kinesis, Pub/Sub |
-| **Storage** | S3, GCS, Delta Lake, Iceberg |
-| **Warehouses** | Snowflake, BigQuery, Redshift, Databricks |
-| **Quality** | Great Expectations, dbt tests, Monte Carlo |
-| **Monitoring** | Prometheus, Grafana, Datadog |
-
----
+Project-specific decision criteria (batch vs streaming decision tree, Lambda
+vs Kappa, warehouse vs lakehouse selection) live in
+`references/data_pipeline_architecture.md`. Consult it when latency, volume,
+or reprocessing requirements make the choice non-obvious.
 
 ## Reference Documentation
 
-### 1. Data Pipeline Architecture
-See `references/data_pipeline_architecture.md` for:
-- Lambda vs Kappa architecture patterns
-- Batch processing with Spark and Airflow
-- Stream processing with Kafka and Flink
-- Exactly-once semantics implementation
-- Error handling and dead letter queues
-
-### 2. Data Modeling Patterns
-See `references/data_modeling_patterns.md` for:
-- Dimensional modeling (Star/Snowflake)
-- Slowly Changing Dimensions (SCD Types 1-6)
-- Data Vault modeling
-- dbt best practices
-- Partitioning and clustering
-
-### 3. DataOps Best Practices
-See `references/dataops_best_practices.md` for:
-- Data testing frameworks
-- Data contracts and schema validation
-- CI/CD for data pipelines
-- Observability and lineage
-- Incident response
-
----
+| Reference | Use for |
+|-----------|---------|
+| `references/data_pipeline_architecture.md` | Batch/stream patterns, exactly-once semantics, dead letter queues, architecture selection |
+| `references/data_modeling_patterns.md` | Star/Snowflake dimensional modeling, SCD Types 1-6, Data Vault, dbt practices, partitioning |
+| `references/dataops_best_practices.md` | Data testing, data contracts, CI/CD for pipelines, observability and lineage, incident response |
+| `references/workflows.md` | Full step-by-step code for the three workflows above |
+| `references/troubleshooting.md` | Complete diagnostics for the failures summarized below |
 
 ## Troubleshooting
 
