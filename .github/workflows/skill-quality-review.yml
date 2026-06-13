@@ -73,6 +73,8 @@ jobs:
     needs: detect-skills
     if: needs.detect-skills.outputs.has_skills == 'true'
     runs-on: ubuntu-latest
+    # TESSL_TOKEN secret lives in the environment of the same name.
+    environment: TESSL_TOKEN
     permissions:
       contents: read
       pull-requests: write
