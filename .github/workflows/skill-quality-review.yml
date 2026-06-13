@@ -140,7 +140,9 @@ jobs:
             PARSED=$(echo "$JSON_OUT" | python3 -c "
           import sys, json
           try:
-              d = json.load(sys.stdin)
+              # tessl prints a Terms banner before the JSON; parse from the first '{'
+              text = sys.stdin.read()
+              d = json.loads(text[text.index('{'):])
               score = d.get('review', {}).get('reviewScore', 0)
               ds = round(d.get('descriptionJudge', {}).get('normalizedScore', 0) * 100)
               cs = round(d.get('contentJudge', {}).get('normalizedScore', 0) * 100)
