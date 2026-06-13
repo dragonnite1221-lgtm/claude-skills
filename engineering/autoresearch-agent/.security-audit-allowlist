@@ -1,0 +1,10 @@
+# Per-skill security-audit suppressions (auditable). Scoped to this skill only;
+# detection is unchanged for every other skill.
+#
+# Fixed benchmark evaluator templates ("DO NOT MODIFY after experiment starts").
+# COMMAND/BUILD_CMD/DOCKER_BUILD_CMD/CLEAN_CMD are user-configured constants for
+# benchmarking the user's OWN project locally — not untrusted input. shell=True
+# is intentional so a benchmark command may use shell pipelines.
+CMD-INJECT  evaluators/build_speed.py
+CMD-INJECT  evaluators/benchmark_size.py
+CMD-INJECT  evaluators/benchmark_speed.py

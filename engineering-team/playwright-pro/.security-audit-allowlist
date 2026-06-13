@@ -1,0 +1,8 @@
+# Per-skill security-audit suppressions (auditable). Scoped to this skill only;
+# detection is unchanged for every other skill.
+#
+# Local PostToolUse git hook that parses Claude Code's stdin JSON via an inline
+# python3 snippet. It is inspectable, runs only on the developer's own machine
+# against files they are editing, and is not part of the skill's agent-facing
+# executable surface.
+CODE-EXEC  hooks/validate-test.sh
