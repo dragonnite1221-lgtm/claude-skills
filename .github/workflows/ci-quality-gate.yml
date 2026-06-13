@@ -26,16 +26,31 @@ jobs:
     steps:
       - name: Resolve ref
         id: ref
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          WORKFLOW_REF: ${{ github.event.inputs.ref }}
+          DISPATCH_REF: ${{ github.event.client_payload.ref }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+          FALLBACK_REF: ${{ github.head_ref || github.ref_name }}
         run: |
-          if [[ "${{ github.event_name }}" == "workflow_dispatch" && -n "${{ github.event.inputs.ref }}" ]]; then
-            echo "target_ref=${{ github.event.inputs.ref }}" >> "$GITHUB_OUTPUT"
-          elif [[ "${{ github.event_name }}" == "repository_dispatch" && -n "${{ github.event.client_payload.ref }}" ]]; then
-            echo "target_ref=${{ github.event.client_payload.ref }}" >> "$GITHUB_OUTPUT"
-          elif [[ "${{ github.event_name }}" == "pull_request" ]]; then
+          write_target_ref() {
+            local target_ref="$1"
+            if [[ -z "$target_ref" || "$target_ref" == *$'\n'* || "$target_ref" == *$'\r'* ]]; then
+              echo "Invalid target ref" >&2
+              exit 1
+            fi
+            printf 'target_ref=%s\n' "$target_ref" >> "$GITHUB_OUTPUT"
+          }
+
+          if [[ "$EVENT_NAME" == "workflow_dispatch" && -n "$WORKFLOW_REF" ]]; then
+            write_target_ref "$WORKFLOW_REF"
+          elif [[ "$EVENT_NAME" == "repository_dispatch" && -n "$DISPATCH_REF" ]]; then
+            write_target_ref "$DISPATCH_REF"
+          elif [[ "$EVENT_NAME" == "pull_request" ]]; then
             # Use commit SHA for PRs — branch names from forks don't exist in the base repo
-            echo "target_ref=${{ github.event.pull_request.head.sha }}" >> "$GITHUB_OUTPUT"
+            write_target_ref "$PR_HEAD_SHA"
           else
-            echo "target_ref=${{ github.head_ref || github.ref_name }}" >> "$GITHUB_OUTPUT"
+            write_target_ref "$FALLBACK_REF"
           fi
 
       - name: Checkout
@@ -81,6 +96,10 @@ jobs:
             marketing-skill product-team c-level-advisor \
             engineering-team ra-qm-team engineering \
             business-growth finance project-management scripts
+
+      - name: Skill frontmatter and Gemini mirror gate
+        run: |
+          python scripts/validate-skill-frontmatter.py
 
       - name: Run test suite
         run: |

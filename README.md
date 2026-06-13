@@ -1,16 +1,16 @@
 # Claude Code Skills & Plugins — Agent Skills for Every Coding Tool
 
-**235 production-ready Claude Code skills, plugins, and agent skills for 12 AI coding tools.**
+**239 production-ready Claude Code skills, plugins, and agent skills for 12 AI coding tools.**
 
 The most comprehensive open-source library of Claude Code skills and agent plugins — also works with OpenAI Codex, Gemini CLI, Cursor, and 7 more coding agents. Reusable expertise packages covering engineering, DevOps, marketing, compliance, C-level advisory, and more.
 
 **Works with:** Claude Code · OpenAI Codex · Gemini CLI · OpenClaw · Hermes Agent · Cursor · Aider · Windsurf · Kilo Code · OpenCode · Augment · Antigravity
 
 [![License: MIT](https://img.shields.io/badge/License-MIT-yellow?style=for-the-badge)](https://opensource.org/licenses/MIT)
-[![Skills](https://img.shields.io/badge/Skills-235-brightgreen?style=for-the-badge)](#skills-overview)
-[![Agents](https://img.shields.io/badge/Agents-28-blue?style=for-the-badge)](#agents)
+[![Skills](https://img.shields.io/badge/Skills-239-brightgreen?style=for-the-badge)](#skills-overview)
+[![Agents](https://img.shields.io/badge/Agents-30-blue?style=for-the-badge)](#agents)
 [![Personas](https://img.shields.io/badge/Personas-3-purple?style=for-the-badge)](#personas)
-[![Commands](https://img.shields.io/badge/Commands-27-orange?style=for-the-badge)](#commands)
+[![Commands](https://img.shields.io/badge/Commands-29-orange?style=for-the-badge)](#commands)
 [![Stars](https://img.shields.io/github/stars/alirezarezvani/claude-skills?style=for-the-badge)](https://github.com/alirezarezvani/claude-skills/stargazers)
 [![SkillCheck Validated](https://img.shields.io/badge/SkillCheck-Validated-4c1?style=for-the-badge)](https://getskillcheck.com)
 
@@ -23,10 +23,10 @@ The most comprehensive open-source library of Claude Code skills and agent plugi
 Claude Code skills (also called agent skills or coding agent plugins) are modular instruction packages that give AI coding agents domain expertise they don't have out of the box. Each skill includes:
 
 - **SKILL.md** — structured instructions, workflows, and decision frameworks
-- **Python tools** — 305 CLI scripts (all stdlib-only, zero pip installs)
+- **Python tools** — 368 CLI scripts (all stdlib-only, zero pip installs)
 - **Reference docs** — templates, checklists, and domain-specific knowledge
 
-**One repo, eleven platforms.** Works natively as Claude Code plugins, Codex agent skills, Gemini CLI skills, and converts to 8 more tools via `scripts/convert.sh`. All 305 Python tools run anywhere Python runs.
+**One repo, eleven platforms.** Works natively as Claude Code plugins, Codex agent skills, Gemini CLI skills, and converts to 8 more tools via `scripts/convert.sh`. All 368 Python tools run anywhere Python runs.
 
 ### Skills vs Agents vs Personas
 
@@ -105,7 +105,7 @@ git clone https://github.com/alirezarezvani/claude-skills.git
 
 ## Multi-Tool Support (New)
 
-**Convert all 156 skills to 7 AI coding tools** with a single script:
+**Convert all synced skills to 7 AI coding tools** with a single script:
 
 | Tool | Format | Install |
 |------|--------|---------|
@@ -131,11 +131,11 @@ git clone https://github.com/alirezarezvani/claude-skills.git
 ./scripts/install.sh --tool aider --target . --force
 
 # 3. Verify
-find .cursor/rules -name "*.mdc" | wc -l  # Should show 156
+find .cursor/rules -name "*.mdc" | wc -l  # Should match synced skill count
 ```
 
 **Each tool gets:**
-- ✅ All 156 skills converted to native format
+- ✅ All synced skills converted to native format
 - ✅ Per-tool README with install/verify/update steps
 - ✅ Support for scripts, references, templates where applicable
 - ✅ Zero manual conversion work
@@ -297,7 +297,7 @@ for MDR Annex II compliance gaps.
 
 ## Python Analysis Tools
 
-305 CLI tools ship with the skills (all verified, stdlib-only):
+368 CLI tools ship with the skills (all verified, stdlib-only):
 
 ```bash
 # SaaS health check
@@ -343,7 +343,7 @@ Yes. Skills work natively with 12 tools: Claude Code, OpenAI Codex, Gemini CLI, 
 No. We follow semantic versioning and maintain backward compatibility within patch releases. Existing script arguments, plugin source paths, and SKILL.md structures are never changed in patch versions. See the [CHANGELOG](CHANGELOG.md) for details on each release.
 
 **Are the Python tools dependency-free?**
-Yes. All 305 Python CLI tools use the standard library only — zero pip installs required. Every script is verified to run with `--help`.
+Yes. All 368 Python CLI tools use the standard library only — zero pip installs required. Every script is verified to run with `--help`.
 
 **How do I create my own Claude Code skill?**
 Each skill is a folder with a `SKILL.md` (frontmatter + instructions), optional `scripts/`, `references/`, and `assets/`. See the [Skills & Agents Factory](https://github.com/alirezarezvani/claude-code-skills-agents-factory) for a step-by-step guide.

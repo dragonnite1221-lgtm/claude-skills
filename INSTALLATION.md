@@ -80,7 +80,7 @@ npx agent-skills-cli add alirezarezvani/claude-skills
 This single command installs all skills to all supported agents automatically.
 
 **What this does:**
-- ✅ Detects all 205+ skills automatically
+- ✅ Detects synced skills automatically
 - ✅ Installs to Claude, Cursor, Copilot, Windsurf, Cline, and 37+ other AI agents
 - ✅ Works across all skill formats
 
@@ -674,7 +674,7 @@ rm -rf .cursor/skills/fullstack-engineer/
 
 ## Gemini CLI Installation
 
-Gemini CLI users can install skills using the setup script below. This repository provides Gemini CLI compatibility through a `.gemini/skills/` directory with symlinks to all 205+ skills, agents, and commands.
+Gemini CLI users can install skills using the setup script below. This repository provides Gemini CLI compatibility through a `.gemini/skills/` directory with symlinks to repository `SKILL.md` files.
 
 ### Setup Instructions
 
@@ -690,13 +690,11 @@ Gemini CLI users can install skills using the setup script below. This repositor
     ```
     This script performs the following:
     - Scans all 9 domain folders for `SKILL.md` files.
-    - Scans the `agents/` folder for multi-agent persona definitions.
-    - Scans the `commands/` folder for predefined slash command workflows.
     - Creates a `.gemini/skills/` directory with standardized subfolders for each.
     - Generates a `skills-index.json` manifest for discovery.
 
 3.  **Activate Skills in Gemini CLI:**
-    Gemini CLI can now activate any of these 205+ skills by name. Use the `activate_skill` tool:
+    Gemini CLI can now activate any synced skill by name. Use the `activate_skill` tool:
     ```javascript
     // Activate a core skill
     activate_skill(name="senior-architect")
@@ -706,12 +704,6 @@ Gemini CLI users can install skills using the setup script below. This repositor
 
     // Activate a C-level advisor
     activate_skill(name="cto-advisor")
-
-    // Activate a multi-agent persona
-    activate_skill(name="cs-engineering-lead")
-
-    // Activate a slash command workflow
-    activate_skill(name="tdd")
     ```
 
 ### Python CLI Tools
