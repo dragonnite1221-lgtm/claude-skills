@@ -1098,3 +1098,45 @@ for config in configs['pipelines']:
     dag_id = f"etl_{config['source']}_{config['destination']}"
     globals()[dag_id] = create_etl_dag(config)
 ```
+
+## Architecture Selection
+
+Decision criteria for choosing between the patterns documented above.
+
+### Batch vs Streaming
+
+```
+Is real-time insight required?
+├── Yes → Use streaming
+│   └── Is exactly-once semantics needed?
+│       ├── Yes → Kafka + Flink/Spark Structured Streaming
+│       └── No → Kafka + consumer groups
+└── No → Use batch
+    └── Is data volume > 1TB daily?
+        ├── Yes → Spark/Databricks
+        └── No → dbt + warehouse compute
+```
+
+Batch is cheaper and easier to reprocess; choose streaming only when latency
+in seconds-to-minutes genuinely changes a decision downstream.
+
+### Lambda vs Kappa
+
+**Choose Lambda when:**
+- You need to train ML models on historical data
+- Complex batch transformations are not feasible in streaming
+- Existing batch infrastructure must be preserved
+
+**Choose Kappa when:**
+- The system is event-sourced
+- All processing can be expressed as stream operations
+- You are starting fresh without legacy systems
+
+### Data Warehouse vs Data Lakehouse
+
+**Choose a warehouse (Snowflake/BigQuery) when:** BI and SQL analytics
+dominate, mature BI tooling matters, and schema-on-write is acceptable.
+
+**Choose a lakehouse (Delta/Iceberg) when:** ML workloads and unstructured
+data are central, open storage formats matter for cost control, and you need
+schema-on-read flexibility.
