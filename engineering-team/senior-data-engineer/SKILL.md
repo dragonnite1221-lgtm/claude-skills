@@ -14,8 +14,8 @@ Three CLI tools ship with this skill. Pick by task:
 | Task | Tool |
 |------|------|
 | Scaffold an Airflow/Prefect/Dagster pipeline | `scripts/pipeline_orchestrator.py` |
-| Validate a dataset against a schema and quality checks | `scripts/data_quality_validator.py` |
-| Profile a slow SQL/Spark job and get tuning recommendations | `scripts/etl_performance_optimizer.py` |
+| Validate a dataset (CSV/JSON/JSONL) against a schema | `scripts/data_quality_validator.py` |
+| Profile a slow SQL query or Spark job | `scripts/etl_performance_optimizer.py` (`analyze-sql` / `analyze-spark`) |
 
 ```bash
 # Generate pipeline orchestration config (DAG file written to --output)
@@ -25,17 +25,14 @@ python scripts/pipeline_orchestrator.py generate \
   --destination snowflake \
   --schedule "0 5 * * *"
 
-# Validate data quality (exit code 1 on failed checks — safe for CI gates)
-python scripts/data_quality_validator.py validate \
-  --input data/sales.parquet \
+# Validate data quality (exits 1 on error-severity failures — safe for CI gates)
+python scripts/data_quality_validator.py validate data/sales.csv \
   --schema schemas/sales.json \
-  --checks freshness,completeness,uniqueness
+  --json
 
-# Optimize ETL performance (--recommend prints prioritized fixes)
-python scripts/etl_performance_optimizer.py analyze \
-  --query queries/daily_aggregation.sql \
-  --engine spark \
-  --recommend
+# Analyze a slow SQL query and get prioritized tuning recommendations
+python scripts/etl_performance_optimizer.py analyze-sql queries/daily_aggregation.sql \
+  --warehouse snowflake
 ```
 
 All tools run on the Python standard library. `pipeline_orchestrator.py`
@@ -51,7 +48,7 @@ Full step-by-step instructions with code live in `references/workflows.md`. Summ
 PostgreSQL → dbt → Snowflake, incremental by watermark column.
 
 1. Document source schema (`information_schema.columns` inventory)
-2. Generate extraction config — `pipeline_orchestrator.py generate --mode incremental --watermark updated_at`
+2. Generate extraction config — `pipeline_orchestrator.py generate --mode incremental --tables orders,customers`
 3. Create dbt staging + mart models (incremental materialization, `unique_key`, clustering)
 4. **Validation gate:** add dbt tests (not_null, unique, relationships) before scheduling
 5. Create Airflow DAG wiring extract → transform → test
