@@ -701,7 +701,7 @@
     {
       "name": "skill-tester",
       "category": "engineering-advanced",
-      "description": "Skill Tester"
+      "description": "Validate and quality-score Claude skill packages before publishing. Checks SKILL.md frontmatter (name + description) and structure, runs each Python tool for syntax/argparse/main-guard/stdlib-only compliance, scores documentation and structure 0-100, and audits for dangerous patterns. Use when the user wants to test, validate, lint, or quality-check a skill, verify a SKILL.md, or gate skills in CI before release \u2014 e.g. 'validate my skill', 'is this skill ready to publish', 'skill quality score', or 'check this SKILL.md'."
     },
     {
       "name": "skills-init",
