@@ -85,6 +85,24 @@ jobs:
         with:
           python-version: '3.11'
 
+      - name: Verify Tessl token is configured
+        env:
+          TESSL_TOKEN: ${{ secrets.TESSL_TOKEN }}
+          TESSL_API_KEY: ${{ secrets.TESSL_API_KEY }}
+        run: |
+          if [ -n "$TESSL_TOKEN" ]; then
+            echo "TESSL_TOKEN secret: present (${#TESSL_TOKEN} chars)"
+          elif [ -n "$TESSL_API_KEY" ]; then
+            echo "::error::Secret TESSL_API_KEY exists but this workflow expects TESSL_TOKEN." \
+              "Rename it: Settings → Secrets and variables → Actions → Repository secrets."
+            exit 1
+          else
+            echo "::error::TESSL_TOKEN is missing or empty in this repository's Actions secrets." \
+              "Add it under Settings → Secrets and variables → Actions → Repository secrets" \
+              "(not Variables, not Codespaces/Dependabot, not Environments)."
+            exit 1
+          fi
+
       - name: Set up Tessl CLI
         uses: tesslio/setup-tessl@v2
         with:
