@@ -1,0 +1,9 @@
+# Per-skill security-audit suppressions.
+# Format: CATEGORY <relpath>[:line]   # reason
+#
+# This skill's whole purpose is secret handling, so its SKILL.md gives
+# defensive guidance like "load/read secrets from a dedicated store, never
+# from .env" — the markdown prompt-injection heuristic matches the phrase
+# "read secrets" in that advice. Scoped to this skill only; detection is
+# unchanged everywhere else.
+PROMPT-EXFIL  SKILL.md   # documents defensive secret-handling guidance
