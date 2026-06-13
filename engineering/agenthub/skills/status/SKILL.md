@@ -1,6 +1,6 @@
 ---
 name: "status"
-description: "Show DAG state, agent progress, and branch status for an AgentHub session."
+description: "AgentHub /hub:status command — show the live state of a multi-agent session: session overview (task, agent count, base branch, state), per-agent git branches with commit counts and frontier/leaf status from the DAG analyzer, and recent message-board progress/results activity. Then advises whether to wait or move to /hub:eval. Use when: you want to see how the competing subagents are progressing, which branches exist, or who has finished — 'how are the agents doing', 'session status', 'are the agents done', 'show the DAG'. (For autoresearch experiment dashboards, use /ar:status instead.)"
 command: /hub:status
 ---
 

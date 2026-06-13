@@ -496,7 +496,7 @@
     {
       "name": "board",
       "category": "engineering-advanced",
-      "description": "Read, write, and browse the AgentHub message board for agent coordination."
+      "description": "AgentHub /hub:board command \u2014 interact with the append-only message board (.agenthub/board/) that coordinator and subagents use to communicate. Lists channels with post counts, reads a channel's posts in chronological order with YAML frontmatter, posts a new message, or replies to a thread by post-id. Channels: dispatch (coordinator \u2192 agents task assignments), progress (agents \u2192 coordinator status), results (final summaries + merge notes). Use when: you want to inspect, post to, or thread on agent coordination messages \u2014 'check the board', 'what did the agents report', 'post to progress', 'read the results channel'."
     },
     {
       "name": "browser-automation",
@@ -566,7 +566,7 @@
     {
       "name": "eval",
       "category": "engineering-advanced",
-      "description": "Evaluate and rank agent results by metric or LLM judge for an AgentHub session."
+      "description": "AgentHub /hub:eval command \u2014 rank the competing subagents in a session by metric mode (run an eval command in each worktree, parse the metric, sort by direction), LLM-judge mode (compare git diffs and result posts on correctness/simplicity/quality), or hybrid (metric first, judge to break sub-10% ties). Updates session state to evaluating and points to /hub:merge with the winner. Use when: agents have finished and you want to score, compare, or pick the best result before merging \u2014 'rank the agents', 'which approach won', 'evaluate the session', 'judge the diffs'."
     },
     {
       "name": "focused-fix",
@@ -716,7 +716,7 @@
     {
       "name": "skills-status",
       "category": "engineering-advanced",
-      "description": "Show DAG state, agent progress, and branch status for an AgentHub session."
+      "description": "AgentHub /hub:status command \u2014 show the live state of a multi-agent session: session overview (task, agent count, base branch, state), per-agent git branches with commit counts and frontier/leaf status from the DAG analyzer, and recent message-board progress/results activity. Then advises whether to wait or move to /hub:eval. Use when: you want to see how the competing subagents are progressing, which branches exist, or who has finished \u2014 'how are the agents doing', 'session status', 'are the agents done', 'show the DAG'. (For autoresearch experiment dashboards, use /ar:status instead.)"
     },
     {
       "name": "spawn",
