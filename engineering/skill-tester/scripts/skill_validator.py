@@ -222,8 +222,11 @@ class SkillValidator:
             lines = content.split('\n')
             line_count = len([line for line in lines if line.strip()])
             
-            # Check line count
-            min_lines = self._get_tier_requirement("min_skill_md_lines", 100)
+            # Check line count. With no --tier, only flag genuine stubs: Tessl
+            # skill review rewards concision (a 78-line skill can score 100/100),
+            # so a 100-line floor would push skills toward bloat the real quality
+            # gate penalizes. Tier-specific minimums still apply when targeted.
+            min_lines = self._get_tier_requirement("min_skill_md_lines", 20)
             if line_count >= min_lines:
                 self.report.add_check("skill_md_length", True, 
                                      f"SKILL.md has {line_count} lines (≥{min_lines})", 1.0)
@@ -263,14 +266,19 @@ class SkillValidator:
                                          "Frontmatter is not a valid dictionary", 0.0)
                     return
                     
-                # Check required fields
+                # Check required fields are present AND non-blank. The enforced
+                # gate (scripts/validate-skill-frontmatter.py) rejects empty
+                # required keys, so presence alone would let a `name: ""` skill
+                # pass locally yet fail CI — exactly the local≠CI divergence
+                # this alignment is meant to remove.
                 missing_fields = []
                 for field in self.FRONTMATTER_REQUIRED_FIELDS:
-                    if field not in frontmatter:
+                    value = frontmatter.get(field)
+                    if field not in frontmatter or value is None or not str(value).strip():
                         missing_fields.append(field)
-                        
+
                 if not missing_fields:
-                    self.report.add_check("frontmatter_complete", True, 
+                    self.report.add_check("frontmatter_complete", True,
                                          "All required frontmatter fields present", 1.0)
                 else:
                     self.report.add_check("frontmatter_complete", False,
@@ -458,9 +466,11 @@ class SkillValidator:
             if not has_argparse:
                 self.report.add_error(f"{script_name} must use argparse for command-line arguments")
                 
-        # Check for main guard
+        # Check for main guard (accept both quote styles — both are valid Python)
         if "main_guard" in required_features:
-            has_main_guard = 'if __name__ == "__main__"' in content
+            has_main_guard = bool(
+                re.search(r'if\s+__name__\s*==\s*[\'"]__main__[\'"]', content)
+            )
             self.report.add_check(f"script_main_guard_{script_name}", has_main_guard,
                                  f"{'Has' if has_main_guard else 'Missing'} main guard in {script_name}", 1.0 if has_main_guard else 0.0)
             if not has_main_guard:

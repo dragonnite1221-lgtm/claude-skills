@@ -1,0 +1,19 @@
+# Per-skill security-audit suppressions.
+#
+# Format: CATEGORY <relpath-from-skill-root>[:line]   # reason
+#
+# This skill IS the security auditor: its docs and threat model legitimately
+# contain the very attack patterns it detects, and it deletes its own temp
+# clone directories. These suppressions are scoped to THIS skill only —
+# detection strength is unchanged for every other skill in the repo.
+
+# The threat model and tool docs document attack examples the auditor detects.
+PROMPT-OVERRIDE  SKILL.md                      # documents prompt-override examples
+SAFETY-BYPASS    SKILL.md                      # documents safety-bypass examples
+PROMPT-EXFIL     SKILL.md                      # documents data-exfiltration examples
+PROMPT-OVERRIDE  references/threat-model.md    # threat catalogue
+SAFETY-BYPASS    references/threat-model.md    # threat catalogue
+PROMPT-EXFIL     references/threat-model.md    # threat catalogue
+
+# The auditor clones repos to a tempfile.mkdtemp dir and removes only that dir.
+FS-ABUSE         scripts/skill_security_auditor.py   # cleans its own temp clone dir
