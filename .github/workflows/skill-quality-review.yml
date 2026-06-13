@@ -89,9 +89,15 @@ jobs:
         env:
           TESSL_TOKEN: ${{ secrets.TESSL_TOKEN }}
           TESSL_API_KEY: ${{ secrets.TESSL_API_KEY }}
+          TESSL_TOKEN_AS_VAR: ${{ vars.TESSL_TOKEN }}
         run: |
           if [ -n "$TESSL_TOKEN" ]; then
             echo "TESSL_TOKEN secret: present (${#TESSL_TOKEN} chars)"
+          elif [ -n "$TESSL_TOKEN_AS_VAR" ]; then
+            echo "::error::TESSL_TOKEN is registered under the Variables tab, not Secrets." \
+              "Delete the variable and re-add it as a Repository secret" \
+              "(Settings → Secrets and variables → Actions → Secrets tab → New repository secret)."
+            exit 1
           elif [ -n "$TESSL_API_KEY" ]; then
             echo "::error::Secret TESSL_API_KEY exists but this workflow expects TESSL_TOKEN." \
               "Rename it: Settings → Secrets and variables → Actions → Repository secrets."
