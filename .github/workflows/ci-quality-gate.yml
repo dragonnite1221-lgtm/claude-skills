@@ -90,20 +90,13 @@ jobs:
             ! -name "smart-sync.yml" \
             -exec check-jsonschema --builtin-schema github-workflows {} + || true
 
-      - name: Python syntax check (blocking)
-        run: |
-          python -m compileall \
-            marketing-skill product-team c-level-advisor \
-            engineering-team ra-qm-team engineering \
-            business-growth finance project-management scripts
-
-      - name: Skill frontmatter and Gemini mirror gate
-        run: |
-          python scripts/validate-skill-frontmatter.py
-
-      - name: Run test suite
-        run: |
-          python -m pytest tests/ --tb=short -q
+      # Blocking quality gates run through scripts/check.sh so that a local
+      # `bash scripts/check.sh` exercises exactly what CI does
+      # (FLEET_QUALITY_INVARIANTS.md, Invariant 2: local == CI). This single
+      # step covers: Python syntax, frontmatter + Gemini mirror gate,
+      # inventory drift gate, and the test suite.
+      - name: Quality gates (syntax, frontmatter, mirror, inventory, tests)
+        run: bash scripts/check.sh
 
       - name: Safety dependency audit (requirements*.txt)
         run: |
