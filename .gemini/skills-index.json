@@ -246,7 +246,7 @@
     {
       "name": "email-template-builder",
       "category": "engineering",
-      "description": "Email Template Builder"
+      "description": "Build production transactional email systems with React Email (.tsx) templates \u2014 welcome, verification, password reset, invoice, notification, digest \u2014 wired to a unified send function for Resend, Postmark, SendGrid, or AWS SES. Covers the 600px inline-style email layout, dark-mode media queries, typed i18n locale files, UTM/open-click tracking, a deliverability/spam checklist (SPF/DKIM/DMARC), and the `email dev` preview server. Use when setting up transactional email for a product, adding a new email type, fixing deliverability or rendering issues, or asked to 'build a welcome email', 'create an invoice email template', or 'set up React Email with Resend'."
     },
     {
       "name": "engineering-team-bundle",
@@ -256,7 +256,7 @@
     {
       "name": "epic-design",
       "category": "engineering",
-      "description": "Build immersive, cinematic 2.5D interactive websites using scroll storytelling, parallax depth, text animations, and premium scroll effects \u2014 no WebGL required. Use this skill for any web design task: landing pages, product sites, hero sections, scroll animations, parallax, sticky sections, section overlaps, floating products between sections, clip-path reveals, text that flies in from sides, words that light up on scroll, curtain drops, iris opens, card stacks, bleed typography, and any site that should feel cinematic or premium. Trigger on phrases like \"make it feel alive\", \"Apple-style animation\", \"sections that overlap\", \"product rises between sections\", \"immersive\", \"scrollytelling\", or any scroll-driven visual effect. Covers 45+ techniques across 8 categories. Always inspects, judges, and plans assets before coding. Use aggressively for ANY web design task."
+      "description": "Build immersive, cinematic 2.5D interactive websites using scroll storytelling, parallax depth, text animations, and premium scroll effects with CSS + GSAP \u2014 no WebGL. Inspects every image asset (inspect-assets.py), judges whether each background needs removing, assigns a 0\u20135 depth layer, then generates a self-contained HTML page with GPU-safe animations and reduced-motion fallbacks (validated by validate-layers.js). Covers 45+ techniques across 8 categories: parallax, pinned/scrub timelines, clip-path reveals, floating products between sections, card stacks, iris/curtain transitions, word-by-word text lighting, and split-converge typography. Use for landing pages, product sites, and hero sections, or on phrases like \"make it feel alive\", \"Apple-style animation\", \"sections that overlap\", \"product rises between sections\", \"immersive\", or \"scrollytelling\"."
     },
     {
       "name": "extract",
@@ -286,7 +286,7 @@
     {
       "name": "incident-commander",
       "category": "engineering",
-      "description": "Incident Commander Skill"
+      "description": "Run technology incidents end to end: classify severity (SEV1\u2013SEV4) from impact/urgency and emit escalation paths, reconstruct a chronological timeline from scattered timestamped events with phase detection and gap analysis, and generate blameless Post-Incident Reviews using 5 Whys, Fishbone, Timeline, or Bow-Tie RCA. Six stdlib-only Python tools read JSON (file or stdin) and output text/JSON/markdown. Use when triaging or commanding a live incident, deciding a severity level, building an incident timeline from logs, drafting stakeholder/exec/customer comms, or writing a postmortem/PIR \u2014 e.g. 'classify this incident', 'reconstruct the timeline', 'generate a postmortem'."
     },
     {
       "name": "incident-response",
@@ -431,7 +431,7 @@
     {
       "name": "stripe-integration-expert",
       "category": "engineering",
-      "description": "Stripe Integration Expert"
+      "description": "Implement production Stripe billing with TypeScript SDK patterns for Next.js App Router (Express/Django variants): the subscription lifecycle state machine (trial \u2192 active \u2192 past_due \u2192 canceled), Checkout Sessions, plan upgrade/downgrade with proration preview, usage-based metered billing, the customer portal, and a complete idempotent webhook handler with signature verification and a processed-events table. Includes Stripe CLI local testing (`stripe listen`, `stripe trigger`) and feature-gating helpers. Use when adding subscription billing to an app, handling proration on plan changes, building usage/seat-based billing, or debugging webhook delivery \u2014 e.g. 'add Stripe subscriptions', 'handle the checkout.session.completed webhook', 'preview proration before upgrade'."
     },
     {
       "name": "tdd-guide",
@@ -461,7 +461,7 @@
     {
       "name": "agent-workflow-designer",
       "category": "engineering-advanced",
-      "description": "Agent Workflow Designer"
+      "description": "Design multi-agent workflows and generate ready-to-edit JSON skeleton configs for five orchestration patterns \u2014 sequential, parallel (fan-out/fan-in), router, orchestrator (planner + specialists), and evaluator (generator + quality-gate loop) \u2014 each pre-wired with retry, timeout, and dependency fields. Use when a task is too complex for one prompt and you need specialist agents with explicit handoff contracts, when you're choosing between fan-out vs router vs planner topologies, or when you say things like 'design an agent pipeline', 'scaffold a multi-agent workflow', or 'set up an orchestrator with validation loops'. Runs scripts/workflow_scaffolder.py (Python stdlib only)."
     },
     {
       "name": "agenthub",
@@ -471,7 +471,7 @@
     {
       "name": "api-design-reviewer",
       "category": "engineering-advanced",
-      "description": "API Design Reviewer"
+      "description": "Review REST API designs from OpenAPI/Swagger specs. api_linter.py checks resource naming, HTTP method usage, status codes, error-format consistency, and documentation coverage; breaking_change_detector.py diffs two spec versions to catch removed endpoints/fields, type changes, and newly-required fields (with an --exit-on-breaking CI gate); api_scorecard.py grades the design A\u2013F across consistency, documentation, security, usability, and performance. Use when the user wants to review or lint an API spec, check whether an API change is a breaking change, score API design quality, or gate API changes in CI \u2014 e.g. \"review my OpenAPI spec\", \"is this a breaking change?\", \"lint this API\", or \"score my API design\"."
     },
     {
       "name": "api-test-suite-builder",
@@ -511,7 +511,7 @@
     {
       "name": "ci-cd-pipeline-builder",
       "category": "engineering-advanced",
-      "description": "CI/CD Pipeline Builder"
+      "description": "Detect a repository's stack from lockfiles and manifests (npm/yarn/pnpm via package-lock/yarn.lock/pnpm-lock, Python via requirements.txt/pyproject.toml, Go via go.mod) and generate a ready-to-commit GitHub Actions or GitLab CI pipeline with lint/test/build stages, runtime setup, and dependency caching keyed to the detected package manager. Use when bootstrapping CI for a new repo, replacing brittle copy-pasted pipeline YAML, migrating between GitHub Actions and GitLab CI, or checking that pipeline steps match the actual stack \u2014 e.g. 'set up CI for this project', 'generate a GitHub Actions workflow', or 'migrate my pipeline to GitLab'."
     },
     {
       "name": "code-tour",
@@ -546,7 +546,7 @@
     {
       "name": "dependency-auditor",
       "category": "engineering-advanced",
-      "description": "Dependency Auditor"
+      "description": "Audit project dependencies for security vulnerabilities (CVE matching with CVSS scores), license compliance/conflicts, and safe upgrade paths across 8+ ecosystems \u2014 npm (package.json/lock, yarn.lock), Python (requirements.txt/poetry.lock), Go (go.mod), Rust (Cargo.lock), Ruby, Maven, PHP, .NET. Use when the user wants to scan dependencies for CVEs, check licenses (GPL/MIT/Apache compatibility), find outdated packages, plan version upgrades with breaking-change risk, or gate dependency security in CI \u2014 e.g. 'audit my dependencies', 'are any of my packages vulnerable', 'check license compliance', or 'plan a safe upgrade'."
     },
     {
       "name": "docker-development",
@@ -561,7 +561,7 @@
     {
       "name": "env-secrets-manager",
       "category": "engineering-advanced",
-      "description": "Env & Secrets Manager"
+      "description": "Audit a repository working tree for hardcoded secret leaks (AWS keys, Stripe/Slack/GitHub tokens, JWTs, private keys, credentialed connection strings) with severity-ranked findings, and guide `.env`/`.env.example`/`.gitignore` hygiene, credential rotation, and CI secret injection. Use when the user wants to scan for leaked secrets before pushing, check that no credentials are hardcoded, set safe env conventions for contributors, plan a rotation after a leak, or wire secret scanning into CI \u2014 e.g. 'scan my repo for secrets', 'did I commit an API key', or 'how do I rotate a leaked credential'."
     },
     {
       "name": "eval",
@@ -576,7 +576,7 @@
     {
       "name": "git-worktree-manager",
       "category": "engineering-advanced",
-      "description": "Git Worktree Manager"
+      "description": "Create and tear down isolated git worktrees for parallel branch work \u2014 auto-allocates non-conflicting ports (app/DB/Redis) per worktree, persists them to .worktree-ports.json, copies .env* files from the main repo, optionally installs deps, and safely removes stale/merged/clean worktrees. Use when running 2+ branches locally at once, giving each agent or terminal its own isolated dev server, shipping a hotfix while a feature branch is dirty, or replacing ad-hoc `rm -rf` worktree cleanup \u2014 e.g. 'set up a worktree for this feature', 'run two branches in parallel', or 'clean up old worktrees'."
     },
     {
       "name": "helm-chart-builder",
@@ -621,7 +621,7 @@
     {
       "name": "migration-architect",
       "category": "engineering-advanced",
-      "description": "Migration Architect"
+      "description": "Plan zero-downtime system, database, and infrastructure migrations from a JSON migration spec. migration_planner.py generates a phased plan with validation gates, risk assessment, and timeline; compatibility_checker.py diffs before/after database schemas or API specs to flag breaking and potentially-breaking changes; rollback_generator.py turns a plan into a step-by-step rollback runbook. Applies expand-contract, strangler-fig, dual-write, CDC, blue-green, and canary patterns. Use when the user wants to plan a migration, check schema or API backward compatibility, assess migration risk, or generate a rollback runbook \u2014 e.g. \"plan a zero-downtime migration\", \"is this schema change breaking?\", \"migrate Postgres to the cloud\", or \"generate a rollback plan\"."
     },
     {
       "name": "monorepo-navigator",
@@ -1011,7 +1011,7 @@
     {
       "name": "code-to-prd",
       "category": "product",
-      "description": "Reverse-engineer any codebase into a complete Product Requirements Document (PRD).\nAnalyzes routes, components, state management, API integrations, and user interactions to produce\nbusiness-readable documentation detailed enough for engineers or AI agents to fully reconstruct\nevery page and endpoint. Works with frontend frameworks (React, Vue, Angular, Svelte, Next.js, Nuxt),\nbackend frameworks (NestJS, Django, Express, FastAPI), and fullstack applications.\n\nTrigger when users mention: generate PRD, reverse-engineer requirements, code to documentation,\nextract product specs from code, document page logic, analyze page fields and interactions,\ncreate a functional inventory, write requirements from an existing codebase, document API endpoints,\nor analyze backend routes."
+      "description": "Reverse-engineer a frontend, backend, or fullstack codebase into a complete Product\nRequirements Document. Scans routes/pages, components, state, API calls, database models,\nenums, and mock-vs-real data with codebase_analyzer.py, then scaffolds a structured prd/\ndirectory (README, per-page docs, enum dictionary, API inventory) with prd_scaffolder.py \u2014\ndetailed enough for an engineer or AI agent to reconstruct every page and endpoint in\nbusiness language. Use when the user says \"generate a PRD from this code\",\n\"reverse-engineer requirements\", \"document this codebase / its pages / API endpoints\",\n\"extract product specs from code\", or \"create a functional inventory\". Covers React, Vue,\nAngular, Svelte, Next.js, Nuxt, SvelteKit, Remix, Astro, NestJS, Express, Fastify,\nDjango/DRF, FastAPI, and Flask."
     },
     {
       "name": "competitive-teardown",
