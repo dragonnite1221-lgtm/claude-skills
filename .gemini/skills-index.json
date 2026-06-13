@@ -226,7 +226,7 @@
     {
       "name": "browserstack",
       "category": "engineering",
-      "description": "Run tests on BrowserStack. Use when user mentions \"browserstack\", \"cross-browser\", \"cloud testing\", \"browser matrix\", \"test on safari\", \"test on firefox\", or \"browser compatibility\"."
+      "description": "Run Playwright tests on the BrowserStack cloud grid for cross-browser and cross-device coverage. Adds CDP wsEndpoint connectOptions projects (Chrome/ Firefox/WebKit on Windows/macOS) to playwright.config.ts, runs the cloud suite, pulls per-session build results (status, browser/OS, video and log URLs) and lists available browsers via the browserstack_get_builds, browserstack_get_sessions and browserstack_get_browsers MCP tools, and sets up BrowserStack Local tunnels for localhost/staging. Requires BROWSERSTACK_USERNAME and BROWSERSTACK_ACCESS_KEY env vars. Use when the user runs /pw:browserstack or says \"browserstack\", \"cross-browser\", \"cloud testing\", \"browser matrix\", \"test on safari\", or \"browser compatibility\"."
     },
     {
       "name": "cloud-security",
@@ -276,7 +276,7 @@
     {
       "name": "generate",
       "category": "engineering",
-      "description": "Generate Playwright tests. Use when user says \"write tests\", \"generate tests\", \"add tests for\", \"test this component\", \"e2e test\", \"create test for\", \"test this page\", or \"test this feature\"."
+      "description": "Generate production-ready Playwright tests from a user story, URL, component path, or feature description ($ARGUMENTS). Explores the project for playwright.config.ts (testDir, baseURL), existing tests, page objects, fixtures and auth setup, picks a matching template (auth, CRUD, checkout, search, forms, dashboard, API, accessibility), and writes .spec.ts/.spec.js that follow the locator priority (getByRole first), web-first assertions and no waitForTimeout, plus any needed page objects, fixtures or test-data, then runs the test to verify. Use when the user runs /pw:generate or says \"write tests\", \"generate tests\", \"add tests for\", \"test this component\", \"e2e test\", \"create test for\", or \"test this page\"."
     },
     {
       "name": "google-workspace-cli",
@@ -296,12 +296,12 @@
     {
       "name": "init",
       "category": "engineering",
-      "description": "Set up Playwright in a project. Use when user says \"set up playwright\", \"add e2e tests\", \"configure playwright\", \"testing setup\", \"init playwright\", or \"add test infrastructure\"."
+      "description": "Scaffold a production-ready Playwright setup: detects the framework (Next.js/React-Vite/Vue-Nuxt/Angular) and TS vs JS from package.json and tsconfig.json, installs @playwright/test, generates playwright.config.ts with framework-specific baseURL/webServer plus retries, traces and chromium/firefox/ webkit projects, creates the e2e/ folder (fixtures, pages, test-data, example spec), adds a GitHub Actions or GitLab CI workflow, updates .gitignore and npm scripts, then runs the example test to verify. Use when the user runs /pw:init or says \"set up playwright\", \"add e2e tests\", \"configure playwright\", \"init playwright\", \"testing setup\", or \"add test infrastructure\"."
     },
     {
       "name": "migrate",
       "category": "engineering",
-      "description": "Migrate from Cypress or Selenium to Playwright. Use when user mentions \"cypress\", \"selenium\", \"migrate tests\", \"convert tests\", \"switch to playwright\", \"move from cypress\", or \"replace selenium\"."
+      "description": "Migrate a Cypress or Selenium/WebDriver suite to Playwright file by file. Auto-detects the source (cypress/ dir or cypress.config, selenium/webdriver deps, Python selenium imports), assesses scope and batches large suites, runs /pw:init if Playwright is missing, then converts using cypress-mapping.md / selenium-mapping.md (cy.visit\u2192page.goto, cy.get\u2192getByRole, driver.findElement \u2192locator, WebDriverWait\u2192expect().toBeVisible), upgrades CSS/XPath selectors to role-based locators, ports custom commands to fixtures and page objects, runs each converted file to verify, and cleans up old deps/config/CI. Accepts \"from cypress\", \"from selenium\", or a file path in $ARGUMENTS. Use when the user runs /pw:migrate or says \"cypress\", \"selenium\", \"migrate tests\", \"convert tests\", \"switch to playwright\", or \"replace selenium\"."
     },
     {
       "name": "ms365-tenant-manager",
@@ -331,7 +331,7 @@
     {
       "name": "report",
       "category": "engineering",
-      "description": "Generate test report. Use when user says \"test report\", \"results summary\", \"test status\", \"show results\", \"test dashboard\", or \"how did tests go\"."
+      "description": "Generate a Playwright test report and route it to whatever the project already uses, no new tooling. Runs the suite (or reuses existing test-results/ and playwright-report/), parses the JSON reporter for passed/failed/skipped/flaky counts, durations and per-browser breakdown, then emits a markdown report to test-reports/ and auto-routes by what is configured: TestRail push when TESTRAIL_URL is set, a Slack summary when SLACK_WEBHOOK_URL is set, PR-artifact results under .github/workflows/, or the HTML report. Adds trend analysis when prior reports exist. Use when the user runs /pw:report or says \"test report\", \"results summary\", \"test status\", \"show results\", \"test dashboard\", or \"how did tests go\"."
     },
     {
       "name": "review",
@@ -446,7 +446,7 @@
     {
       "name": "testrail",
       "category": "engineering",
-      "description": "Sync tests with TestRail. Use when user mentions \"testrail\", \"test management\", \"test cases\", \"test run\", \"sync test cases\", \"push results to testrail\", or \"import from testrail\"."
+      "description": "Bidirectionally sync Playwright with TestRail: imports cases into generated tests (linked via a 'testrail' annotation like C12345), runs the suite with the JSON reporter and pushes pass/fail/skip results to a run, creates runs, updates case steps, and reports linked-vs-unlinked coverage. Drives the testrail_get_cases, testrail_add_result, testrail_add_run and testrail_update_case MCP tools. Requires TESTRAIL_URL, TESTRAIL_USER and TESTRAIL_API_KEY env vars. Use when the user runs /pw:testrail (import / push / run / status / update) or says \"testrail\", \"test management\", \"test cases\", \"test run\", \"sync test cases\", \"push results to testrail\", or \"import from testrail\"."
     },
     {
       "name": "threat-detection",
@@ -486,7 +486,7 @@
     {
       "name": "autoresearch-agent-skills-status",
       "category": "engineering-advanced",
-      "description": "Show experiment dashboard with results, active loops, and progress."
+      "description": "Render the autoresearch experiment dashboard from results.tsv \u2014 per-experiment runs, kept count, best metric, percent change from start, and status \u2014 plus active-loop info (interval, cron id) read from loop.json. Scopes to one experiment, a domain, or all, and exports the view as markdown or CSV. Use when the user runs /ar:status or asks 'show experiment status', 'how is the optimization going', 'autoresearch dashboard', 'is the loop still running', or 'export experiment results'. (For multi-agent competition sessions use /hub:status instead.)"
     },
     {
       "name": "behuman",

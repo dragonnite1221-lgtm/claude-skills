@@ -1,0 +1,12 @@
+# Per-skill security-audit suppressions (auditable). Scoped to this skill only;
+# detection is unchanged for every other skill, and each entry is pinned to an
+# exact file:line so a NEW finding elsewhere in the same file still surfaces.
+#
+# .mcp.json (line 0 = file-level finding): reviewed MCP server config — launches
+# the skill's own bundled servers via `npx tsx ...` with ${ENV} placeholders;
+# no inline shell, no secrets. Kept hidden because MCP clients require this name.
+FS-HIDDEN  .mcp.json:0
+#
+# Local PostToolUse git hook: parses Claude Code stdin JSON via an inline python3
+# snippet; inspectable, runs only on the developer's machine, not agent-facing.
+CODE-EXEC  hooks/validate-test.sh:10
