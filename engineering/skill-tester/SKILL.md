@@ -31,8 +31,8 @@ This skill is essential for maintaining ecosystem consistency, enabling automate
 ## Core Features
 
 ### Comprehensive Skill Validation
-- **Structure Compliance**: Validates directory structure, required files (SKILL.md, README.md, scripts/, references/, assets/, expected_outputs/)
-- **Documentation Standards**: Checks SKILL.md frontmatter, section completeness, minimum line counts per tier
+- **Structure Compliance**: Validates the skill contract — SKILL.md (required) plus optional scripts/, references/, assets/. Directory requirements are only enforced when a specific `--tier` is targeted.
+- **Documentation Standards**: Checks SKILL.md frontmatter (`name` + `description`, matching the enforced gate), a top-level title, and minimum line counts
 - **File Format Validation**: Ensures proper Markdown formatting, YAML frontmatter syntax, and file naming conventions
 
 ### Advanced Script Testing
@@ -108,8 +108,8 @@ generate_compliance_score() -> float
 ```
 
 Key validation checks include:
-- SKILL.md frontmatter parsing and validation
-- Required section presence (Description, Features, Usage, etc.)
+- SKILL.md frontmatter parsing and validation (`name` + `description`)
+- Top-level title presence (body sections are not mandated; a custom list can be set via `REQUIRED_SKILL_MD_SECTIONS`)
 - Minimum line count enforcement per tier
 - Python script argparse implementation verification
 - Standard library import enforcement

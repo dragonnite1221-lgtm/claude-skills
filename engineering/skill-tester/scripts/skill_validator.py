@@ -132,13 +132,15 @@ class SkillValidator:
         }
     }
     
-    REQUIRED_SKILL_MD_SECTIONS = [
-        "Name", "Description", "Features", "Usage", "Examples"
-    ]
-    
-    FRONTMATTER_REQUIRED_FIELDS = [
-        "Name", "Tier", "Category", "Dependencies", "Author", "Version"
-    ]
+    # The repository's enforced skill contract (scripts/validate-skill-frontmatter.py
+    # + Tessl skill review) puts name/description in YAML frontmatter and does
+    # NOT mandate body sections — Tessl actively rewards removing boilerplate
+    # Usage/Examples headings. Leave this empty to require only a title; set it
+    # to enforce a custom section list for a specific project.
+    REQUIRED_SKILL_MD_SECTIONS: list = []
+
+    # Matches the enforced frontmatter gate (lowercase name + description).
+    FRONTMATTER_REQUIRED_FIELDS = ["name", "description"]
     
     def __init__(self, skill_path: str, target_tier: Optional[str] = None, verbose: bool = False):
         self.skill_path = Path(skill_path).resolve()
@@ -196,13 +198,16 @@ class SkillValidator:
             self.report.add_error("SKILL.md is required but missing")
             
         # Check README.md
+        # README.md is not part of the skill contract (CLAUDE.md skill package
+        # = SKILL.md + optional scripts/references/assets). Treat it as advisory
+        # so its absence does not lower the contract-compliance score.
         readme_path = self.skill_path / "README.md"
         if readme_path.exists():
-            self.report.add_check("readme_exists", True, "README.md found", 1.0)
+            self.report.add_check("readme_present", True, "README.md present (optional)", 1.0)
         else:
-            self.report.add_check("readme_exists", False, "README.md missing", 0.0)
-            self.report.add_warning("README.md is recommended but missing")
-            self.report.add_suggestion("Add README.md with usage instructions and examples")
+            self.report.add_check("readme_present", True,
+                                 "README.md optional — not part of skill contract", 1.0)
+            self.report.add_suggestion("Optional: add README.md for standalone usage docs")
             
     def _validate_skill_md(self):
         """Validate SKILL.md content and format"""
@@ -286,19 +291,30 @@ class SkillValidator:
         """Validate required sections in SKILL.md"""
         self.log_verbose("Checking required sections...")
         
-        missing_sections = []
-        for section in self.REQUIRED_SKILL_MD_SECTIONS:
-            pattern = rf'^#+\s*{re.escape(section)}\s*$'
-            if not re.search(pattern, content, re.MULTILINE | re.IGNORECASE):
-                missing_sections.append(section)
-                
-        if not missing_sections:
-            self.report.add_check("required_sections", True,
-                                 "All required sections present", 1.0)
+        # When a custom section list is configured, enforce it. Otherwise the
+        # only universal structural requirement is a top-level title (name and
+        # description already live in frontmatter).
+        if self.REQUIRED_SKILL_MD_SECTIONS:
+            missing_sections = []
+            for section in self.REQUIRED_SKILL_MD_SECTIONS:
+                pattern = rf'^#+\s*{re.escape(section)}\s*$'
+                if not re.search(pattern, content, re.MULTILINE | re.IGNORECASE):
+                    missing_sections.append(section)
+
+            if not missing_sections:
+                self.report.add_check("required_sections", True,
+                                     "All required sections present", 1.0)
+            else:
+                self.report.add_check("required_sections", False,
+                                     f"Missing sections: {', '.join(missing_sections)}", 0.0)
+                self.report.add_error(f"Missing required sections: {', '.join(missing_sections)}")
+            return
+
+        if re.search(r'^#\s+\S', content, re.MULTILINE):
+            self.report.add_check("skill_md_title", True, "Top-level title present", 1.0)
         else:
-            self.report.add_check("required_sections", False,
-                                 f"Missing sections: {', '.join(missing_sections)}", 0.0)
-            self.report.add_error(f"Missing required sections: {', '.join(missing_sections)}")
+            self.report.add_check("skill_md_title", False, "No top-level (#) title found", 0.0)
+            self.report.add_error("SKILL.md must have a top-level '# Title' heading")
             
     def _validate_readme(self):
         """Validate README.md content"""
@@ -328,8 +344,12 @@ class SkillValidator:
         """Validate directory structure against tier requirements"""
         self.log_verbose("Validating directory structure...")
         
-        required_dirs = self._get_tier_requirement("required_dirs", ["scripts"])
-        optional_dirs = self._get_tier_requirement("optional_dirs", [])
+        # scripts/, references/, assets/ are all optional in the repo's skill
+        # contract, so nothing is mandatory unless a specific --tier is targeted.
+        required_dirs = self._get_tier_requirement("required_dirs", [])
+        optional_dirs = self._get_tier_requirement(
+            "optional_dirs", ["scripts", "references", "assets"]
+        )
         
         # Check required directories
         missing_required = []

@@ -7,7 +7,7 @@
 | Metric | Count |
 |--------|-------|
 | Skills (total) | 239 |
-| Python tools (tracked `*.py`) | 378 |
+| Python tools (tracked `*.py`) | 379 |
 | Agents (`agents/**/*.md`) | 30 |
 | Slash commands (`commands/**/*.md`) | 29 |
 | Gemini mirror skill links | 239 |
