@@ -11,7 +11,7 @@
     {
       "name": "contract-and-proposal-writer",
       "category": "business-growth",
-      "description": "Contract & Proposal Writer"
+      "description": "Draft jurisdiction-aware business and legal documents as structured Markdown: freelance/dev contracts (fixed-price & hourly), consulting retainers, SaaS partnership agreements, project proposals, SOWs, NDAs (mutual/one-way), and MSAs, plus an Art. 28 GDPR Data Processing Addendum. Covers US (Delaware/work-for-hire), EU (GDPR), UK (post-Brexit English law), and DACH (BGB, Nutzungsrechte, HGB non-competes) clauses, with a key-clauses matrix (payment, IP, liability cap, termination, dispute resolution) and ready-to-fill [BRACKETED] templates. Includes pandoc commands to convert the Markdown to DOCX. Use when the user needs a client contract, proposal, SOW, NDA, MSA, or retainer fast, asks 'draft a freelance contract', 'write an NDA', or 'I need a GDPR DPA'. Not a substitute for legal counsel."
     },
     {
       "name": "customer-success-manager",
@@ -506,7 +506,7 @@
     {
       "name": "changelog-generator",
       "category": "engineering-advanced",
-      "description": "Changelog Generator"
+      "description": "Generate Keep-a-Changelog release notes from Conventional Commits and infer the SemVer bump (major/minor/patch) with generate_changelog.py \u2014 reads commits from a git range (--from-tag/--to-tag or --from-ref/--to-ref), stdin, or --input file; renders markdown or JSON; prepends into CHANGELOG.md with --write. Lint commit subjects with commit_linter.py (non-zero exit in --strict) to gate PRs. Supports feat/fix/perf/refactor/docs/test/build/ci/chore/security/deprecated/remove and breaking-change detection (type!: or BREAKING CHANGE:). Use when cutting a release, automating release notes in CI, or blocking malformed commit messages \u2014 e.g. 'generate a changelog from v1.3.0 to v1.4.0', 'what version bump do these commits need', 'lint my commit messages'."
     },
     {
       "name": "ci-cd-pipeline-builder",
@@ -521,7 +521,7 @@
     {
       "name": "codebase-onboarding",
       "category": "engineering-advanced",
-      "description": "Codebase Onboarding"
+      "description": "Scan an unfamiliar repository and draft onboarding documentation for new engineers, tech leads, or contractors. codebase_analyzer.py walks the repo to detect languages by extension, key config files (package.json, requirements.txt, Dockerfile, go.mod, etc.), the largest files, and the directory tree, emitting text or --json facts. Reference templates turn those facts into a README/onboarding packet with setup, architecture, key files, common tasks, and debugging sections, tailored by audience. Use when the user wants to onboard onto a new codebase, write or refresh onboarding/handoff docs, or asks 'document this repo for new hires', 'what does this project use', or 'generate an onboarding guide'."
     },
     {
       "name": "data-quality-auditor",
@@ -611,7 +611,7 @@
     {
       "name": "mcp-server-builder",
       "category": "engineering-advanced",
-      "description": "MCP Server Builder"
+      "description": "Generate a production-ready MCP server scaffold (Python or TypeScript) from an OpenAPI spec with openapi_to_mcp.py \u2014 converts paths/operations into an MCP tool manifest + starter server, deriving tool names from operationId. Validate the manifest with mcp_validator.py (duplicate names, missing descriptions, invalid schema shape, empty required fields, naming hygiene; non-zero exit in --strict). Use when exposing a REST API to an LLM agent, replacing brittle browser automation with typed tools, bootstrapping an MCP server from an OpenAPI/Swagger spec, or gating MCP tool quality in CI \u2014 e.g. 'build an MCP server from this openapi.json', 'turn our API into MCP tools', 'validate my MCP tool manifest'."
     },
     {
       "name": "merge",
@@ -626,17 +626,17 @@
     {
       "name": "monorepo-navigator",
       "category": "engineering-advanced",
-      "description": "Monorepo Navigator"
+      "description": "Detect a monorepo's tool (Turborepo, Nx, pnpm/yarn workspaces, Lerna), enumerate its workspaces, and build the internal package dependency graph from a repo path using monorepo_analyzer.py (text or --json). Guides cross-package impact analysis, selective/affected-only builds and tests, remote caching, multi-repo\u2192monorepo migration with git history preserved, Changesets publishing, and workspace-aware CLAUDE.md setup. Use when shared packages make builds slow, when you need to know which apps break if a shared package changes, when migrating polyrepo\u2192monorepo, or when setting up coordinated npm publishing \u2014 e.g. 'analyze my monorepo structure', 'which packages are affected by this change', 'set up Turborepo caching'."
     },
     {
       "name": "observability-designer",
       "category": "engineering-advanced",
-      "description": "Observability Designer (POWERFUL)"
+      "description": "Design production observability \u2014 SLI/SLO frameworks, dashboards, and alert tuning \u2014 from a service-description JSON. slo_designer.py turns service type/criticality/user-facing into SLIs, SLO targets, error budgets, and multi-window burn-rate alerts. dashboard_generator.py emits a Grafana-compatible dashboard with golden-signals/RED/USE panels and role-based views (sre/developer/executive/ops). alert_optimizer.py analyzes an existing alert config for noise, duplicates, coverage gaps, and bad thresholds and emits an optimized config (JSON or HTML report). Use when the user wants to define SLOs/error budgets, build a Grafana dashboard, reduce alert fatigue, or asks 'set up monitoring for this service', 'what SLOs should this API have', or 'my alerts are too noisy'."
     },
     {
       "name": "performance-profiler",
       "category": "engineering-advanced",
-      "description": "Performance Profiler"
+      "description": "Find and fix performance bottlenecks in Node.js, Python, and Go apps with a measure-first discipline. performance_profiler.py scans a project directory for risk indicators \u2014 dependency counts, bundle-like artifacts and build dirs, and large files over a --large-file-threshold-kb \u2014 in text or --json. references/profiling-recipes.md gives the real profiling commands: clinic.js/0x flamegraphs and heap snapshots for Node, py-spy/cProfile/memory_profiler for Python, pprof for Go, plus EXPLAIN ANALYZE and k6/Artillery load tests. Use when an app is slow, P99 exceeds SLA, memory grows (suspected leak), bundle size jumped, or before a traffic spike \u2014 e.g. 'why is this endpoint slow', 'profile this service', 'find the memory leak', or 'load test before launch'."
     },
     {
       "name": "pr-review-expert",
@@ -671,7 +671,7 @@
     {
       "name": "runbook-generator",
       "category": "engineering-advanced",
-      "description": "Runbook Generator"
+      "description": "Scaffold a markdown operational runbook for a service from its name using runbook_generator.py \u2014 emits standard sections (Overview, Preconditions, Start/Stop Procedure, Health Checks, Deployment Checklist, Rollback, Incident Response, Escalation, Post-Incident) with copy-paste command placeholders. Use when a service has no runbook and needs a baseline, when on-call onboarding needs standardized ops docs, or when runbooks are inconsistent across teams \u2014 e.g. 'create a runbook for payments-api', 'generate an on-call/incident-response doc', 'scaffold a deployment + rollback runbook'."
     },
     {
       "name": "sample-skill",
@@ -1006,7 +1006,7 @@
     {
       "name": "apple-hig-expert",
       "category": "product",
-      "description": "Expert guidance on Apple Human Interface Guidelines (HIG). Covers iOS, macOS, and visionOS with 2026 Liquid Glass aesthetics and accessibility-first design."
+      "description": "Design and audit apps against Apple's Human Interface Guidelines (HIG) for iOS, macOS, watchOS, and visionOS, with the 2026 Liquid Glass aesthetic (translucent materials, depth, fluid motion) and accessibility-first rules (44pt tap targets, VoiceOver semantics, contrast). Runs hig_checker.py to verify contrast ratios (WCAG), tap-target sizes, and batch element checks, then produces a 0-100 HIG scorecard with prioritized fixes. Use when the user says 'audit my iOS app', 'check HIG compliance', 'is this accessible / VoiceOver-ready', 'design a visionOS ornament', 'review my mockup against Apple guidelines', or asks about San Francisco typography, semantic colors, navigation patterns (tab bars, sidebars, ornaments), or Liquid Glass materials."
     },
     {
       "name": "code-to-prd",
@@ -1041,7 +1041,7 @@
     {
       "name": "product-manager-toolkit",
       "category": "product",
-      "description": "Comprehensive toolkit for product managers including RICE prioritization, customer interview analysis, PRD templates, discovery frameworks, and go-to-market strategies. Use for feature prioritization, user research synthesis, requirement documentation, and product strategy development."
+      "description": "Product management toolkit covering RICE prioritization, customer-interview synthesis, PRD authoring, discovery frameworks, and go-to-market. Runs rice_prioritizer.py to score features by (Reach x Impact x Confidence) / Effort with portfolio balance and quarterly capacity planning, and customer_interview_analyzer.py to extract pain points, feature requests, jobs-to-be-done, sentiment, themes, and quotes from transcripts. Ships PRD templates (standard, one-page, brief, agile epic) and framework references (RICE, MoSCoW, Kano, JTBD). Use when the user says 'prioritize these features', 'run RICE', 'build a roadmap from this backlog', 'analyze this customer interview', 'synthesize user research', 'write a PRD', or 'plan sprint capacity'."
     },
     {
       "name": "product-strategist",
