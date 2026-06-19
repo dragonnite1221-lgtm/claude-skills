@@ -1,46 +1,33 @@
 ---
 name: "email-template-builder"
-description: "Email Template Builder"
+description: "Build production transactional email systems with React Email (.tsx) templates — welcome, verification, password reset, invoice, notification, digest — wired to a unified send function for Resend, Postmark, SendGrid, or AWS SES. Covers the 600px inline-style email layout, dark-mode media queries, typed i18n locale files, UTM/open-click tracking, a deliverability/spam checklist (SPF/DKIM/DMARC), and the `email dev` preview server. Use when setting up transactional email for a product, adding a new email type, fixing deliverability or rendering issues, or asked to 'build a welcome email', 'create an invoice email template', or 'set up React Email with Resend'."
 ---
 
 # Email Template Builder
 
-**Tier:** POWERFUL  
-**Category:** Engineering Team  
-**Domain:** Transactional Email / Communications Infrastructure
+Build complete transactional email systems: React Email templates, multi-provider
+sending, local preview, i18n, dark mode, spam optimization, and analytics tracking.
+Output is production-ready code for Resend, Postmark, SendGrid, or AWS SES.
 
----
+## Capabilities
 
-## Overview
-
-Build complete transactional email systems: React Email templates, provider integration, preview server, i18n support, dark mode, spam optimization, and analytics tracking. Output production-ready code for Resend, Postmark, SendGrid, or AWS SES.
-
----
-
-## Core Capabilities
-
-- React Email templates (welcome, verification, password reset, invoice, notification, digest)
-- MJML templates for maximum email client compatibility
-- Multi-provider support with unified sending interface
-- Local preview server with hot reload
+- React Email `.tsx` templates (welcome, verification, password reset, invoice, notification, digest)
+- Multi-provider sending behind one unified `sendEmail()` interface
+- Local preview server with hot reload (`email dev`)
 - i18n/localization with typed translation keys
-- Dark mode support using media queries
-- Spam score optimization checklist
+- Dark mode via `prefers-color-scheme` media queries
+- Spam-score / deliverability checklist
 - Open/click tracking with UTM parameters
 
----
-
-## When to Use
+## When to use
 
 - Setting up transactional email for a new product
 - Migrating from a legacy email system
 - Adding new email types (invoice, digest, notification)
-- Debugging email deliverability issues
+- Debugging email deliverability or client-rendering issues
 - Implementing i18n for email templates
 
----
-
-## Project Structure
+## Project structure
 
 ```
 emails/
@@ -162,7 +149,7 @@ import { Button, Heading, Text } from "@react-email/components"
 import { EmailLayout } from "../components/layout/email-layout"
 
 interface WelcomeEmailProps {
-  name: "string"
+  name: string
   confirmUrl: string
   trialDays?: number
 }
@@ -221,7 +208,7 @@ import { EmailLayout } from "../components/layout/email-layout"
 interface InvoiceItem { description: string; amount: number }
 
 interface InvoiceEmailProps {
-  name: "string"
+  name: string
   invoiceNumber: string
   invoiceDate: string
   dueDate: string
@@ -337,21 +324,21 @@ export async function sendEmail(to: string, payload: EmailPayload) {
 
 ---
 
-## Preview Server Setup
+## Preview server + verification workflow
 
-```typescript
-// package.json scripts
-{
-  "scripts": {
-    "email:dev": "email dev --dir emails/templates --port 3001",
-    "email:build": "email export --dir emails/templates --outDir emails/out"
-  }
-}
+```bash
+# package.json scripts:
+#   "email:dev":   "email dev --dir emails/templates --port 3001"
+#   "email:build": "email export --dir emails/templates --outDir emails/out"
 
-// Run: npm run email:dev
-// Opens: http://localhost:3001
-// Shows all templates with live preview and hot reload
+npm run email:dev          # live preview + hot reload at http://localhost:3001
 ```
+
+Validate before shipping a template:
+
+1. `npm run email:dev` and open each template in the preview — check desktop, mobile, and dark mode toggles.
+2. Send a real test to a seed inbox via `sendEmail()`; if it renders wrong in Gmail/Outlook, fix inline styles (see Common Pitfalls) and re-send.
+3. Run the deliverability check below (Mail-Tester) and resolve any flags before the first production send.
 
 ---
 
@@ -361,8 +348,8 @@ export async function sendEmail(to: string, payload: EmailPayload) {
 // emails/i18n/en.ts
 export const en = {
   welcome: {
-    preview: (name: "string-welcome-to-myapp-name"
-    heading: (name: "string-welcome-to-myapp-name"
+    preview: (name: string) => `Welcome to MyApp, ${name}!`,
+    heading: (name: string) => `Welcome to MyApp, ${name}!`,
     body: (days: number) => `You've got ${days} days to explore everything.`,
     cta: "Confirm Email Address",
   },
@@ -371,8 +358,8 @@ export const en = {
 // emails/i18n/de.ts
 export const de = {
   welcome: {
-    preview: (name: "string-willkommen-bei-myapp-name"
-    heading: (name: "string-willkommen-bei-myapp-name"
+    preview: (name: string) => `Willkommen bei MyApp, ${name}!`,
+    heading: (name: string) => `Willkommen bei MyApp, ${name}!`,
     body: (days: number) => `Du hast ${days} Tage Zeit, alles zu erkunden.`,
     cta: "E-Mail-Adresse bestätigen",
   },

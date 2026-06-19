@@ -73,6 +73,8 @@ jobs:
     needs: detect-skills
     if: needs.detect-skills.outputs.has_skills == 'true'
     runs-on: ubuntu-latest
+    # TESSL_TOKEN secret lives in the environment of the same name.
+    environment: TESSL_TOKEN
     permissions:
       contents: read
       pull-requests: write
@@ -85,13 +87,34 @@ jobs:
         with:
           python-version: '3.11'
 
-      - name: Set up Node.js
-        uses: actions/setup-node@v4
-        with:
-          node-version: 20
+      - name: Verify Tessl token is configured
+        env:
+          TESSL_TOKEN: ${{ secrets.TESSL_TOKEN }}
+          TESSL_API_KEY: ${{ secrets.TESSL_API_KEY }}
+          TESSL_TOKEN_AS_VAR: ${{ vars.TESSL_TOKEN }}
+        run: |
+          if [ -n "$TESSL_TOKEN" ]; then
+            echo "TESSL_TOKEN secret: present (${#TESSL_TOKEN} chars)"
+          elif [ -n "$TESSL_TOKEN_AS_VAR" ]; then
+            echo "::error::TESSL_TOKEN is registered under the Variables tab, not Secrets." \
+              "Delete the variable and re-add it as a Repository secret" \
+              "(Settings → Secrets and variables → Actions → Secrets tab → New repository secret)."
+            exit 1
+          elif [ -n "$TESSL_API_KEY" ]; then
+            echo "::error::Secret TESSL_API_KEY exists but this workflow expects TESSL_TOKEN." \
+              "Rename it: Settings → Secrets and variables → Actions → Repository secrets."
+            exit 1
+          else
+            echo "::error::TESSL_TOKEN is missing or empty in this repository's Actions secrets." \
+              "Add it under Settings → Secrets and variables → Actions → Repository secrets" \
+              "(not Variables, not Codespaces/Dependabot, not Environments)."
+            exit 1
+          fi
 
-      - name: Install Tessl CLI
-        run: npm install -g tessl
+      - name: Set up Tessl CLI
+        uses: tesslio/setup-tessl@v2
+        with:
+          token: ${{ secrets.TESSL_TOKEN }}
 
       - name: Review changed skills
         id: review
@@ -117,7 +140,9 @@ jobs:
             PARSED=$(echo "$JSON_OUT" | python3 -c "
           import sys, json
           try:
-              d = json.load(sys.stdin)
+              # tessl prints a Terms banner before the JSON; parse from the first '{'
+              text = sys.stdin.read()
+              d = json.loads(text[text.index('{'):])
               score = d.get('review', {}).get('reviewScore', 0)
               ds = round(d.get('descriptionJudge', {}).get('normalizedScore', 0) * 100)
               cs = round(d.get('contentJudge', {}).get('normalizedScore', 0) * 100)

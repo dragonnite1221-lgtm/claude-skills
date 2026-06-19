@@ -14,6 +14,7 @@ Exit codes:
 """
 
 import argparse
+import io
 import json
 import os
 import re
@@ -22,6 +23,7 @@ import subprocess
 import sys
 import tempfile
 import shutil
+import tokenize
 from dataclasses import dataclass, field, asdict
 from enum import IntEnum
 from pathlib import Path
@@ -598,6 +600,49 @@ MD_EXTENSIONS = {".md", ".mdx", ".markdown"}
 ALL_SCAN_EXTENSIONS = CODE_EXTENSIONS | MD_EXTENSIONS
 
 
+def is_test_artifact(path: Path) -> bool:
+    """True for test files/dirs. Test suites for security/validation tooling
+    legitimately contain intentional attack samples as fixtures; scanning them
+    produces false positives, and tests are not part of a skill's shipped
+    executable surface."""
+    parts = {p.lower() for p in path.parts}
+    if parts & {"tests", "test", "__tests__", "fixtures", "testdata"}:
+        return True
+    name = path.name.lower()
+    return name.startswith("test_") or name.endswith("_test.py")
+
+
+def mask_python_noncode(content: str) -> str:
+    """Blank out string and comment token text in Python source, preserving
+    line/column offsets, so the pattern scanner sees only executable code.
+
+    This removes the 'scanner flags scanner' false positives: a security tool's
+    docstrings and pattern-definition string literals (e.g. the text
+    "os.system(), os.popen() usage") are not executable calls and must not be
+    flagged. A real `os.system(...)` call is a NAME token and survives masking,
+    so genuine detections are preserved."""
+    try:
+        tokens = list(tokenize.generate_tokens(io.StringIO(content).readline))
+    except (tokenize.TokenError, IndentationError, SyntaxError):
+        return content  # fall back to raw text on un-tokenizable input
+
+    lines = content.split("\n")
+    for tok in tokens:
+        if tok.type not in (tokenize.STRING, tokenize.COMMENT) and \
+                tok.type != getattr(tokenize, "FSTRING_MIDDLE", -1):
+            continue
+        (srow, scol), (erow, ecol) = tok.start, tok.end
+        for row in range(srow, erow + 1):
+            idx = row - 1
+            if idx >= len(lines):
+                continue
+            line = lines[idx]
+            start = scol if row == srow else 0
+            end = ecol if row == erow else len(line)
+            lines[idx] = line[:start] + " " * (end - start) + line[end:]
+    return "\n".join(lines)
+
+
 def scan_file_code(filepath: Path, report: AuditReport):
     """Scan a code file for dangerous patterns."""
     try:
@@ -605,8 +650,11 @@ def scan_file_code(filepath: Path, report: AuditReport):
     except Exception:
         return
 
-    lines = content.split("\n")
     ext = filepath.suffix.lower()
+    original_lines = content.split("\n")
+    # For Python, match against a version with string/comment text blanked so
+    # only executable code is scanned; report the original line for context.
+    scan_lines = mask_python_noncode(content).split("\n") if ext == ".py" else original_lines
 
     # Select pattern sets based on file type
     patterns = list(CODE_PATTERNS)
@@ -615,8 +663,8 @@ def scan_file_code(filepath: Path, report: AuditReport):
     if ext in {".js", ".ts", ".mjs", ".cjs"}:
         patterns.extend(JS_PATTERNS)
 
-    for i, line in enumerate(lines, 1):
-        stripped = line.strip()
+    for i, (scan_line, orig_line) in enumerate(zip(scan_lines, original_lines), 1):
+        stripped = scan_line.strip()
         # Skip comments
         if stripped.startswith("#") and ext in {".py", ".sh", ".bash"}:
             continue
@@ -624,14 +672,14 @@ def scan_file_code(filepath: Path, report: AuditReport):
             continue
 
         for pat in patterns:
-            if re.search(pat["regex"], line):
+            if re.search(pat["regex"], scan_line):
                 report.findings.append(
                     Finding(
                         severity=pat["severity"],
                         category=pat["category"],
                         file=str(filepath),
                         line=i,
-                        pattern=stripped[:120],
+                        pattern=orig_line.strip()[:120],
                         risk=pat["risk"],
                         fix=pat["fix"],
                     )
@@ -716,14 +764,22 @@ def scan_dependencies(skill_path: Path, report: AuditReport):
 
     # Check for pip/npm install in code
     for code_file in skill_path.rglob("*"):
-        if code_file.suffix.lower() not in CODE_EXTENSIONS:
+        if code_file.suffix.lower() not in CODE_EXTENSIONS or is_test_artifact(code_file):
             continue
         try:
             content = code_file.read_text(encoding="utf-8", errors="replace")
         except Exception:
             continue
 
-        for i, line in enumerate(content.split("\n"), 1):
+        ext = code_file.suffix.lower()
+        # Match only executable code: blank string/comment text for Python and
+        # skip comment lines, so a literal "pip install" in a docstring or
+        # comment is not flagged as a runtime install.
+        scan_src = mask_python_noncode(content) if ext == ".py" else content
+        for i, line in enumerate(scan_src.split("\n"), 1):
+            stripped = line.strip()
+            if stripped.startswith("#") and ext in {".py", ".sh", ".bash"}:
+                continue
             if re.search(r"\bpip\s+install\b", line):
                 report.findings.append(
                     Finding(
@@ -765,7 +821,7 @@ def scan_filesystem(skill_path: Path, report: AuditReport):
         # Hidden files (except common ones)
         if item.name.startswith(".") and item.name not in (
             ".gitignore", ".gitkeep", ".editorconfig", ".prettierrc",
-            ".eslintrc", ".pylintrc", ".flake8",
+            ".eslintrc", ".pylintrc", ".flake8", ".security-audit-allowlist",
             ".claude-plugin", ".codex", ".gemini",
         ):
             severity = Severity.CRITICAL if item.name == ".env" else Severity.HIGH
@@ -856,6 +912,49 @@ def scan_filesystem(skill_path: Path, report: AuditReport):
                 pass
 
 
+def load_allowlist(skill_path: Path) -> list:
+    """Load per-skill audit suppressions from `.security-audit-allowlist`.
+
+    Each non-comment line is a rule `CATEGORY <relpath>[:line]`. A finding is
+    suppressed when its category and file (and line, if given) match. This is
+    the auditable escape hatch for security-tooling skills that legitimately
+    contain the patterns they detect (e.g. attack examples documented in a
+    threat model). Detection strength is unchanged for every other skill —
+    exceptions are explicit, per-skill, and reviewable in one file."""
+    allowlist_file = skill_path / ".security-audit-allowlist"
+    rules = []
+    if not allowlist_file.exists():
+        return rules
+    for raw in allowlist_file.read_text(encoding="utf-8").splitlines():
+        line = raw.split("#", 1)[0].strip()
+        if not line:
+            continue
+        parts = line.split()
+        if len(parts) < 2:
+            continue
+        category = parts[0]
+        target = parts[1]
+        relpath, _, lineno = target.partition(":")
+        rules.append((category, relpath, lineno or None))
+    return rules
+
+
+def _is_allowlisted(finding: "Finding", rules: list, skill_path: Path) -> bool:
+    try:
+        rel = Path(finding.file).resolve().relative_to(skill_path.resolve()).as_posix()
+    except ValueError:
+        rel = Path(finding.file).name
+    for category, relpath, lineno in rules:
+        if finding.category != category:
+            continue
+        if rel != relpath:
+            continue
+        if lineno is not None and str(finding.line) != lineno:
+            continue
+        return True
+    return False
+
+
 def scan_skill(skill_path: Path) -> AuditReport:
     """Run full security audit on a skill directory."""
     report = AuditReport(
@@ -881,9 +980,9 @@ def scan_skill(skill_path: Path) -> AuditReport:
     # 1. Filesystem scan
     scan_filesystem(skill_path, report)
 
-    # 2. Code scanning
+    # 2. Code scanning (test fixtures are excluded — see is_test_artifact)
     for code_file in skill_path.rglob("*"):
-        if ".git" in code_file.parts:
+        if ".git" in code_file.parts or is_test_artifact(code_file):
             continue
         if code_file.is_file() and code_file.suffix.lower() in CODE_EXTENSIONS:
             report.scripts_scanned += 1
@@ -899,6 +998,13 @@ def scan_skill(skill_path: Path) -> AuditReport:
 
     # 4. Dependency scanning
     scan_dependencies(skill_path, report)
+
+    # 5. Apply per-skill allowlist (auditable suppressions)
+    rules = load_allowlist(skill_path)
+    if rules:
+        report.findings = [
+            f for f in report.findings if not _is_allowlisted(f, rules, skill_path)
+        ]
 
     return report
 

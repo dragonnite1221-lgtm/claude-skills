@@ -1,9 +1,17 @@
 ---
 name: "migrate"
 description: >-
-  Migrate from Cypress or Selenium to Playwright. Use when user mentions
-  "cypress", "selenium", "migrate tests", "convert tests", "switch to
-  playwright", "move from cypress", or "replace selenium".
+  Migrate a Cypress or Selenium/WebDriver suite to Playwright file by file.
+  Auto-detects the source (cypress/ dir or cypress.config, selenium/webdriver
+  deps, Python selenium imports), assesses scope and batches large suites,
+  runs /pw:init if Playwright is missing, then converts using cypress-mapping.md
+  / selenium-mapping.md (cy.visit→page.goto, cy.get→getByRole, driver.findElement
+  →locator, WebDriverWait→expect().toBeVisible), upgrades CSS/XPath selectors to
+  role-based locators, ports custom commands to fixtures and page objects, runs
+  each converted file to verify, and cleans up old deps/config/CI. Accepts "from
+  cypress", "from selenium", or a file path in $ARGUMENTS. Use when the user runs
+  /pw:migrate or says "cypress", "selenium", "migrate tests", "convert tests",
+  "switch to playwright", or "replace selenium".
 ---
 
 # Migrate to Playwright

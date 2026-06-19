@@ -1,9 +1,15 @@
 ---
 name: "init"
 description: >-
-  Set up Playwright in a project. Use when user says "set up playwright",
-  "add e2e tests", "configure playwright", "testing setup", "init playwright",
-  or "add test infrastructure".
+  Scaffold a production-ready Playwright setup: detects the framework
+  (Next.js/React-Vite/Vue-Nuxt/Angular) and TS vs JS from package.json and
+  tsconfig.json, installs @playwright/test, generates playwright.config.ts with
+  framework-specific baseURL/webServer plus retries, traces and chromium/firefox/
+  webkit projects, creates the e2e/ folder (fixtures, pages, test-data, example
+  spec), adds a GitHub Actions or GitLab CI workflow, updates .gitignore and npm
+  scripts, then runs the example test to verify. Use when the user runs /pw:init
+  or says "set up playwright", "add e2e tests", "configure playwright", "init
+  playwright", "testing setup", or "add test infrastructure".
 ---
 
 # Initialize Playwright Project
