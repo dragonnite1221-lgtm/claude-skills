@@ -82,7 +82,7 @@
 576 engineering-team/senior-computer-vision/scripts/vision_model_trainer.py
 1636 engineering-team/senior-data-engineer/scripts/data_quality_validator.py
 1685 engineering-team/senior-data-engineer/scripts/etl_performance_optimizer.py
-883 engineering-team/senior-data-engineer/scripts/pipeline_orchestrator.py
+1053 engineering-team/senior-data-engineer/scripts/pipeline_orchestrator.py
 407 engineering-team/senior-frontend/scripts/bundle_analyzer.py
 329 engineering-team/senior-frontend/scripts/component_generator.py
 1005 engineering-team/senior-frontend/scripts/frontend_scaffolder.py
@@ -176,12 +176,12 @@
 330 engineering/secrets-vault-manager/scripts/audit_log_analyzer.py
 280 engineering/secrets-vault-manager/scripts/rotation_planner.py
 302 engineering/secrets-vault-manager/scripts/vault_config_generator.py
-1050 engineering/skill-security-auditor/scripts/skill_security_auditor.py
+1156 engineering/skill-security-auditor/scripts/skill_security_auditor.py
 382 engineering/skill-tester/assets/sample-skill/scripts/text_processor.py
 1182 engineering/skill-tester/scripts/quality_scorer.py
 731 engineering/skill-tester/scripts/script_tester.py
 606 engineering/skill-tester/scripts/security_scorer.py
-667 engineering/skill-tester/scripts/skill_validator.py
+697 engineering/skill-tester/scripts/skill_validator.py
 851 engineering/skill-tester/tests/test_security_scorer.py
 338 engineering/spec-driven-workflow/scripts/spec_generator.py
 461 engineering/spec-driven-workflow/scripts/spec_validator.py
@@ -224,9 +224,11 @@
 517 marketing-skill/cold-email/scripts/email_sequence_analyzer.py
 365 marketing-skill/competitor-alternatives/scripts/comparison_matrix_builder.py
 504 marketing-skill/content-humanizer/scripts/humanizer_scorer.py
+267 marketing-skill/content-production/scripts/content_quality_gates.py
 464 marketing-skill/content-production/scripts/content_scorer.py
 433 marketing-skill/content-production/scripts/seo_optimizer.py
 243 marketing-skill/content-strategy/scripts/topic_cluster_mapper.py
+285 marketing-skill/copy-editing/scripts/ai_content_detector.py
 285 marketing-skill/copy-editing/scripts/readability_scorer.py
 256 marketing-skill/copywriting/scripts/headline_scorer.py
 354 marketing-skill/email-sequence/scripts/sequence_analyzer.py
@@ -236,6 +238,7 @@
 219 marketing-skill/marketing-context/scripts/context_validator.py
 217 marketing-skill/onboarding-cro/scripts/activation_funnel_analyzer.py
 427 marketing-skill/page-cro/scripts/conversion_audit.py
+271 marketing-skill/paid-ads/scripts/ad_health_scorer.py
 304 marketing-skill/paid-ads/scripts/roas_calculator.py
 283 marketing-skill/pricing-strategy/scripts/pricing_modeler.py
 239 marketing-skill/prompt-engineer-toolkit/scripts/prompt_tester.py
@@ -243,6 +246,7 @@
 420 marketing-skill/referral-program/scripts/referral_roi_calculator.py
 442 marketing-skill/schema-markup/scripts/schema_validator.py
 361 marketing-skill/seo-audit/scripts/seo_checker.py
+255 marketing-skill/seo-audit/scripts/seo_health_scorer.py
 320 marketing-skill/signup-flow-cro/scripts/funnel_drop_analyzer.py
 375 marketing-skill/site-architecture/scripts/sitemap_analyzer.py
 399 marketing-skill/social-media-manager/scripts/social_calendar_generator.py
@@ -303,6 +307,9 @@
 479 ra-qm-team/soc2-compliance/scripts/gap_analyzer.py
 666 scripts/generate-docs.py
 399 scripts/sync-codex-skills.py
-270 scripts/sync-gemini-skills.py
+279 scripts/sync-gemini-skills.py
 213 scripts/sync-hermes-skills.py
+344 scripts/validate-skill-frontmatter.py
 213 tests/test_dcf_valuation.py
+288 tests/test_pipeline_orchestrator.py
+401 tests/test_skill_integrity.py
