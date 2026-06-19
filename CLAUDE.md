@@ -126,6 +126,24 @@ See [standards/git/git-workflow-standards.md](standards/git/git-workflow-standar
 - Document all dependencies in SKILL.md
 - Prefer standard library implementations
 
+### 200-line Python file-size gate
+
+`scripts/check_file_size.py` (`LIMIT = 200`) enforces a 200-line ceiling on
+every tracked `*.py` file. Existing oversized scripts are frozen in
+`scripts/file_size_baseline.txt`; the gate blocks **new** violations, **growth**
+of a baselined file, and **stale** baseline entries. New Python tools must stay
+≤200 lines.
+
+```bash
+python3 scripts/check_file_size.py                   # check (exit 1 on new/grown violations)
+python3 scripts/check_file_size.py --write-baseline  # regenerate ONLY after a genuine split
+```
+
+Regenerate the baseline only when you have actually shrunk files (a
+behavior-preserving split), never to paper over new growth. Enforced in CI
+(`.github/workflows/file-size.yml`) and locally via `.githooks/pre-push` —
+enable once with `git config core.hooksPath .githooks`.
+
 ## Current Version
 
 **Version:** v2.3.0 (latest)
