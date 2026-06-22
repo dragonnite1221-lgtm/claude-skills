@@ -125,8 +125,17 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ## [Unreleased]
 
+### Planned
+- Complete Anthropic best practices refactoring (remaining skills)
+- Production Python tools for remaining RA/QM skills
+- Marketing expansion: SEO Optimizer, Social Media Manager skills
+
+---
+
+## [2.3.1] - 2026-06-22
+
 ### Added
-- **skill-security-auditor** (POWERFUL tier) — Security audit and vulnerability scanner for AI agent skills. Scans for malicious code, prompt injection, data exfiltration, supply chain risks, and privilege escalation. Zero dependencies, PASS/WARN/FAIL verdicts.
+- **skill-security-auditor** (POWERFUL tier, `engineering/`) — Security audit and vulnerability scanner for AI agent skills. Scans for malicious code, prompt injection, data exfiltration, supply chain risks, and privilege escalation. Zero dependencies, PASS/WARN/FAIL verdicts. Ships `scripts/skill_security_auditor.py`, `references/threat-model.md`, and a full trigger-phrase SKILL.md. Registered in `.claude-plugin/marketplace.json`.
 - `engineering/git-worktree-manager` enhancements:
   - Added `scripts/worktree_manager.py` (worktree creation, port allocation, env sync, optional dependency install)
   - Added `scripts/worktree_cleanup.py` (stale/dirty/merged analysis with safe cleanup options)
@@ -150,15 +159,11 @@ and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0
 
 ### Changed
 - Refactored the five enhanced skills to slim, workflow-first `SKILL.md` documents aligned to Anthropic best practices.
-- Updated `engineering/.claude-plugin/plugin.json` metadata:
-  - Description now reflects 25 advanced engineering skills
-  - Version bumped from `1.0.0` to `1.1.0`
-- Updated root `README.md` with a dedicated \"Recently Enhanced Skills\" section.
+- Filled in proper trigger-phrase `description` frontmatter for `git-worktree-manager`, `mcp-server-builder`, `changelog-generator`, and `ci-cd-pipeline-builder` SKILL.md files (previously placeholder title-case strings), matching the activation-description quality bar used across the rest of the library.
+- Updated root `README.md` with a dedicated "Recently Enhanced Skills" section.
 
-### Planned
-- Complete Anthropic best practices refactoring (5/42 skills remaining)
-- Production Python tools for remaining RA/QM skills
-- Marketing expansion: SEO Optimizer, Social Media Manager skills
+### Verified
+- All 11 new/enhanced Python tools are stdlib-only and pass `python3 <script> --help`, and were smoke-tested with real inputs (security audit verdicts, stack detection, GitHub Actions YAML generation, conventional-commit changelog rendering, prompt A/B scoring, prompt versioning).
 
 ---
 
@@ -416,7 +421,8 @@ Major rewrite of existing skills following Anthropic's agent skills specificatio
 
 ---
 
-[Unreleased]: https://github.com/alirezarezvani/claude-skills/compare/v2.1.2...HEAD
+[Unreleased]: https://github.com/alirezarezvani/claude-skills/compare/v2.3.1...HEAD
+[2.3.1]: https://github.com/alirezarezvani/claude-skills/compare/v2.3.0...v2.3.1
 [2.1.2]: https://github.com/alirezarezvani/claude-skills/compare/v2.1.1...v2.1.2
 [2.1.1]: https://github.com/alirezarezvani/claude-skills/compare/v2.0.0...v2.1.1
 [2.0.0]: https://github.com/alirezarezvani/claude-skills/compare/v1.0.2...v2.0.0
