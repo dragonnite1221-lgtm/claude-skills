@@ -1,1 +1,1 @@
-../../../engineering-team/playwright-pro/skills/review/SKILL.md
+../../../engineering-team/self-improving-agent/skills/review/SKILL.md

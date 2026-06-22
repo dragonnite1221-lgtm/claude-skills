@@ -1,6 +1,6 @@
 ---
 name: "eval"
-description: "Evaluate and rank agent results by metric or LLM judge for an AgentHub session."
+description: "AgentHub /hub:eval command — rank the competing subagents in a session by metric mode (run an eval command in each worktree, parse the metric, sort by direction), LLM-judge mode (compare git diffs and result posts on correctness/simplicity/quality), or hybrid (metric first, judge to break sub-10% ties). Updates session state to evaluating and points to /hub:merge with the winner. Use when: agents have finished and you want to score, compare, or pick the best result before merging — 'rank the agents', 'which approach won', 'evaluate the session', 'judge the diffs'."
 command: /hub:eval
 ---
 

@@ -1,9 +1,16 @@
 ---
 name: "testrail"
 description: >-
-  Sync tests with TestRail. Use when user mentions "testrail", "test management",
-  "test cases", "test run", "sync test cases", "push results to testrail",
-  or "import from testrail".
+  Bidirectionally sync Playwright with TestRail: imports cases into generated
+  tests (linked via a 'testrail' annotation like C12345), runs the suite with
+  the JSON reporter and pushes pass/fail/skip results to a run, creates runs,
+  updates case steps, and reports linked-vs-unlinked coverage. Drives the
+  testrail_get_cases, testrail_add_result, testrail_add_run and
+  testrail_update_case MCP tools. Requires TESTRAIL_URL, TESTRAIL_USER and
+  TESTRAIL_API_KEY env vars. Use when the user runs /pw:testrail (import / push /
+  run / status / update) or says "testrail", "test management", "test cases",
+  "test run", "sync test cases", "push results to testrail", or "import from
+  testrail".
 ---
 
 # TestRail Integration

@@ -1,76 +1,52 @@
 ---
 name: "runbook-generator"
-description: "Runbook Generator"
+description: "Scaffold a markdown operational runbook for a service from its name using runbook_generator.py — emits standard sections (Overview, Preconditions, Start/Stop Procedure, Health Checks, Deployment Checklist, Rollback, Incident Response, Escalation, Post-Incident) with copy-paste command placeholders. Use when a service has no runbook and needs a baseline, when on-call onboarding needs standardized ops docs, or when runbooks are inconsistent across teams — e.g. 'create a runbook for payments-api', 'generate an on-call/incident-response doc', 'scaffold a deployment + rollback runbook'."
 ---
 
 # Runbook Generator
 
-**Tier:** POWERFUL  
-**Category:** Engineering  
-**Domain:** DevOps / Site Reliability Engineering
+Generate a markdown runbook skeleton for a service, then fill in the
+service-specific commands, URLs, and escalation contacts. One stdlib-only CLI
+emits a consistent section layout so every service's ops docs look the same.
 
----
+## Tool
 
-## Overview
-
-Generate operational runbooks quickly from a service name, then customize for deployment, incident response, maintenance, and rollback workflows.
-
-## Core Capabilities
-
-- Runbook skeleton generation from a CLI
-- Standard sections for start/stop/health/rollback
-- Structured escalation and incident handling placeholders
-- Reference templates for deployment and incident playbooks
-
----
-
-## When to Use
-
-- A service has no runbook and needs a baseline immediately
-- Existing runbooks are inconsistent across teams
-- On-call onboarding requires standardized operations docs
-- You need repeatable runbook scaffolding for new services
-
----
-
-## Quick Start
+`scripts/runbook_generator.py SERVICE` writes a runbook to stdout (or a file)
+with these sections: Overview, Preconditions, Start Procedure, Stop Procedure,
+Health Checks, Deployment Checklist, Rollback, Incident Response, Escalation,
+and Post-Incident. Each procedure section ships an example command block to
+replace.
 
 ```bash
-# Print runbook to stdout
+# Print to stdout
 python3 scripts/runbook_generator.py payments-api
 
-# Write runbook file
-python3 scripts/runbook_generator.py payments-api --owner platform --output docs/runbooks/payments-api.md
+# Label owner + environment and write to the repo near the service
+python3 scripts/runbook_generator.py payments-api \
+  --owner platform --environment production \
+  --output docs/runbooks/payments-api.md
 ```
 
----
+Flags: `--owner` (ownership/escalation label), `--environment` (primary env),
+`--output` (path; prints to stdout if omitted).
 
-## Recommended Workflow
+## Workflow
 
-1. Generate the initial skeleton with `scripts/runbook_generator.py`.
-2. Fill in service-specific commands and URLs.
-3. Add verification checks and rollback triggers.
-4. Dry-run in staging.
-5. Store runbook in version control near service code.
-
----
-
-## Reference Docs
-
-- `references/runbook-templates.md`
-
----
+1. Generate the skeleton with `runbook_generator.py`.
+2. Replace every example command with the real, copy-pasteable command.
+3. Add an expected-output / health check after each critical step and define
+   explicit rollback triggers.
+4. Dry-run the procedures in staging — if a step fails or output doesn't match,
+   fix the runbook text and re-run until it executes cleanly.
+5. Commit the runbook in version control next to the service code.
 
 ## Common Pitfalls
 
-- Missing rollback triggers or rollback commands
-- Steps without expected output checks
-- Stale ownership/escalation contacts
-- Runbooks never tested outside of incidents
+- Missing rollback triggers or rollback commands.
+- Steps without an expected-output check.
+- Stale ownership/escalation contacts.
+- Runbooks never tested outside of a live incident.
 
-## Best Practices
-
-1. Keep every command copy-pasteable.
-2. Include health checks after every critical step.
-3. Validate runbooks on a fixed review cadence.
-4. Update runbook content after incidents and postmortems.
+Keep commands copy-pasteable, verify a health check after every critical step,
+and update content after each incident/postmortem. Section patterns and filled
+examples: [references/runbook-templates.md](references/runbook-templates.md).

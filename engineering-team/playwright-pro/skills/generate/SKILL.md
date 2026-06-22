@@ -1,9 +1,16 @@
 ---
 name: "generate"
 description: >-
-  Generate Playwright tests. Use when user says "write tests", "generate tests",
-  "add tests for", "test this component", "e2e test", "create test for",
-  "test this page", or "test this feature".
+  Generate production-ready Playwright tests from a user story, URL, component
+  path, or feature description ($ARGUMENTS). Explores the project for
+  playwright.config.ts (testDir, baseURL), existing tests, page objects,
+  fixtures and auth setup, picks a matching template (auth, CRUD, checkout,
+  search, forms, dashboard, API, accessibility), and writes .spec.ts/.spec.js
+  that follow the locator priority (getByRole first), web-first assertions and
+  no waitForTimeout, plus any needed page objects, fixtures or test-data, then
+  runs the test to verify. Use when the user runs /pw:generate or says "write
+  tests", "generate tests", "add tests for", "test this component", "e2e test",
+  "create test for", or "test this page".
 ---
 
 # Generate Playwright Tests
