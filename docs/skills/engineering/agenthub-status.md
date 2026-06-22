@@ -1,6 +1,6 @@
 ---
 title: "/hub:status — Session Status — Agent Skill for Codex & OpenClaw"
-description: "Show DAG state, agent progress, and branch status for an AgentHub session. Agent skill for Claude Code, Codex CLI, Gemini CLI, OpenClaw."
+description: "AgentHub /hub:status command — show the live state of a multi-agent session: session overview (task, agent count, base branch, state), per-agent git. Agent skill for Claude Code, Codex CLI, Gemini CLI, OpenClaw."
 ---
 
 # /hub:status — Session Status

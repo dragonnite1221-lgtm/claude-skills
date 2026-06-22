@@ -1,6 +1,6 @@
 ---
 title: "Migrate to Playwright — Agent Skill & Codex Plugin"
-description: "Migrate from Cypress or Selenium to Playwright. Use when user mentions 'cypress', 'selenium', 'migrate tests', 'convert tests', 'switch to. Agent skill for Claude Code, Codex CLI, Gemini CLI, OpenClaw."
+description: "Migrate a Cypress or Selenium/WebDriver suite to Playwright file by file. Auto-detects the source (cypress/ dir or cypress.config, selenium/webdriver. Agent skill for Claude Code, Codex CLI, Gemini CLI, OpenClaw."
 ---
 
 # Migrate to Playwright

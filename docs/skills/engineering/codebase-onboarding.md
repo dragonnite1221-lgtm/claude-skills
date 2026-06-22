@@ -1,6 +1,6 @@
 ---
 title: "Codebase Onboarding — Agent Skill for Codex & OpenClaw"
-description: "Codebase Onboarding. Agent skill for Claude Code, Codex CLI, Gemini CLI, OpenClaw."
+description: "Scan an unfamiliar repository and draft onboarding documentation for new engineers, tech leads, or contractors. codebase_analyzer.py walks the repo. Agent skill for Claude Code, Codex CLI, Gemini CLI, OpenClaw."
 ---
 
 # Codebase Onboarding
@@ -16,80 +16,58 @@ description: "Codebase Onboarding. Agent skill for Claude Code, Codex CLI, Gemin
 </div>
 
 
-**Tier:** POWERFUL  
-**Category:** Engineering  
-**Domain:** Documentation / Developer Experience
+Analyze a repository and generate onboarding documentation for engineers, tech leads,
+and contractors. `codebase_analyzer.py` gathers the facts; the reference templates turn
+them into audience-aware docs.
 
----
+## Tool
 
-## Overview
+| Tool | Purpose |
+|------|---------|
+| `scripts/codebase_analyzer.py` | Walk a repo and report languages, key config files, largest files, and directory structure |
 
-Analyze a codebase and generate onboarding documentation for engineers, tech leads, and contractors. This skill is optimized for fast fact-gathering and repeatable onboarding outputs.
+## Workflow
 
-## Core Capabilities
-
-- Architecture and stack discovery from repository signals
-- Key file and config inventory for new contributors
-- Local setup and common-task guidance generation
-- Audience-aware documentation framing
-- Debugging and contribution checklist scaffolding
-
----
-
-## When to Use
-
-- Onboarding a new team member or contractor
-- Rebuilding stale project docs after large refactors
-- Preparing internal handoff documentation
-- Creating a standardized onboarding packet for services
-
----
-
-## Quick Start
+Run the analyzer, then draft docs from the template. If the analyzer reports "None found
+from default checklist" for config files or misses a language, the repo likely uses an
+unrecognized manifest — note it manually before writing setup steps.
 
 ```bash
-# 1) Gather codebase facts
+# 1. Gather facts (human-readable). --max-depth controls structure depth (default 2).
 python3 scripts/codebase_analyzer.py /path/to/repo
+python3 scripts/codebase_analyzer.py /path/to/repo --max-depth 3
 
-# 2) Export machine-readable output
+# 2. Machine-readable facts for templating / CI.
 python3 scripts/codebase_analyzer.py /path/to/repo --json
-
-# 3) Use the template to draft onboarding docs
-# See references/onboarding-template.md
 ```
 
----
+`--json` emits `{ root, file_count, languages, key_config_files, top_extensions,
+largest_files, structure }`. The analyzer detects languages by extension (Python, JS/TS,
+Go, Rust, Java, etc.) and checks for known manifests (package.json, requirements.txt,
+pyproject.toml, go.mod, Cargo.toml, Dockerfile, and more).
 
-## Recommended Workflow
+## Drafting the docs
 
-1. Run `scripts/codebase_analyzer.py` against the target repository.
-2. Capture key signals: file counts, detected languages, config files, top-level structure.
-3. Fill the onboarding template in `references/onboarding-template.md`.
-4. Tailor output depth by audience:
-   - Junior: setup + guardrails
-   - Senior: architecture + operational concerns
-   - Contractor: scoped ownership + integration boundaries
+1. Run the analyzer and capture the signals above.
+2. Fill the onboarding template — see [onboarding-template.md](https://github.com/alirezarezvani/claude-skills/tree/main/engineering/codebase-onboarding/references/onboarding-template.md)
+   (full README structure: Quick Start, Architecture, Key Files, Common Developer Tasks,
+   Debugging Guide, Contribution Guidelines, audience notes).
+3. **Validate setup commands on a clean checkout before publishing** — docs that don't
+   reproduce are worse than none.
+4. Tailor depth by audience:
+   - **Junior:** setup + guardrails
+   - **Senior:** architecture + operational concerns
+   - **Contractor:** scoped ownership + integration boundaries
+5. Export to Notion or Confluence using [output-format-templates.md](https://github.com/alirezarezvani/claude-skills/tree/main/engineering/codebase-onboarding/references/output-format-templates.md).
 
----
+## Common pitfalls
 
-## Onboarding Document Template
+- Publishing setup steps that were never run on a clean environment.
+- Mixing architecture deep-dives into contractor-scoped docs.
+- Omitting troubleshooting/verification steps.
+- Letting docs drift — update them in the same PR as behavior changes.
 
-Detailed template and section examples live in:
-- `references/onboarding-template.md`
-- `references/output-format-templates.md`
+## References
 
----
-
-## Common Pitfalls
-
-- Writing docs without validating setup commands on a clean environment
-- Mixing architecture deep-dives into contractor-oriented docs
-- Omitting troubleshooting and verification steps
-- Letting onboarding docs drift from current repo state
-
-## Best Practices
-
-1. Keep setup instructions executable and time-bounded.
-2. Document the "why" for key architectural decisions.
-3. Update docs in the same PR as behavior changes.
-4. Treat onboarding docs as living operational assets, not one-time deliverables.
+- [onboarding-template.md](https://github.com/alirezarezvani/claude-skills/tree/main/engineering/codebase-onboarding/references/onboarding-template.md) — full README/onboarding packet template with section examples
+- [output-format-templates.md](https://github.com/alirezarezvani/claude-skills/tree/main/engineering/codebase-onboarding/references/output-format-templates.md) — Notion and Confluence export formats

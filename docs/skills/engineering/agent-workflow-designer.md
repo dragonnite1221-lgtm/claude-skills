@@ -1,6 +1,6 @@
 ---
 title: "Agent Workflow Designer — Agent Skill for Codex & OpenClaw"
-description: "Agent Workflow Designer. Agent skill for Claude Code, Codex CLI, Gemini CLI, OpenClaw."
+description: "Design multi-agent workflows and generate ready-to-edit JSON skeleton configs for five orchestration patterns — sequential, parallel. Agent skill for Claude Code, Codex CLI, Gemini CLI, OpenClaw."
 ---
 
 # Agent Workflow Designer
@@ -16,79 +16,62 @@ description: "Agent Workflow Designer. Agent skill for Claude Code, Codex CLI, G
 </div>
 
 
-**Tier:** POWERFUL  
-**Category:** Engineering  
-**Domain:** Multi-Agent Systems / AI Orchestration
+Design production-grade multi-agent workflows with clear pattern choice, handoff contracts, failure handling, and cost/context controls. The scaffolder emits a JSON skeleton you then fill in with concrete agents and prompts.
 
----
+## When to use
 
-## Overview
+- A single prompt is insufficient for task complexity.
+- You need specialist agents with explicit boundaries and handoff contracts.
+- You want a deterministic workflow structure before implementation.
+- You need validation loops for quality or safety gates.
 
-Design production-grade multi-agent workflows with clear pattern choice, handoff contracts, failure handling, and cost/context controls.
+## Pattern map
 
-## Core Capabilities
+Pick the smallest pattern that satisfies the dependency shape and risk profile:
 
-- Workflow pattern selection for multi-step agent systems
-- Skeleton config generation for fast workflow bootstrapping
-- Context and cost discipline across long-running flows
-- Error recovery and retry strategy scaffolding
-- Documentation pointers for operational pattern tradeoffs
+- `sequential` — strict step-by-step dependency chain (research → draft → review).
+- `parallel` — fan-out independent subtasks, then fan-in to synthesize.
+- `router` — dispatch by intent/type to a handler, with a fallback agent.
+- `orchestrator` — a planner coordinates specialists over a DAG of dependencies.
+- `evaluator` — a generator runs against an evaluator quality gate in a retry loop.
 
----
+Detailed templates and tradeoffs: [workflow-patterns.md](https://github.com/alirezarezvani/claude-skills/tree/main/engineering/agent-workflow-designer/references/workflow-patterns.md).
 
-## When to Use
+## Generate a skeleton
 
-- A single prompt is insufficient for task complexity
-- You need specialist agents with explicit boundaries
-- You want deterministic workflow structure before implementation
-- You need validation loops for quality or safety gates
-
----
-
-## Quick Start
+`scripts/workflow_scaffolder.py PATTERN [--name NAME] [--output PATH]`. With no
+`--output` it prints the JSON to stdout; with `--output` it writes the file
+(creating parent dirs).
 
 ```bash
-# Generate a sequential workflow skeleton
+# Print a sequential skeleton to stdout
 python3 scripts/workflow_scaffolder.py sequential --name content-pipeline
 
-# Generate an orchestrator workflow and save it
-python3 scripts/workflow_scaffolder.py orchestrator --name incident-triage --output workflows/incident-triage.json
+# Write an orchestrator workflow to a file
+python3 scripts/workflow_scaffolder.py orchestrator --name incident-triage \
+  --output workflows/incident-triage.json
+
+# Other patterns: parallel | router | evaluator
+python3 scripts/workflow_scaffolder.py evaluator --name draft-and-grade
 ```
 
----
+Each skeleton ships with pattern-appropriate guardrail fields already present —
+`retry` (sequential), `timeouts` (parallel), `fallback` (router),
+`execution.max_parallel`/`completion_policy` (orchestrator), and
+`loop.max_iterations`/`pass_threshold` (evaluator).
 
-## Pattern Map
+## Recommended workflow
 
-- `sequential`: strict step-by-step dependency chain
-- `parallel`: fan-out/fan-in for independent subtasks
-- `router`: dispatch by intent/type with fallback
-- `orchestrator`: planner coordinates specialists with dependencies
-- `evaluator`: generator + quality gate loop
+1. Select the pattern from the map above.
+2. Scaffold the config with `workflow_scaffolder.py`.
+3. Replace placeholder agent IDs and define the handoff contract fields on every edge.
+4. Confirm retry/timeout and output-validation gates are set per step.
+5. Dry-run with small context budgets, inspect intermediate outputs, then scale up.
 
-Detailed templates: `references/workflow-patterns.md`
+## Common pitfalls
 
----
-
-## Recommended Workflow
-
-1. Select pattern based on dependency shape and risk profile.
-2. Scaffold config via `scripts/workflow_scaffolder.py`.
-3. Define handoff contract fields for every edge.
-4. Add retry/timeouts and output validation gates.
-5. Dry-run with small context budgets before scaling.
-
----
-
-## Common Pitfalls
-
-- Over-orchestrating tasks solvable by one well-structured prompt
-- Missing timeout/retry policies for external-model calls
-- Passing full upstream context instead of targeted artifacts
-- Ignoring per-step cost accumulation
-
-## Best Practices
-
-1. Start with the smallest pattern that can satisfy requirements.
-2. Keep handoff payloads explicit and bounded.
-3. Validate intermediate outputs before fan-in synthesis.
-4. Enforce budget and timeout limits in every step.
+- Over-orchestrating tasks solvable by one well-structured prompt — start small.
+- Missing timeout/retry policies on external-model calls.
+- Passing full upstream context instead of targeted artifacts (raises cost and noise).
+- Skipping validation of intermediate outputs before fan-in synthesis.
+- Ignoring per-step cost accumulation across long-running flows.

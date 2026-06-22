@@ -1,0 +1,130 @@
+# ruff: noqa: F403, F405, E501, E402
+import sys as _spsys
+import pathlib as _sppath
+_spsys.path.insert(0, str(_sppath.Path(__file__).resolve().parent))
+from control_matrix_builder_base import *  # noqa: F403,E402
+
+
+def _mod_cg1_0():
+    return [
+        {
+                "id": "SEC-001",
+                "tsc": "CC1.1",
+                "description": "Management demonstrates commitment to integrity and ethical values",
+                "type": "Preventive",
+                "frequency": "Annual",
+                "evidence": "Code of conduct, ethics policy, signed acknowledgments",
+            },
+        {
+                "id": "SEC-002",
+                "tsc": "CC1.2",
+                "description": "Board of directors demonstrates independence and exercises oversight",
+                "type": "Preventive",
+                "frequency": "Quarterly",
+                "evidence": "Board meeting minutes, oversight committee charters",
+            },
+        {
+                "id": "SEC-003",
+                "tsc": "CC1.3",
+                "description": "Management establishes organizational structure, reporting lines, and authorities",
+                "type": "Preventive",
+                "frequency": "Annual",
+                "evidence": "Org charts, RACI matrices, role descriptions",
+            },
+        {
+                "id": "SEC-004",
+                "tsc": "CC1.4",
+                "description": "Organization demonstrates commitment to attract, develop, and retain competent individuals",
+                "type": "Preventive",
+                "frequency": "Annual",
+                "evidence": "Training records, competency assessments, HR policies",
+            },
+        {
+                "id": "SEC-005",
+                "tsc": "CC1.5",
+                "description": "Organization holds individuals accountable for internal control responsibilities",
+                "type": "Preventive",
+                "frequency": "Annual",
+                "evidence": "Performance reviews, disciplinary policy, accountability matrix",
+            },
+        {
+                "id": "SEC-006",
+                "tsc": "CC2.1",
+                "description": "Organization obtains and generates relevant quality information to support internal control",
+                "type": "Detective",
+                "frequency": "Continuous",
+                "evidence": "Information classification policy, data flow diagrams",
+            },
+        {
+                "id": "SEC-007",
+                "tsc": "CC2.2",
+                "description": "Organization internally communicates objectives and responsibilities for internal control",
+                "type": "Preventive",
+                "frequency": "Quarterly",
+                "evidence": "Internal communications, policy distribution records, training materials",
+            },
+        {
+                "id": "SEC-008",
+                "tsc": "CC2.3",
+                "description": "Organization communicates with external parties regarding matters affecting internal control",
+                "type": "Preventive",
+                "frequency": "Continuous",
+                "evidence": "Customer notifications, external communication policy, incident notices",
+            },
+        {
+                "id": "SEC-009",
+                "tsc": "CC3.1",
+                "description": "Organization specifies objectives to identify and assess risks",
+                "type": "Preventive",
+                "frequency": "Annual",
+                "evidence": "Risk assessment methodology, risk register, risk appetite statement",
+            },
+        {
+                "id": "SEC-010",
+                "tsc": "CC3.2",
+                "description": "Organization identifies and analyzes risks to achievement of objectives",
+                "type": "Detective",
+                "frequency": "Annual",
+                "evidence": "Risk assessment report, threat modeling documentation",
+            },
+        {
+                "id": "SEC-011",
+                "tsc": "CC3.3",
+                "description": "Organization considers potential for fraud in assessing risks",
+                "type": "Detective",
+                "frequency": "Annual",
+                "evidence": "Fraud risk assessment, anti-fraud controls documentation",
+            },
+        {
+                "id": "SEC-012",
+                "tsc": "CC3.4",
+                "description": "Organization identifies and assesses changes that could impact internal control",
+                "type": "Detective",
+                "frequency": "Quarterly",
+                "evidence": "Change impact assessments, environmental scan reports",
+            },
+        {
+                "id": "SEC-013",
+                "tsc": "CC4.1",
+                "description": "Organization selects and performs ongoing and separate monitoring evaluations",
+                "type": "Detective",
+                "frequency": "Continuous",
+                "evidence": "Monitoring dashboards, automated alert configurations, review logs",
+            },
+        {
+                "id": "SEC-014",
+                "tsc": "CC4.2",
+                "description": "Organization evaluates and communicates internal control deficiencies",
+                "type": "Corrective",
+                "frequency": "Quarterly",
+                "evidence": "Deficiency tracking log, management reports, remediation plans",
+            },
+        {
+                "id": "SEC-015",
+                "tsc": "CC5.1",
+                "description": "Organization selects and develops control activities that mitigate risks",
+                "type": "Preventive",
+                "frequency": "Annual",
+                "evidence": "Control matrix, risk treatment plans, control design documentation",
+            },
+    ]

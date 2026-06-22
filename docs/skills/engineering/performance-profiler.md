@@ -1,6 +1,6 @@
 ---
 title: "Performance Profiler — Agent Skill for Codex & OpenClaw"
-description: "Performance Profiler. Agent skill for Claude Code, Codex CLI, Gemini CLI, OpenClaw."
+description: "Find and fix performance bottlenecks in Node.js, Python, and Go apps with a measure-first discipline. performance_profiler.py scans a project. Agent skill for Claude Code, Codex CLI, Gemini CLI, OpenClaw."
 ---
 
 # Performance Profiler
@@ -16,166 +16,81 @@ description: "Performance Profiler. Agent skill for Claude Code, Codex CLI, Gemi
 </div>
 
 
-**Tier:** POWERFUL  
-**Category:** Engineering  
-**Domain:** Performance Engineering  
+Systematic performance work for Node.js, Python, and Go: scan for risk indicators, then
+profile, optimize, and re-measure. Always measure before and after.
 
----
+## Tool
 
-## Overview
-
-Systematic performance profiling for Node.js, Python, and Go applications. Identifies CPU, memory, and I/O bottlenecks; generates flamegraphs; analyzes bundle sizes; optimizes database queries; detects memory leaks; and runs load tests with k6 and Artillery. Always measures before and after.
-
-## Core Capabilities
-
-- **CPU profiling** — flamegraphs for Node.js, py-spy for Python, pprof for Go
-- **Memory profiling** — heap snapshots, leak detection, GC pressure
-- **Bundle analysis** — webpack-bundle-analyzer, Next.js bundle analyzer
-- **Database optimization** — EXPLAIN ANALYZE, slow query log, N+1 detection
-- **Load testing** — k6 scripts, Artillery scenarios, ramp-up patterns
-- **Before/after measurement** — establish baseline, profile, optimize, verify
-
----
-
-## When to Use
-
-- App is slow and you don't know where the bottleneck is
-- P99 latency exceeds SLA before a release
-- Memory usage grows over time (suspected leak)
-- Bundle size increased after adding dependencies
-- Preparing for a traffic spike (load test before launch)
-- Database queries taking >100ms
-
----
-
-## Quick Start
+| Tool | Purpose |
+|------|---------|
+| `scripts/performance_profiler.py` | Scan a project for risk indicators: dependency counts, bundle/build artifacts, large files |
 
 ```bash
-# Analyze a project for performance risk indicators
+# Scan for performance risk indicators (text).
 python3 scripts/performance_profiler.py /path/to/project
 
-# JSON output for CI integration
+# JSON output for CI integration.
 python3 scripts/performance_profiler.py /path/to/project --json
 
-# Custom large-file threshold
+# Flag files larger than a custom threshold (default 512 KB).
 python3 scripts/performance_profiler.py /path/to/project --large-file-threshold-kb 256
 ```
 
----
+The scanner surfaces *candidates*; it does not profile running code. Use it to point
+profiling effort, then run the real tools from
+[profiling-recipes.md](https://github.com/alirezarezvani/claude-skills/tree/main/engineering/performance-profiler/references/profiling-recipes.md).
 
-## Golden Rule: Measure First
+## Golden rule: measure first
 
-```bash
-# Establish baseline BEFORE any optimization
-# Record: P50, P95, P99 latency | RPS | error rate | memory usage
+Establish a baseline before touching anything — P50/P95/P99 latency, RPS, error rate,
+memory. Then: **profile → confirm the bottleneck → fix one thing → re-measure → verify the
+delta.** Never optimize on a hunch; you will optimize the wrong thing.
 
-# Wrong: "I think the N+1 query is slow, let me fix it"
-# Right: Profile → confirm bottleneck → fix → measure again → verify improvement
-```
+## Profiling recipes
 
----
+Full commands live in [profiling-recipes.md](https://github.com/alirezarezvani/claude-skills/tree/main/engineering/performance-profiler/references/profiling-recipes.md):
 
-## Node.js Profiling
-→ See references/profiling-recipes.md for details
+- **Node.js** — clinic.js / 0x CPU flamegraphs, heap snapshots & leak detection, event-loop blocking, autocannon load.
+- **Python** — py-spy flamegraphs (no code change), cProfile function-level, memory_profiler line-by-line.
+- **Go** — pprof CPU/heap/block profiles.
+- **Database** — EXPLAIN ANALYZE, slow query log, N+1 detection.
+- **Load testing** — k6 and Artillery scenarios with ramp-up.
 
-## Before/After Measurement Template
+## Optimization checklist (quick wins first)
+
+**Database:** missing indexes on WHERE/ORDER BY; N+1 queries (count queries/request);
+`SELECT *` when 2-3 columns suffice; unbounded queries (no LIMIT); per-request connections
+(no pool).
+**Node.js:** sync I/O (`fs.readFileSync`) in hot path; `JSON.parse/stringify` of large
+objects in a loop; uncached expensive computations; no gzip/brotli; deps required inside
+request handlers.
+**Bundle:** Moment.js → dayjs/date-fns; full Lodash → per-function imports; static imports
+of heavy components → dynamic; unoptimized images; no route code-splitting.
+**API:** no pagination on lists; no `Cache-Control`; serial `await`s that could be
+`Promise.all`; fetching related data in a loop instead of a JOIN.
+
+## Document the win
+
+Record baseline and result in the PR — the contrast motivates the team and proves the fix.
 
 ```markdown
-## Performance Optimization: [What You Fixed]
-
-**Date:** 2026-03-01  
-**Engineer:** @username  
-**Ticket:** PROJ-123  
-
-### Problem
-[1-2 sentences: what was slow, how was it observed]
-
-### Root Cause
-[What the profiler revealed]
-
-### Baseline (Before)
-| Metric | Value |
-|--------|-------|
-| P50 latency | 480ms |
-| P95 latency | 1,240ms |
-| P99 latency | 3,100ms |
-| RPS @ 50 VUs | 42 |
-| Error rate | 0.8% |
-| DB queries/req | 23 (N+1) |
-
-Profiler evidence: [link to flamegraph or screenshot]
-
-### Fix Applied
-[What changed — code diff or description]
-
-### After
+## Performance: <what you fixed> (PROJ-123)
+### Root cause: <what the profiler revealed>
 | Metric | Before | After | Delta |
 |--------|--------|-------|-------|
-| P50 latency | 480ms | 48ms | -90% |
 | P95 latency | 1,240ms | 120ms | -90% |
-| P99 latency | 3,100ms | 280ms | -91% |
 | RPS @ 50 VUs | 42 | 380 | +804% |
-| Error rate | 0.8% | 0% | -100% |
-| DB queries/req | 23 | 1 | -96% |
-
-### Verification
-Load test run: [link to k6 output]
+| DB queries/req | 23 (N+1) | 1 | -96% |
+### Verification: <link to k6 output / flamegraph>
 ```
 
----
+## Common pitfalls
 
-## Optimization Checklist
+- Optimizing without measuring; testing against dev-sized data instead of production volumes.
+- Watching P50 while P99 is catastrophic.
+- Optimizing before correctness; skipping the re-measure that proves the fix.
+- Load-testing production instead of a production-sized staging environment.
 
-### Quick wins (check these first)
+## Reference
 
-```
-Database
-□ Missing indexes on WHERE/ORDER BY columns
-□ N+1 queries (check query count per request)
-□ Loading all columns when only 2-3 needed (SELECT *)
-□ No LIMIT on unbounded queries
-□ Missing connection pool (creating new connection per request)
-
-Node.js
-□ Sync I/O (fs.readFileSync) in hot path
-□ JSON.parse/stringify of large objects in hot loop
-□ Missing caching for expensive computations
-□ No compression (gzip/brotli) on responses
-□ Dependencies loaded in request handler (move to module level)
-
-Bundle
-□ Moment.js → dayjs/date-fns
-□ Lodash (full) → lodash/function imports
-□ Static imports of heavy components → dynamic imports
-□ Images not optimized / not using next/image
-□ No code splitting on routes
-
-API
-□ No pagination on list endpoints
-□ No response caching (Cache-Control headers)
-□ Serial awaits that could be parallel (Promise.all)
-□ Fetching related data in a loop instead of JOIN
-```
-
----
-
-## Common Pitfalls
-
-- **Optimizing without measuring** — you'll optimize the wrong thing
-- **Testing in development** — profile against production-like data volumes
-- **Ignoring P99** — P50 can look fine while P99 is catastrophic
-- **Premature optimization** — fix correctness first, then performance
-- **Not re-measuring** — always verify the fix actually improved things
-- **Load testing production** — use staging with production-size data
-
----
-
-## Best Practices
-
-1. **Baseline first, always** — record metrics before touching anything
-2. **One change at a time** — isolate the variable to confirm causation
-3. **Profile with realistic data** — 10 rows in dev, millions in prod — different bottlenecks
-4. **Set performance budgets** — `p(95) < 200ms` in CI thresholds with k6
-5. **Monitor continuously** — add Datadog/Prometheus metrics for key paths
-6. **Cache invalidation strategy** — cache aggressively, invalidate precisely
-7. **Document the win** — before/after in the PR description motivates the team
+- [profiling-recipes.md](https://github.com/alirezarezvani/claude-skills/tree/main/engineering/performance-profiler/references/profiling-recipes.md) — copy-paste profiling commands for Node.js, Python, Go, databases, and load tests

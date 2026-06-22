@@ -64,3 +64,6 @@ npx agent-skills-cli add alirezarezvani/claude-skills/engineering
 
 - Load only the specific skill SKILL.md you need
 - These are advanced skills — combine with engineering-team/ core skills as needed
+- For overlap with `engineering-team/`, follow the
+  [Engineering Skill Matrix](https://github.com/alirezarezvani/claude-skills/tree/main/documentation/ENGINEERING_SKILL_MATRIX.md)
+  instead of moving or renaming folders

@@ -1,6 +1,6 @@
 ---
 title: "Smart Test Reporting — Agent Skill & Codex Plugin"
-description: "Generate test report. Use when user says 'test report', 'results summary', 'test status', 'show results', 'test dashboard', or 'how did tests go'. Agent skill for Claude Code, Codex CLI, Gemini CLI, OpenClaw."
+description: "Generate a Playwright test report and route it to whatever the project already uses, no new tooling. Runs the suite (or reuses existing test-results/. Agent skill for Claude Code, Codex CLI, Gemini CLI, OpenClaw."
 ---
 
 # Smart Test Reporting

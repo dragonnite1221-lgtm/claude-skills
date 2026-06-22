@@ -1,9 +1,9 @@
 ---
-title: "Observability Designer (POWERFUL) — Agent Skill for Codex & OpenClaw"
-description: "Observability Designer (POWERFUL). Agent skill for Claude Code, Codex CLI, Gemini CLI, OpenClaw."
+title: "Observability Designer — Agent Skill for Codex & OpenClaw"
+description: "Design production observability — SLI/SLO frameworks, dashboards, and alert tuning — from a service-description JSON. slo_designer.py turns service. Agent skill for Claude Code, Codex CLI, Gemini CLI, OpenClaw."
 ---
 
-# Observability Designer (POWERFUL)
+# Observability Designer
 
 <div class="page-meta" markdown>
 <span class="meta-badge">:material-rocket-launch: Engineering - POWERFUL</span>
@@ -16,265 +16,63 @@ description: "Observability Designer (POWERFUL). Agent skill for Claude Code, Co
 </div>
 
 
-**Category:** Engineering  
-**Tier:** POWERFUL  
-**Description:** Design comprehensive observability strategies for production systems including SLI/SLO frameworks, alerting optimization, and dashboard generation.
+Design SLI/SLO frameworks, dashboards, and alerting for production systems. Three
+stdlib-only tools take a service-description JSON (or CLI flags) and produce frameworks,
+Grafana dashboards, and optimized alert configs.
 
-## Overview
+## Tools
 
-Observability Designer enables you to create production-ready observability strategies that provide deep insights into system behavior, performance, and reliability. This skill combines the three pillars of observability (metrics, logs, traces) with proven frameworks like SLI/SLO design, golden signals monitoring, and alert optimization to create comprehensive observability solutions.
+| Tool | Purpose |
+|------|---------|
+| `scripts/slo_designer.py` | Service description → SLIs, SLO targets, error budgets, burn-rate alerts, SLA recommendations |
+| `scripts/dashboard_generator.py` | Service description → Grafana-compatible dashboard (golden signals, RED/USE, role views) |
+| `scripts/alert_optimizer.py` | Existing alert config → noise/duplicate/coverage analysis + optimized config |
 
-## Core Competencies
+## Workflow
 
-### SLI/SLO/SLA Framework Design
-- **Service Level Indicators (SLI):** Define measurable signals that indicate service health
-- **Service Level Objectives (SLO):** Set reliability targets based on user experience
-- **Service Level Agreements (SLA):** Establish customer-facing commitments with consequences
-- **Error Budget Management:** Calculate and track error budget consumption
-- **Burn Rate Alerting:** Multi-window burn rate alerts for proactive SLO protection
+Design SLOs first (they set dashboard thresholds and alert targets), then generate the
+dashboard, then optimize alerts. After optimizing alerts, re-run `--analyze-only` on the
+new config to confirm the warnings cleared before shipping.
 
-### Three Pillars of Observability
+```bash
+# 1. SLO framework from a service definition (or pass --service-type/--criticality flags).
+python3 scripts/slo_designer.py -i assets/sample_service_api.json -o slo_framework.json
+python3 scripts/slo_designer.py --service-type api --criticality high --user-facing true --summary-only
 
-#### Metrics
-- **Golden Signals:** Latency, traffic, errors, and saturation monitoring
-- **RED Method:** Rate, Errors, and Duration for request-driven services
-- **USE Method:** Utilization, Saturation, and Errors for resource monitoring
-- **Business Metrics:** Revenue, user engagement, and feature adoption tracking
-- **Infrastructure Metrics:** CPU, memory, disk, network, and custom resource metrics
+# 2. Grafana dashboard for the same service, tuned for a role.
+python3 scripts/dashboard_generator.py -i assets/sample_service_api.json \
+  --format grafana --role sre -o dashboard.json --doc-output dashboard.md
 
-#### Logs
-- **Structured Logging:** JSON-based log formats with consistent fields
-- **Log Aggregation:** Centralized log collection and indexing strategies
-- **Log Levels:** Appropriate use of DEBUG, INFO, WARN, ERROR, FATAL levels
-- **Correlation IDs:** Request tracing through distributed systems
-- **Log Sampling:** Volume management for high-throughput systems
+# 3. Analyze an existing alert config, then emit the optimized version.
+python3 scripts/alert_optimizer.py -i assets/sample_alerts.json --analyze-only
+python3 scripts/alert_optimizer.py -i assets/sample_alerts.json -o optimized_alerts.json
+python3 scripts/alert_optimizer.py -i assets/sample_alerts.json --report report.html --format html
+```
 
-#### Traces
-- **Distributed Tracing:** End-to-end request flow visualization
-- **Span Design:** Meaningful span boundaries and metadata
-- **Trace Sampling:** Intelligent sampling strategies for performance and cost
-- **Service Maps:** Automatic dependency discovery through traces
-- **Root Cause Analysis:** Trace-driven debugging workflows
+Service-type choices: `api|web|database|queue|batch|ml`; criticality `critical|high|medium|low`;
+dashboard roles `sre|developer|executive|ops`. Sample inputs are in `assets/`
+(`sample_service_api.json`, `sample_service_web.json`, `sample_alerts.json`); reference
+outputs are in `expected_outputs/` (`sample_slo_framework.json`, `sample_dashboard.json`).
 
-### Dashboard Design Principles
+## Design principles
 
-#### Information Architecture
-- **Hierarchy:** Overview → Service → Component → Instance drill-down paths
-- **Golden Ratio:** 80% operational metrics, 20% exploratory metrics
-- **Cognitive Load:** Maximum 7±2 panels per dashboard screen
-- **User Journey:** Role-based dashboard personas (SRE, Developer, Executive)
+**SLI/SLO** — pick SLIs that track user experience (availability, latency, correctness),
+set SLO targets, derive an error budget, and alert on multi-window burn rate rather than
+raw thresholds. See [slo_cookbook.md](https://github.com/alirezarezvani/claude-skills/tree/main/engineering/observability-designer/references/slo_cookbook.md).
 
-#### Visualization Best Practices
-- **Chart Selection:** Time series for trends, heatmaps for distributions, gauges for status
-- **Color Theory:** Red for critical, amber for warning, green for healthy states
-- **Reference Lines:** SLO targets, capacity thresholds, and historical baselines
-- **Time Ranges:** Default to meaningful windows (4h for incidents, 7d for trends)
+**Dashboards** — golden signals (latency, traffic, errors, saturation) for request
+services; RED (rate/errors/duration) for services, USE (utilization/saturation/errors) for
+resources. Keep to ~7±2 panels per screen, with overview → service → instance drill-down
+and SLO reference lines. See [dashboard_best_practices.md](https://github.com/alirezarezvani/claude-skills/tree/main/engineering/observability-designer/references/dashboard_best_practices.md).
 
-#### Panel Design
-- **Metric Queries:** Efficient Prometheus/InfluxDB queries with proper aggregation
-- **Alerting Integration:** Visual alert state indicators on relevant panels
-- **Interactive Elements:** Template variables, drill-down links, and annotation overlays
-- **Performance:** Sub-second render times through query optimization
+**Alerts** — every alert must be actionable. Favor precision over recall, use hysteresis
+(separate firing/resolving thresholds), group related alerts, and suppress dependents
+during known outages. See [alert_design_patterns.md](https://github.com/alirezarezvani/claude-skills/tree/main/engineering/observability-designer/references/alert_design_patterns.md).
 
-### Alert Design and Optimization
+## References
 
-#### Alert Classification
-- **Severity Levels:** 
-  - **Critical:** Service down, SLO burn rate high
-  - **Warning:** Approaching thresholds, non-user-facing issues
-  - **Info:** Deployment notifications, capacity planning alerts
-- **Actionability:** Every alert must have a clear response action
-- **Alert Routing:** Escalation policies based on severity and team ownership
-
-#### Alert Fatigue Prevention
-- **Signal vs Noise:** High precision (few false positives) over high recall
-- **Hysteresis:** Different thresholds for firing and resolving alerts
-- **Suppression:** Dependent alert suppression during known outages
-- **Grouping:** Related alerts grouped into single notifications
-
-#### Alert Rule Design
-- **Threshold Selection:** Statistical methods for threshold determination
-- **Window Functions:** Appropriate averaging windows and percentile calculations
-- **Alert Lifecycle:** Clear firing conditions and automatic resolution criteria
-- **Testing:** Alert rule validation against historical data
-
-### Runbook Generation and Incident Response
-
-#### Runbook Structure
-- **Alert Context:** What the alert means and why it fired
-- **Impact Assessment:** User-facing vs internal impact evaluation
-- **Investigation Steps:** Ordered troubleshooting procedures with time estimates
-- **Resolution Actions:** Common fixes and escalation procedures
-- **Post-Incident:** Follow-up tasks and prevention measures
-
-#### Incident Detection Patterns
-- **Anomaly Detection:** Statistical methods for detecting unusual patterns
-- **Composite Alerts:** Multi-signal alerts for complex failure modes
-- **Predictive Alerts:** Capacity and trend-based forward-looking alerts
-- **Canary Monitoring:** Early detection through progressive deployment monitoring
-
-### Golden Signals Framework
-
-#### Latency Monitoring
-- **Request Latency:** P50, P95, P99 response time tracking
-- **Queue Latency:** Time spent waiting in processing queues
-- **Network Latency:** Inter-service communication delays
-- **Database Latency:** Query execution and connection pool metrics
-
-#### Traffic Monitoring
-- **Request Rate:** Requests per second with burst detection
-- **Bandwidth Usage:** Network throughput and capacity utilization
-- **User Sessions:** Active user tracking and session duration
-- **Feature Usage:** API endpoint and feature adoption metrics
-
-#### Error Monitoring
-- **Error Rate:** 4xx and 5xx HTTP response code tracking
-- **Error Budget:** SLO-based error rate targets and consumption
-- **Error Distribution:** Error type classification and trending
-- **Silent Failures:** Detection of processing failures without HTTP errors
-
-#### Saturation Monitoring
-- **Resource Utilization:** CPU, memory, disk, and network usage
-- **Queue Depth:** Processing queue length and wait times
-- **Connection Pools:** Database and service connection saturation
-- **Rate Limiting:** API throttling and quota exhaustion tracking
-
-### Distributed Tracing Strategies
-
-#### Trace Architecture
-- **Sampling Strategy:** Head-based, tail-based, and adaptive sampling
-- **Trace Propagation:** Context propagation across service boundaries
-- **Span Correlation:** Parent-child relationship modeling
-- **Trace Storage:** Retention policies and storage optimization
-
-#### Service Instrumentation
-- **Auto-Instrumentation:** Framework-based automatic trace generation
-- **Manual Instrumentation:** Custom span creation for business logic
-- **Baggage Handling:** Cross-cutting concern propagation
-- **Performance Impact:** Instrumentation overhead measurement and optimization
-
-### Log Aggregation Patterns
-
-#### Collection Architecture
-- **Agent Deployment:** Log shipping agent strategies (push vs pull)
-- **Log Routing:** Topic-based routing and filtering
-- **Parsing Strategies:** Structured vs unstructured log handling
-- **Schema Evolution:** Log format versioning and migration
-
-#### Storage and Indexing
-- **Index Design:** Optimized field indexing for common query patterns
-- **Retention Policies:** Time and volume-based log retention
-- **Compression:** Log data compression and archival strategies
-- **Search Performance:** Query optimization and result caching
-
-### Cost Optimization for Observability
-
-#### Data Management
-- **Metric Retention:** Tiered retention based on metric importance
-- **Log Sampling:** Intelligent sampling to reduce ingestion costs
-- **Trace Sampling:** Cost-effective trace collection strategies
-- **Data Archival:** Cold storage for historical observability data
-
-#### Resource Optimization
-- **Query Efficiency:** Optimized metric and log queries
-- **Storage Costs:** Appropriate storage tiers for different data types
-- **Ingestion Rate Limiting:** Controlled data ingestion to manage costs
-- **Cardinality Management:** High-cardinality metric detection and mitigation
-
-## Scripts Overview
-
-This skill includes three powerful Python scripts for comprehensive observability design:
-
-### 1. SLO Designer (`slo_designer.py`)
-Generates complete SLI/SLO frameworks based on service characteristics:
-- **Input:** Service description JSON (type, criticality, dependencies)
-- **Output:** SLI definitions, SLO targets, error budgets, burn rate alerts, SLA recommendations
-- **Features:** Multi-window burn rate calculations, error budget policies, alert rule generation
-
-### 2. Alert Optimizer (`alert_optimizer.py`)
-Analyzes and optimizes existing alert configurations:
-- **Input:** Alert configuration JSON with rules, thresholds, and routing
-- **Output:** Optimization report and improved alert configuration
-- **Features:** Noise detection, coverage gaps, duplicate identification, threshold optimization
-
-### 3. Dashboard Generator (`dashboard_generator.py`)
-Creates comprehensive dashboard specifications:
-- **Input:** Service/system description JSON
-- **Output:** Grafana-compatible dashboard JSON and documentation
-- **Features:** Golden signals coverage, RED/USE methods, drill-down paths, role-based views
-
-## Integration Patterns
-
-### Monitoring Stack Integration
-- **Prometheus:** Metric collection and alerting rule generation
-- **Grafana:** Dashboard creation and visualization configuration
-- **Elasticsearch/Kibana:** Log analysis and dashboard integration
-- **Jaeger/Zipkin:** Distributed tracing configuration and analysis
-
-### CI/CD Integration
-- **Pipeline Monitoring:** Build, test, and deployment observability
-- **Deployment Correlation:** Release impact tracking and rollback triggers
-- **Feature Flag Monitoring:** A/B test and feature rollout observability
-- **Performance Regression:** Automated performance monitoring in pipelines
-
-### Incident Management Integration
-- **PagerDuty/VictorOps:** Alert routing and escalation policies
-- **Slack/Teams:** Notification and collaboration integration
-- **JIRA/ServiceNow:** Incident tracking and resolution workflows
-- **Post-Mortem:** Automated incident analysis and improvement tracking
-
-## Advanced Patterns
-
-### Multi-Cloud Observability
-- **Cross-Cloud Metrics:** Unified metrics across AWS, GCP, Azure
-- **Network Observability:** Inter-cloud connectivity monitoring
-- **Cost Attribution:** Cloud resource cost tracking and optimization
-- **Compliance Monitoring:** Security and compliance posture tracking
-
-### Microservices Observability
-- **Service Mesh Integration:** Istio/Linkerd observability configuration
-- **API Gateway Monitoring:** Request routing and rate limiting observability
-- **Container Orchestration:** Kubernetes cluster and workload monitoring
-- **Service Discovery:** Dynamic service monitoring and health checks
-
-### Machine Learning Observability
-- **Model Performance:** Accuracy, drift, and bias monitoring
-- **Feature Store Monitoring:** Feature quality and freshness tracking
-- **Pipeline Observability:** ML pipeline execution and performance monitoring
-- **A/B Test Analysis:** Statistical significance and business impact measurement
-
-## Best Practices
-
-### Organizational Alignment
-- **SLO Setting:** Collaborative target setting between product and engineering
-- **Alert Ownership:** Clear escalation paths and team responsibilities
-- **Dashboard Governance:** Centralized dashboard management and standards
-- **Training Programs:** Team education on observability tools and practices
-
-### Technical Excellence
-- **Infrastructure as Code:** Observability configuration version control
-- **Testing Strategy:** Alert rule testing and dashboard validation
-- **Performance Monitoring:** Observability system performance tracking
-- **Security Considerations:** Access control and data privacy in observability
-
-### Continuous Improvement
-- **Metrics Review:** Regular SLI/SLO effectiveness assessment
-- **Alert Tuning:** Ongoing alert threshold and routing optimization
-- **Dashboard Evolution:** User feedback-driven dashboard improvements
-- **Tool Evaluation:** Regular assessment of observability tool effectiveness
-
-## Success Metrics
-
-### Operational Metrics
-- **Mean Time to Detection (MTTD):** How quickly issues are identified
-- **Mean Time to Resolution (MTTR):** Time from detection to resolution
-- **Alert Precision:** Percentage of actionable alerts
-- **SLO Achievement:** Percentage of SLO targets met consistently
-
-### Business Metrics
-- **System Reliability:** Overall uptime and user experience quality
-- **Engineering Velocity:** Development team productivity and deployment frequency
-- **Cost Efficiency:** Observability cost as percentage of infrastructure spend
-- **Customer Satisfaction:** User-reported reliability and performance satisfaction
-
-This comprehensive observability design skill enables organizations to build robust, scalable monitoring and alerting systems that provide actionable insights while maintaining cost efficiency and operational excellence.
+| File | Contents |
+|------|----------|
+| [slo_cookbook.md](https://github.com/alirezarezvani/claude-skills/tree/main/engineering/observability-designer/references/slo_cookbook.md) | SLI selection, SLO targets, error budgets, burn-rate alerting |
+| [dashboard_best_practices.md](https://github.com/alirezarezvani/claude-skills/tree/main/engineering/observability-designer/references/dashboard_best_practices.md) | Golden signals, RED/USE, layout, visualization choices |
+| [alert_design_patterns.md](https://github.com/alirezarezvani/claude-skills/tree/main/engineering/observability-designer/references/alert_design_patterns.md) | Severity, actionability, fatigue prevention, threshold selection |

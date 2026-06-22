@@ -1,0 +1,130 @@
+# ruff: noqa: F403, F405, E501, E402
+import sys as _spsys
+import pathlib as _sppath
+_spsys.path.insert(0, str(_sppath.Path(__file__).resolve().parent))
+from control_matrix_builder_base import *  # noqa: F403,E402
+
+
+def _mod_cg1_1():
+    return [
+        {
+                "id": "SEC-016",
+                "tsc": "CC5.2",
+                "description": "Organization selects and develops general control activities over technology",
+                "type": "Preventive",
+                "frequency": "Continuous",
+                "evidence": "IT general controls documentation, technology policies",
+            },
+        {
+                "id": "SEC-017",
+                "tsc": "CC5.3",
+                "description": "Organization deploys control activities through policies and procedures",
+                "type": "Preventive",
+                "frequency": "Annual",
+                "evidence": "Policy library, procedure documents, acknowledgment records",
+            },
+        {
+                "id": "SEC-018",
+                "tsc": "CC6.1",
+                "description": "Logical access security controls over protected information assets",
+                "type": "Preventive",
+                "frequency": "Continuous",
+                "evidence": "Access control policy, IAM configuration, SSO/MFA settings",
+            },
+        {
+                "id": "SEC-019",
+                "tsc": "CC6.2",
+                "description": "User access provisioning based on role and business need",
+                "type": "Preventive",
+                "frequency": "Continuous",
+                "evidence": "Provisioning tickets, role matrix, access request approvals",
+            },
+        {
+                "id": "SEC-020",
+                "tsc": "CC6.3",
+                "description": "User access removal upon termination or role change",
+                "type": "Preventive",
+                "frequency": "Continuous",
+                "evidence": "Deprovisioning tickets, termination checklists, access removal logs",
+            },
+        {
+                "id": "SEC-021",
+                "tsc": "CC6.4",
+                "description": "Periodic access reviews to validate appropriateness",
+                "type": "Detective",
+                "frequency": "Quarterly",
+                "evidence": "Access review reports, user entitlement listings, review sign-offs",
+            },
+        {
+                "id": "SEC-022",
+                "tsc": "CC6.5",
+                "description": "Physical access restrictions to facilities and protected assets",
+                "type": "Preventive",
+                "frequency": "Continuous",
+                "evidence": "Badge access logs, visitor logs, physical security configuration",
+            },
+        {
+                "id": "SEC-023",
+                "tsc": "CC6.6",
+                "description": "Encryption of data in transit and at rest",
+                "type": "Preventive",
+                "frequency": "Continuous",
+                "evidence": "TLS configuration, encryption settings, certificate inventory",
+            },
+        {
+                "id": "SEC-024",
+                "tsc": "CC6.7",
+                "description": "Restrictions on data transmission and movement",
+                "type": "Preventive",
+                "frequency": "Continuous",
+                "evidence": "DLP configuration, network segmentation, firewall rules",
+            },
+        {
+                "id": "SEC-025",
+                "tsc": "CC6.8",
+                "description": "Controls to prevent or detect unauthorized software",
+                "type": "Detective",
+                "frequency": "Continuous",
+                "evidence": "Endpoint protection config, software whitelist, malware scan reports",
+            },
+        {
+                "id": "SEC-026",
+                "tsc": "CC7.1",
+                "description": "Vulnerability identification and management",
+                "type": "Detective",
+                "frequency": "Weekly",
+                "evidence": "Vulnerability scan reports, remediation SLAs, patch records",
+            },
+        {
+                "id": "SEC-027",
+                "tsc": "CC7.2",
+                "description": "Monitoring for anomalies and security events",
+                "type": "Detective",
+                "frequency": "Continuous",
+                "evidence": "SIEM configuration, alert rules, monitoring dashboards",
+            },
+        {
+                "id": "SEC-028",
+                "tsc": "CC7.3",
+                "description": "Security event evaluation and incident classification",
+                "type": "Detective",
+                "frequency": "Continuous",
+                "evidence": "Incident classification criteria, triage procedures, event logs",
+            },
+        {
+                "id": "SEC-029",
+                "tsc": "CC7.4",
+                "description": "Incident response execution and recovery",
+                "type": "Corrective",
+                "frequency": "Continuous",
+                "evidence": "Incident response plan, incident tickets, postmortem reports",
+            },
+        {
+                "id": "SEC-030",
+                "tsc": "CC7.5",
+                "description": "Incident recovery and lessons learned",
+                "type": "Corrective",
+                "frequency": "Continuous",
+                "evidence": "Recovery records, lessons learned documentation, plan updates",
+            },
+    ]

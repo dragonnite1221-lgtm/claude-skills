@@ -1,6 +1,6 @@
 ---
 title: "Env & Secrets Manager — Agent Skill for Codex & OpenClaw"
-description: "Env & Secrets Manager. Agent skill for Claude Code, Codex CLI, Gemini CLI, OpenClaw."
+description: "Audit a repository working tree for hardcoded secret leaks (AWS keys, Stripe/Slack/GitHub tokens, JWTs, private keys, credentialed connection. Agent skill for Claude Code, Codex CLI, Gemini CLI, OpenClaw."
 ---
 
 # Env & Secrets Manager
@@ -16,256 +16,89 @@ description: "Env & Secrets Manager. Agent skill for Claude Code, Codex CLI, Gem
 </div>
 
 
-**Tier:** POWERFUL
-**Category:** Engineering
-**Domain:** Security / DevOps / Configuration Management
+Audits environment-variable hygiene and detects hardcoded secrets across local
+development and CI workflows.
 
----
+## Tool
 
-## Overview
-
-Manage environment-variable hygiene and secrets safety across local development and production workflows. This skill focuses on practical auditing, drift awareness, and rotation readiness.
-
-## Core Capabilities
-
-- `.env` and `.env.example` lifecycle guidance
-- Secret leak detection for repository working trees
-- Severity-based findings for likely credentials
-- Operational pointers for rotation and containment
-- Integration-ready outputs for CI checks
-
----
-
-## When to Use
-
-- Before pushing commits that touched env/config files
-- During security audits and incident triage
-- When onboarding contributors who need safe env conventions
-- When validating that no obvious secrets are hardcoded
-
----
-
-## Quick Start
+`scripts/env_auditor.py` scans a repository's working tree (env files and source)
+for likely secret leaks and returns severity-ranked findings.
 
 ```bash
-# Scan a repository for likely secret leaks
-python3 scripts/env_auditor.py /path/to/repo
-
-# JSON output for CI pipelines
-python3 scripts/env_auditor.py /path/to/repo --json
+python3 scripts/env_auditor.py /path/to/repo               # human-readable
+python3 scripts/env_auditor.py /path/to/repo --json        # JSON for CI gates
+python3 scripts/env_auditor.py /path/to/repo --max-file-size-kb 256  # skip large files
 ```
 
----
-
-## Recommended Workflow
-
-1. Run `scripts/env_auditor.py` on the repository root.
-2. Prioritize `critical` and `high` findings first.
-3. Rotate real credentials and remove exposed values.
-4. Update `.env.example` and `.gitignore` as needed.
-5. Add or tighten pre-commit/CI secret scanning gates.
-
----
-
-## Reference Docs
-
-- `references/validation-detection-rotation.md`
-- `references/secret-patterns.md`
-
----
-
-## Common Pitfalls
-
-- Committing real values in `.env.example`
-- Rotating one system but missing downstream consumers
-- Logging secrets during debugging or incident response
-- Treating suspected leaks as low urgency without validation
-
-## Best Practices
-
-1. Use a secret manager as the production source of truth.
-2. Keep dev env files local and gitignored.
-3. Enforce detection in CI before merge.
-4. Re-test application paths immediately after credential rotation.
-
----
-
-## Cloud Secret Store Integration
-
-Production applications should never read secrets from `.env` files or environment variables baked into container images. Use a dedicated secret store instead.
-
-### Provider Comparison
-
-| Provider | Best For | Key Feature |
-|----------|----------|-------------|
-| **HashiCorp Vault** | Multi-cloud / hybrid | Dynamic secrets, policy engine, pluggable backends |
-| **AWS Secrets Manager** | AWS-native workloads | Native Lambda/ECS/EKS integration, automatic RDS rotation |
-| **Azure Key Vault** | Azure-native workloads | Managed HSM, Azure AD RBAC, certificate management |
-| **GCP Secret Manager** | GCP-native workloads | IAM-based access, automatic replication, versioning |
-
-### Selection Guidance
-
-- **Single cloud provider** — use the cloud-native secret manager. It integrates tightly with IAM, reduces operational overhead, and costs less than self-hosting.
-- **Multi-cloud or hybrid** — use HashiCorp Vault. It provides a uniform API across environments and supports dynamic secret generation (database credentials, cloud IAM keys) that expire automatically.
-- **Kubernetes-heavy** — combine External Secrets Operator with any backend above to sync secrets into K8s `Secret` objects without hardcoding.
-
-### Application Access Patterns
-
-1. **SDK/API pull** — application fetches secret at startup or on-demand via provider SDK.
-2. **Sidecar injection** — a sidecar container (e.g., Vault Agent) writes secrets to a shared volume or injects them as environment variables.
-3. **Init container** — a Kubernetes init container fetches secrets before the main container starts.
-4. **CSI driver** — secrets mount as a filesystem volume via the Secrets Store CSI Driver.
-
-> **Cross-reference:** See `engineering/secrets-vault-manager` for production vault infrastructure patterns, HA deployment, and disaster recovery procedures.
-
----
-
-## Secret Rotation Workflow
-
-Stale secrets are a liability. Rotation ensures that even if a credential leaks, its useful lifetime is bounded.
-
-### Phase 1: Detection
-
-- Track secret creation and expiry dates in your secret store metadata.
-- Set alerts at 30, 14, and 7 days before expiry.
-- Use `scripts/env_auditor.py` to flag secrets with no recorded rotation date.
-
-### Phase 2: Rotation
-
-1. **Generate** a new credential (API key, database password, certificate).
-2. **Deploy** the new credential to all consumers (apps, services, pipelines) in parallel.
-3. **Verify** each consumer can authenticate using the new credential.
-4. **Revoke** the old credential only after all consumers are confirmed healthy.
-5. **Update** metadata with the new rotation timestamp and next rotation date.
-
-### Phase 3: Automation
-
-- **AWS Secrets Manager** — use built-in Lambda-based rotation for RDS, Redshift, and DocumentDB.
-- **HashiCorp Vault** — configure dynamic secrets with TTLs; credentials are generated on-demand and auto-expire.
-- **Azure Key Vault** — use Event Grid notifications to trigger rotation functions.
-- **GCP Secret Manager** — use Pub/Sub notifications tied to Cloud Functions for rotation logic.
-
-### Emergency Rotation Checklist
-
-When a secret is confirmed leaked:
-
-1. **Immediately revoke** the compromised credential at the provider level.
-2. Generate and deploy a replacement credential to all consumers.
-3. Audit access logs for unauthorized usage during the exposure window.
-4. Scan git history, CI logs, and artifact registries for the leaked value.
-5. File an incident report documenting scope, timeline, and remediation steps.
-6. Review and tighten detection controls to prevent recurrence.
-
----
-
-## CI/CD Secret Injection
-
-Secrets in CI/CD pipelines require careful handling to avoid exposure in logs, artifacts, or pull request contexts.
-
-### GitHub Actions
-
-- Use **repository secrets** or **environment secrets** via `${{ secrets.SECRET_NAME }}`.
-- Prefer **OIDC federation** (`aws-actions/configure-aws-credentials` with `role-to-assume`) over long-lived access keys.
-- Environment secrets with required reviewers add approval gates for production deployments.
-- GitHub automatically masks secrets in logs, but avoid `echo` or `toJSON()` on secret values.
-
-### GitLab CI
-
-- Store secrets as **CI/CD variables** with the `masked` and `protected` flags enabled.
-- Use **HashiCorp Vault integration** (`secrets:vault`) for dynamic secret injection without storing values in GitLab.
-- Scope variables to specific environments (`production`, `staging`) to enforce least privilege.
-
-### Universal Patterns
-
-- **Never echo or print** secret values in pipeline output, even for debugging.
-- **Use short-lived tokens** (OIDC, STS AssumeRole) instead of static credentials wherever possible.
-- **Restrict PR access** — do not expose secrets to pipelines triggered by forks or untrusted branches.
-- **Rotate CI secrets** on the same schedule as application secrets; pipeline credentials are attack vectors too.
-- **Audit pipeline logs** periodically for accidental secret exposure that masking may have missed.
-
----
-
-## Pre-Commit Secret Detection
-
-Catching secrets before they reach version control is the most cost-effective defense. Two leading tools cover this space.
-
-### gitleaks
-
-```toml
-# .gitleaks.toml — minimal configuration
-[extend]
-useDefault = true
-
-[[rules]]
-id = "custom-internal-token"
-description = "Internal service token pattern"
-regex = '''INTERNAL_TOKEN_[A-Za-z0-9]{32}'''
-secretGroup = 0
-```
-
-- Install: `brew install gitleaks` or download from GitHub releases.
-- Pre-commit hook: `gitleaks git --pre-commit --staged`
-- Baseline scanning: `gitleaks detect --source . --report-path gitleaks-report.json`
-- Manage false positives in `.gitleaksignore` (one fingerprint per line).
-
-### detect-secrets
-
-```bash
-# Generate baseline
-detect-secrets scan --all-files > .secrets.baseline
-
-# Pre-commit hook (via pre-commit framework)
-# .pre-commit-config.yaml
-repos:
-  - repo: https://github.com/Yelp/detect-secrets
-    rev: v1.5.0
-    hooks:
-      - id: detect-secrets
-        args: ['--baseline', '.secrets.baseline']
-```
-
-- Supports **custom plugins** for organization-specific patterns.
-- Audit workflow: `detect-secrets audit .secrets.baseline` interactively marks true/false positives.
-
-### False Positive Management
-
-- Maintain `.gitleaksignore` or `.secrets.baseline` in version control so the whole team shares exclusions.
-- Review false positive lists during security audits — patterns may mask real leaks over time.
-- Prefer tightening regex patterns over broadly ignoring files.
-
----
-
-## Audit Logging
-
-Knowing who accessed which secret and when is critical for incident investigation and compliance.
-
-### Cloud-Native Audit Trails
-
-| Provider | Service | What It Captures |
-|----------|---------|-----------------|
-| **AWS** | CloudTrail | Every `GetSecretValue`, `DescribeSecret`, `RotateSecret` API call |
-| **Azure** | Activity Log + Diagnostic Logs | Key Vault access events, including caller identity and IP |
-| **GCP** | Cloud Audit Logs | Data access logs for Secret Manager with principal and timestamp |
-| **Vault** | Audit Backend | Full request/response logging (file, syslog, or socket backend) |
-
-### Alerting Strategy
-
-- Alert on **access from unknown IP ranges** or service accounts outside the expected set.
-- Alert on **bulk secret reads** (more than N secrets accessed within a time window).
-- Alert on **access outside deployment windows** when no CI/CD pipeline is running.
-- Feed audit logs into your SIEM (Splunk, Datadog, Elastic) for correlation with other security events.
-- Review audit logs quarterly as part of access recertification.
-
----
-
-## Cross-References
-
-This skill covers env hygiene and secret detection. For deeper coverage of related domains, see:
-
-| Skill | Path | Relationship |
-|-------|------|-------------|
-| **Secrets Vault Manager** | `engineering/secrets-vault-manager` | Production vault infrastructure, HA deployment, DR |
-| **Senior SecOps** | `engineering/senior-secops` | Security operations perspective, incident response |
-| **CI/CD Pipeline Builder** | `engineering/ci-cd-pipeline-builder` | Pipeline architecture, secret injection patterns |
-| **Infrastructure as Code** | `engineering/infrastructure-as-code` | Terraform/Pulumi secret backend configuration |
-| **Container Orchestration** | `engineering/container-orchestration` | Kubernetes secret mounting, sealed secrets |
+## Audit workflow
+
+1. Run `env_auditor.py` on the repository root.
+2. Triage `critical` and `high` findings first; confirm each is a real credential.
+3. Rotate every confirmed-real credential (see rotation below) and remove the value.
+4. Update `.env.example` (placeholders only) and `.gitignore` so `.env*` stays local.
+5. Add or tighten a pre-commit / CI secret-scanning gate, then re-run the audit to
+   confirm a clean tree.
+
+Detected categories and severity rationale are in
+[secret-patterns.md](https://github.com/alirezarezvani/claude-skills/tree/main/engineering/env-secrets-manager/references/secret-patterns.md). Ready-to-use validation,
+working-tree/history scan, and pre-commit hook scripts are in
+[validation-detection-rotation.md](https://github.com/alirezarezvani/claude-skills/tree/main/engineering/env-secrets-manager/references/validation-detection-rotation.md).
+
+## Credential rotation
+
+When a secret is confirmed leaked, bound its useful lifetime by rotating:
+
+1. **Revoke** the compromised credential at the provider immediately.
+2. **Generate** a replacement and **deploy** it to all consumers (apps, services,
+   pipelines) in parallel.
+3. **Verify** each consumer authenticates with the new credential before revoking.
+4. **Audit** access logs for unauthorized use during the exposure window.
+5. **Scrub** the value from git history, CI logs, and artifact registries.
+6. **Record** the rotation timestamp and file an incident report.
+
+Step-by-step rotation, git-history scrubbing, and per-provider update commands
+(Vault KV v2, AWS SSM, 1Password, Doppler) are in
+[validation-detection-rotation.md](https://github.com/alirezarezvani/claude-skills/tree/main/engineering/env-secrets-manager/references/validation-detection-rotation.md).
+Automate rotation where supported: AWS Secrets Manager Lambda rotation, Vault
+dynamic secrets with TTLs, Azure Event Grid triggers, GCP Pub/Sub + Cloud Functions.
+
+## Production secret stores
+
+Production apps should read secrets from a dedicated store, never from `.env` files
+or image-baked environment variables.
+
+- **Single cloud** — use the cloud-native manager (AWS Secrets Manager, Azure Key
+  Vault, GCP Secret Manager); tight IAM integration, lower overhead.
+- **Multi-cloud / hybrid** — HashiCorp Vault for a uniform API and dynamic,
+  auto-expiring secrets.
+- **Kubernetes** — External Secrets Operator or the Secrets Store CSI Driver syncs
+  any backend into the cluster without hardcoding.
+
+Access patterns: SDK/API pull at startup, sidecar injection (Vault Agent), init
+container, or CSI volume mount. For production vault infrastructure (HA, DR), see the
+`engineering/secrets-vault-manager` skill.
+
+## CI/CD secret injection
+
+- **GitHub Actions** — `${{ secrets.NAME }}` repo/environment secrets; prefer OIDC
+  federation (`role-to-assume`) over long-lived keys; environment secrets add
+  reviewer gates. Never `echo`/`toJSON()` a secret.
+- **GitLab CI** — `masked` + `protected` CI/CD variables scoped per environment, or
+  the Vault integration (`secrets:vault`) for dynamic injection.
+- **Universal** — short-lived tokens (OIDC/STS) over static creds; never print secret
+  values; don't expose secrets to fork-triggered pipelines; rotate CI secrets on the
+  same schedule as app secrets; periodically audit pipeline logs.
+
+## Audit logging
+
+Track who read which secret and when: AWS CloudTrail (`GetSecretValue`), Azure
+Activity/Diagnostic Logs, GCP Cloud Audit Logs, or the Vault audit backend. Alert on
+access from unknown IPs/service accounts, bulk reads, or access outside deployment
+windows; feed logs into your SIEM and review during access recertification.
+
+## Common pitfalls
+
+- Real values committed in `.env.example`.
+- Rotating one system but missing downstream consumers.
+- Logging secrets during debugging or incident response.
+- Treating a suspected leak as low urgency without validating it.

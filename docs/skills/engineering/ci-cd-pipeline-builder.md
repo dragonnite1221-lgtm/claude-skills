@@ -1,6 +1,6 @@
 ---
 title: "CI/CD Pipeline Builder — Agent Skill for Codex & OpenClaw"
-description: "CI/CD Pipeline Builder. Agent skill for Claude Code, Codex CLI, Gemini CLI, OpenClaw."
+description: "Detect a repository's stack from lockfiles and manifests (npm/yarn/pnpm via package-lock/yarn.lock/pnpm-lock, Python via. Agent skill for Claude Code, Codex CLI, Gemini CLI, OpenClaw."
 ---
 
 # CI/CD Pipeline Builder
@@ -16,143 +16,82 @@ description: "CI/CD Pipeline Builder. Agent skill for Claude Code, Codex CLI, Ge
 </div>
 
 
-**Tier:** POWERFUL  
-**Category:** Engineering  
-**Domain:** DevOps / Automation
+Generates pragmatic CI/CD pipelines from detected stack signals instead of guesswork.
+Two stdlib-only CLI tools: a stack detector emits a JSON report that the pipeline
+generator turns into committable GitHub Actions or GitLab CI YAML.
 
-## Overview
+## Tools
 
-Use this skill to generate pragmatic CI/CD pipelines from detected project stack signals, not guesswork. It focuses on fast baseline generation, repeatable checks, and environment-aware deployment stages.
+| Tool | Purpose |
+|------|---------|
+| `scripts/stack_detector.py` | Detect package manager, runtime, and lint/test/build commands from repo files |
+| `scripts/pipeline_generator.py` | Generate GitHub Actions or GitLab CI YAML from the detection report |
 
-## Core Capabilities
+Both accept `--input report.json`, stdin JSON, or `--repo .` for auto-detection,
+and emit `--format text` (human summary) or `--format json` (automation).
 
-- Detect language/runtime/tooling from repository files
-- Recommend CI stages (`lint`, `test`, `build`, `deploy`)
-- Generate GitHub Actions or GitLab CI starter pipelines
-- Include caching and matrix strategy based on detected stack
-- Emit machine-readable detection output for automation
-- Keep pipeline logic aligned with project lockfiles and build commands
+## Workflow
 
-## When to Use
-
-- Bootstrapping CI for a new repository
-- Replacing brittle copied pipeline files
-- Migrating between GitHub Actions and GitLab CI
-- Auditing whether pipeline steps match actual stack
-- Creating a reproducible baseline before custom hardening
-
-## Key Workflows
-
-### 1. Detect Stack
+Detect the stack first, then generate the pipeline from that report. On a mismatch,
+fix the report (or the underlying repo signals) and regenerate.
 
 ```bash
+# 1. Detect stack. Writes a JSON report listing package managers + commands.
 python3 scripts/stack_detector.py --repo . --format text
 python3 scripts/stack_detector.py --repo . --format json > detected-stack.json
-```
 
-Supports input via stdin or `--input` file for offline analysis payloads.
-
-### 2. Generate Pipeline From Detection
-
-```bash
+# 2. Generate a pipeline from the report (--platform is required).
 python3 scripts/pipeline_generator.py \
   --input detected-stack.json \
   --platform github \
   --output .github/workflows/ci.yml \
   --format text
-```
 
-Or end-to-end from repo directly:
-
-```bash
+# End-to-end from the repo (auto-detects, no intermediate file):
 python3 scripts/pipeline_generator.py --repo . --platform gitlab --output .gitlab-ci.yml
 ```
 
-### 3. Validate Before Merge
+`--platform` accepts `github` or `gitlab`. Without `--output`, YAML prints to stdout.
 
-1. Confirm commands exist in project (`test`, `lint`, `build`).
-2. Run generated pipeline locally where possible.
-3. Ensure required secrets/env vars are documented.
-4. Keep deploy jobs gated by protected branches/environments.
+## What each tool reports
 
-### 4. Add Deployment Stages Safely
+**`stack_detector.py`** — checks for `package-lock.json`/`yarn.lock`/`pnpm-lock.yaml`,
+`requirements.txt`/`pyproject.toml`, and `go.mod`; resolves the package manager
+(npm/yarn/pnpm) and runtime (Node/Python/Go); and derives lint/test/build commands
+from `package.json` scripts when present, falling back to conservative defaults
+(`ruff check` + `pytest` for Python, `go vet`/`go test`/`go build` for Go).
 
-- Start with CI-only (`lint/test/build`).
-- Add staging deploy with explicit environment context.
-- Add production deploy with manual gate/approval.
-- Keep rollout/rollback commands explicit and auditable.
+**`pipeline_generator.py`** — emits a minimal, reliable pipeline: checkout → runtime
+setup → cached dependency install → separate lint/test/build steps. Caching is keyed
+to the detected package manager. Layer matrix builds, security scans, and deploy
+gates on top of this baseline.
 
-## Script Interfaces
+## Validate before merge
 
-- `python3 scripts/stack_detector.py --help`
-  - Detects stack signals from repository files
-  - Reads optional JSON input from stdin/`--input`
-- `python3 scripts/pipeline_generator.py --help`
-  - Generates GitHub/GitLab YAML from detection payload
-  - Writes to stdout or `--output`
+1. Confirm the referenced `lint`/`test`/`build` commands actually exist in the repo.
+2. Check the generated YAML parses and runs locally where possible.
+3. Document required secrets/env vars; never hardcode them in YAML.
+4. Keep deploy jobs gated behind protected branches/environments with manual approval.
 
-## Common Pitfalls
+## Deployment gates
 
-1. Copying a Node pipeline into Python/Go repos
-2. Enabling deploy jobs before stable tests
-3. Forgetting dependency cache keys
-4. Running expensive matrix builds for every trivial branch
-5. Missing branch protections around prod deploy jobs
-6. Hardcoding secrets in YAML instead of CI secret stores
+Start CI-only (lint/test/build), then add a staging deploy with explicit environment
+context, then a production deploy behind a manual approval gate on a protected branch.
+Keep rollout/rollback commands explicit. Gate policy and the
+`develop`→staging / `main`→production pattern are in
+[deployment-gates.md](https://github.com/alirezarezvani/claude-skills/tree/main/engineering/ci-cd-pipeline-builder/references/deployment-gates.md).
 
-## Best Practices
+## Common pitfalls
 
-1. Detect stack first, then generate pipeline.
-2. Keep generated baseline under version control.
-3. Add one optimization at a time (cache, matrix, split jobs).
-4. Require green CI before deployment jobs.
-5. Use protected environments for production credentials.
-6. Regenerate pipeline when stack changes significantly.
+- Copying a Node pipeline into a Python/Go repo (detect the stack first).
+- Enabling deploy jobs before tests are stable.
+- Forgetting dependency cache keys, or mismatching them to the package manager.
+- Hardcoding secrets in YAML instead of using CI secret stores.
+- Missing branch protections around production deploy jobs.
 
 ## References
 
-- [references/github-actions-templates.md](https://github.com/alirezarezvani/claude-skills/tree/main/engineering/ci-cd-pipeline-builder/references/github-actions-templates.md)
-- [references/gitlab-ci-templates.md](https://github.com/alirezarezvani/claude-skills/tree/main/engineering/ci-cd-pipeline-builder/references/gitlab-ci-templates.md)
-- [references/deployment-gates.md](https://github.com/alirezarezvani/claude-skills/tree/main/engineering/ci-cd-pipeline-builder/references/deployment-gates.md)
-- [README.md](https://github.com/alirezarezvani/claude-skills/tree/main/engineering/ci-cd-pipeline-builder/README.md)
-
-## Detection Heuristics
-
-The stack detector prioritizes deterministic file signals over heuristics:
-
-- Lockfiles determine package manager preference
-- Language manifests determine runtime families
-- Script commands (if present) drive lint/test/build commands
-- Missing scripts trigger conservative placeholder commands
-
-## Generation Strategy
-
-Start with a minimal, reliable pipeline:
-
-1. Checkout and setup runtime
-2. Install dependencies with cache strategy
-3. Run lint, test, build in separate steps
-4. Publish artifacts only after passing checks
-
-Then layer advanced behavior (matrix builds, security scans, deploy gates).
-
-## Platform Decision Notes
-
-- GitHub Actions for tight GitHub ecosystem integration
-- GitLab CI for integrated SCM + CI in self-hosted environments
-- Keep one canonical pipeline source per repo to reduce drift
-
-## Validation Checklist
-
-1. Generated YAML parses successfully.
-2. All referenced commands exist in the repo.
-3. Cache strategy matches package manager.
-4. Required secrets are documented, not embedded.
-5. Branch/protected-environment rules match org policy.
-
-## Scaling Guidance
-
-- Split long jobs by stage when runtime exceeds 10 minutes.
-- Introduce test matrix only when compatibility truly requires it.
-- Separate deploy jobs from CI jobs to keep feedback fast.
-- Track pipeline duration and flakiness as first-class metrics.
+- [github-actions-templates.md](https://github.com/alirezarezvani/claude-skills/tree/main/engineering/ci-cd-pipeline-builder/references/github-actions-templates.md) — Node/Python baseline workflows
+- [gitlab-ci-templates.md](https://github.com/alirezarezvani/claude-skills/tree/main/engineering/ci-cd-pipeline-builder/references/gitlab-ci-templates.md) — Node/Python baseline stages
+- [deployment-gates.md](https://github.com/alirezarezvani/claude-skills/tree/main/engineering/ci-cd-pipeline-builder/references/deployment-gates.md) — gate policy, environment pattern, rollback
+- [README.md](https://github.com/alirezarezvani/claude-skills/tree/main/engineering/ci-cd-pipeline-builder/README.md) — quick start and installation

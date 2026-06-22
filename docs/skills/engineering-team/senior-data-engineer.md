@@ -1,6 +1,6 @@
 ---
 title: "Senior Data Engineer — Agent Skill & Codex Plugin"
-description: "Data engineering skill for building scalable data pipelines, ETL/ELT systems, and data infrastructure. Expertise in Python, SQL, Spark, Airflow, dbt. Agent skill for Claude Code, Codex CLI, Gemini CLI, OpenClaw."
+description: "Build scalable data pipelines, ETL/ELT systems, and data infrastructure with Python, SQL, Spark, Airflow, dbt, and Kafka. Covers dimensional data. Agent skill for Claude Code, Codex CLI, Gemini CLI, OpenClaw."
 ---
 
 # Senior Data Engineer
@@ -18,188 +18,99 @@ description: "Data engineering skill for building scalable data pipelines, ETL/E
 
 Production-grade data engineering skill for building scalable, reliable data systems.
 
-## Table of Contents
-
-1. [Trigger Phrases](#trigger-phrases)
-2. [Quick Start](#quick-start)
-3. [Workflows](#workflows)
-   - [Building a Batch ETL Pipeline](#workflow-1-building-a-batch-etl-pipeline)
-   - [Implementing Real-Time Streaming](#workflow-2-implementing-real-time-streaming)
-   - [Data Quality Framework Setup](#workflow-3-data-quality-framework-setup)
-4. [Architecture Decision Framework](#architecture-decision-framework)
-5. [Tech Stack](#tech-stack)
-6. [Reference Documentation](#reference-documentation)
-7. [Troubleshooting](#troubleshooting)
-
----
-
-## Trigger Phrases
-
-Activate this skill when you see:
-
-**Pipeline Design:**
-- "Design a data pipeline for..."
-- "Build an ETL/ELT process..."
-- "How should I ingest data from..."
-- "Set up data extraction from..."
-
-**Architecture:**
-- "Should I use batch or streaming?"
-- "Lambda vs Kappa architecture"
-- "How to handle late-arriving data"
-- "Design a data lakehouse"
-
-**Data Modeling:**
-- "Create a dimensional model..."
-- "Star schema vs snowflake"
-- "Implement slowly changing dimensions"
-- "Design a data vault"
-
-**Data Quality:**
-- "Add data validation to..."
-- "Set up data quality checks"
-- "Monitor data freshness"
-- "Implement data contracts"
-
-**Performance:**
-- "Optimize this Spark job"
-- "Query is running slow"
-- "Reduce pipeline execution time"
-- "Tune Airflow DAG"
-
----
-
 ## Quick Start
 
-### Core Tools
+Three CLI tools ship with this skill. Pick by task:
+
+| Task | Tool |
+|------|------|
+| Scaffold an Airflow/Prefect/Dagster pipeline | `scripts/pipeline_orchestrator.py` |
+| Validate a dataset (CSV/JSON/JSONL) against a schema | `scripts/data_quality_validator.py` |
+| Profile a slow SQL query or Spark job | `scripts/etl_performance_optimizer.py` (`analyze-sql` / `analyze-spark`) |
 
 ```bash
-# Generate pipeline orchestration config
+# Generate pipeline orchestration config (DAG file written to --output)
 python scripts/pipeline_orchestrator.py generate \
   --type airflow \
   --source postgres \
   --destination snowflake \
   --schedule "0 5 * * *"
 
-# Validate data quality
-python scripts/data_quality_validator.py validate \
-  --input data/sales.parquet \
+# Validate data quality (exits 1 on error-severity failures — safe for CI gates)
+python scripts/data_quality_validator.py validate data/sales.csv \
   --schema schemas/sales.json \
-  --checks freshness,completeness,uniqueness
+  --json
 
-# Optimize ETL performance
-python scripts/etl_performance_optimizer.py analyze \
-  --query queries/daily_aggregation.sql \
-  --engine spark \
-  --recommend
+# Analyze a slow SQL query and get prioritized tuning recommendations
+python scripts/etl_performance_optimizer.py analyze-sql queries/daily_aggregation.sql \
+  --warehouse snowflake
 ```
 
----
+All tools run on the Python standard library. `pipeline_orchestrator.py`
+accepts JSON config files everywhere; YAML configs work too when PyYAML is
+installed (optional, auto-detected).
 
 ## Workflows
-→ See references/workflows.md for details
 
-## Architecture Decision Framework
+Full step-by-step instructions with code live in `references/workflows.md`. Summaries:
 
-Use this framework to choose the right approach for your data pipeline.
+### Workflow 1: Building a Batch ETL Pipeline
 
-### Batch vs Streaming
+PostgreSQL → dbt → Snowflake, incremental by watermark column.
 
-| Criteria | Batch | Streaming |
-|----------|-------|-----------|
-| **Latency requirement** | Hours to days | Seconds to minutes |
-| **Data volume** | Large historical datasets | Continuous event streams |
-| **Processing complexity** | Complex transformations, ML | Simple aggregations, filtering |
-| **Cost sensitivity** | More cost-effective | Higher infrastructure cost |
-| **Error handling** | Easier to reprocess | Requires careful design |
+1. Document source schema (`information_schema.columns` inventory)
+2. Generate extraction config — `pipeline_orchestrator.py generate --mode incremental --tables orders,customers`
+3. Create dbt staging + mart models (incremental materialization, `unique_key`, clustering)
+4. **Validation gate:** add dbt tests (not_null, unique, relationships) before scheduling
+5. Create Airflow DAG wiring extract → transform → test
+6. **Validation gate:** run end-to-end with a bounded date range and reconcile row counts against source
 
-**Decision Tree:**
-```
-Is real-time insight required?
-├── Yes → Use streaming
-│   └── Is exactly-once semantics needed?
-│       ├── Yes → Kafka + Flink/Spark Structured Streaming
-│       └── No → Kafka + consumer groups
-└── No → Use batch
-    └── Is data volume > 1TB daily?
-        ├── Yes → Spark/Databricks
-        └── No → dbt + warehouse compute
-```
+### Workflow 2: Implementing Real-Time Streaming
 
-### Lambda vs Kappa Architecture
+Kafka → Flink/Spark Structured Streaming → data lake sink.
 
-| Aspect | Lambda | Kappa |
-|--------|--------|-------|
-| **Complexity** | Two codebases (batch + stream) | Single codebase |
-| **Maintenance** | Higher (sync batch/stream logic) | Lower |
-| **Reprocessing** | Native batch layer | Replay from source |
-| **Use case** | ML training + real-time serving | Pure event-driven |
+1. Define event schema (Avro/JSON Schema, registered before producers ship)
+2. Create Kafka topic with partition/retention sizing
+3. Implement streaming job with checkpointing enabled
+4. **Validation gate:** handle late data (watermarks) and route bad records to a dead-letter queue
+5. Monitor stream health — consumer lag, checkpoint age, throughput
 
-**When to choose Lambda:**
-- Need to train ML models on historical data
-- Complex batch transformations not feasible in streaming
-- Existing batch infrastructure
+### Workflow 3: Data Quality Framework Setup
 
-**When to choose Kappa:**
-- Event-sourced architecture
-- All processing can be expressed as stream operations
-- Starting fresh without legacy systems
+Great Expectations + dbt tests + data contracts.
 
-### Data Warehouse vs Data Lakehouse
+1. Initialize Great Expectations project
+2. Create expectation suites for critical tables (completeness, uniqueness, ranges)
+3. Add dbt schema tests so quality runs inside the pipeline
+4. **Validation gate:** enforce data contracts on schema changes (fail closed on breaking change)
+5. Publish a quality dashboard for freshness and failure trends
 
-| Feature | Warehouse (Snowflake/BigQuery) | Lakehouse (Delta/Iceberg) |
-|---------|-------------------------------|---------------------------|
-| **Best for** | BI, SQL analytics | ML, unstructured data |
-| **Storage cost** | Higher (proprietary format) | Lower (open formats) |
-| **Flexibility** | Schema-on-write | Schema-on-read |
-| **Performance** | Excellent for SQL | Good, improving |
-| **Ecosystem** | Mature BI tools | Growing ML tooling |
+## Architecture Decisions
 
----
-
-## Tech Stack
-
-| Category | Technologies |
-|----------|--------------|
-| **Languages** | Python, SQL, Scala |
-| **Orchestration** | Airflow, Prefect, Dagster |
-| **Transformation** | dbt, Spark, Flink |
-| **Streaming** | Kafka, Kinesis, Pub/Sub |
-| **Storage** | S3, GCS, Delta Lake, Iceberg |
-| **Warehouses** | Snowflake, BigQuery, Redshift, Databricks |
-| **Quality** | Great Expectations, dbt tests, Monte Carlo |
-| **Monitoring** | Prometheus, Grafana, Datadog |
-
----
+Project-specific decision criteria (batch vs streaming decision tree, Lambda
+vs Kappa, warehouse vs lakehouse selection) live in
+`references/data_pipeline_architecture.md`. Consult it when latency, volume,
+or reprocessing requirements make the choice non-obvious.
 
 ## Reference Documentation
 
-### 1. Data Pipeline Architecture
-See `references/data_pipeline_architecture.md` for:
-- Lambda vs Kappa architecture patterns
-- Batch processing with Spark and Airflow
-- Stream processing with Kafka and Flink
-- Exactly-once semantics implementation
-- Error handling and dead letter queues
-
-### 2. Data Modeling Patterns
-See `references/data_modeling_patterns.md` for:
-- Dimensional modeling (Star/Snowflake)
-- Slowly Changing Dimensions (SCD Types 1-6)
-- Data Vault modeling
-- dbt best practices
-- Partitioning and clustering
-
-### 3. DataOps Best Practices
-See `references/dataops_best_practices.md` for:
-- Data testing frameworks
-- Data contracts and schema validation
-- CI/CD for data pipelines
-- Observability and lineage
-- Incident response
-
----
+| Reference | Use for |
+|-----------|---------|
+| `references/data_pipeline_architecture.md` | Batch/stream patterns, exactly-once semantics, dead letter queues, architecture selection |
+| `references/data_modeling_patterns.md` | Star/Snowflake dimensional modeling, SCD Types 1-6, Data Vault, dbt practices, partitioning |
+| `references/dataops_best_practices.md` | Data testing, data contracts, CI/CD for pipelines, observability and lineage, incident response |
+| `references/workflows.md` | Full step-by-step code for the three workflows above |
+| `references/troubleshooting.md` | Complete diagnostics for the failures summarized below |
 
 ## Troubleshooting
-→ See references/troubleshooting.md for details
 
+Quick reference for the most common failures — full diagnostics and code in
+`references/troubleshooting.md`:
+
+1. **Airflow DAG timeout** — raise `execution_timeout` in `default_args` and
+   switch full reloads to incremental (`WHERE updated_at > '{{ prev_ds }}'`).
+2. **Spark job OOM** — increase `spark.executor.memory`, raise
+   `spark.sql.shuffle.partitions`, and let large shuffles spill to disk.
+3. **Schema drift / stale data** — add dbt source freshness checks and enforce
+   data contracts so breaking schema changes fail the pipeline instead of
+   silently corrupting downstream models.

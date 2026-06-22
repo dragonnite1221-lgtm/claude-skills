@@ -1,6 +1,6 @@
 ---
 title: "Initialize Playwright Project — Agent Skill & Codex Plugin"
-description: "Set up Playwright in a project. Use when user says 'set up playwright', 'add e2e tests', 'configure playwright', 'testing setup', 'init playwright'. Agent skill for Claude Code, Codex CLI, Gemini CLI, OpenClaw."
+description: "Scaffold a production-ready Playwright setup: detects the framework (Next.js/React-Vite/Vue-Nuxt/Angular) and TS vs JS from package.json and. Agent skill for Claude Code, Codex CLI, Gemini CLI, OpenClaw."
 ---
 
 # Initialize Playwright Project

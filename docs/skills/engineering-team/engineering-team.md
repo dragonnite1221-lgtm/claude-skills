@@ -85,3 +85,6 @@ No pip install needed. Scripts include embedded samples for demo mode.
 - Load only the specific skill SKILL.md you need — don't bulk-load all 23
 - Use Python tools for analysis and scaffolding, not manual judgment
 - Check CLAUDE.md for tool usage examples and workflows
+- For overlap with `engineering/` advanced skills, follow the
+  [Engineering Skill Matrix](https://github.com/alirezarezvani/claude-skills/tree/main/documentation/ENGINEERING_SKILL_MATRIX.md)
+  instead of moving or renaming folders

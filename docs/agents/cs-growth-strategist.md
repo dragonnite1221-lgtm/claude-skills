@@ -1,17 +1,17 @@
 ---
-title: "Growth Strategist — AI Coding Agent & Codex Skill"
-description: "Growth Strategist agent for revenue operations, sales engineering, customer success, and business development. Orchestrates business-growth skills. Agent-native orchestrator for Claude Code, Codex, Gemini CLI."
----
+    title: "Growth Strategist — AI Coding Agent & Codex Skill"
+    description: "Growth Strategist agent for revenue operations, sales engineering, customer success, and business development. Orchestrates business-growth skills. Agent-native orchestrator for Claude Code, Codex, Gemini CLI."
+    ---
 
-# Growth Strategist
+    # Growth Strategist
 
-<div class="page-meta" markdown>
-<span class="meta-badge">:material-robot: Agent</span>
-<span class="meta-badge">:material-trending-up: Business & Growth</span>
-<span class="meta-badge">:material-github: <a href="https://github.com/alirezarezvani/claude-skills/tree/main/agents/business-growth/cs-growth-strategist.md">Source</a></span>
-</div>
+    <div class="page-meta" markdown>
+    <span class="meta-badge">:material-robot: Agent</span>
+    <span class="meta-badge">:material-trending-up: Business & Growth</span>
+    <span class="meta-badge">:material-github: <a href="https://github.com/alirezarezvani/claude-skills/tree/main/agents/business-growth/cs-growth-strategist.md">Source</a></span>
+    </div>
 
-
+    
 ## Role & Expertise
 
 Growth-focused operator covering the full revenue lifecycle: pipeline management, sales engineering, customer success, and commercial proposals.

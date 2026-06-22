@@ -1,6 +1,6 @@
 ---
 title: "/ar:status — Experiment Dashboard — Agent Skill for Codex & OpenClaw"
-description: "Show experiment dashboard with results, active loops, and progress. Agent skill for Claude Code, Codex CLI, Gemini CLI, OpenClaw."
+description: "Render the autoresearch experiment dashboard from results.tsv — per-experiment runs, kept count, best metric, percent change from start, and status . Agent skill for Claude Code, Codex CLI, Gemini CLI, OpenClaw."
 ---
 
 # /ar:status — Experiment Dashboard

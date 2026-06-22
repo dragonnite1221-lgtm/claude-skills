@@ -1,0 +1,101 @@
+# ruff: noqa: F403, F405, E501, E402
+import sys as _spsys
+import pathlib as _sppath
+_spsys.path.insert(0, str(_sppath.Path(__file__).resolve().parent))
+from cloud_posture_check_base import *  # noqa: F403,E402
+
+
+PRIVILEGE_ESCALATION_ACTIONS: List[str] = [
+    "iam:CreatePolicyVersion",
+    "iam:SetDefaultPolicyVersion",
+    "iam:PassRole",
+    "iam:CreateAccessKey",
+    "iam:CreateLoginProfile",
+    "iam:UpdateLoginProfile",
+    "iam:AttachUserPolicy",
+    "iam:AttachGroupPolicy",
+    "iam:AttachRolePolicy",
+    "iam:PutUserPolicy",
+    "iam:PutGroupPolicy",
+    "iam:PutRolePolicy",
+    "iam:AddUserToGroup",
+    "iam:UpdateAssumeRolePolicy",
+    "sts:AssumeRole",
+    "iam:CreateRole",
+    "iam:DeletePolicyVersion",
+    "iam:CreateUser",
+    "iam:UpdateAccessKey",
+    "iam:DeactivateMFADevice",
+    "iam:DeleteVirtualMFADevice",
+    "iam:ResyncMFADevice",
+    "iam:EnableMFADevice",
+    "iam:DeleteUserPermissionsBoundary",
+    "iam:DeleteRolePermissionsBoundary",
+    "lambda:CreateFunction",
+    "lambda:InvokeFunction",
+    "lambda:UpdateFunctionCode",
+    "lambda:AddPermission",
+    "ec2:RunInstances",
+    "ec2:AssociateIamInstanceProfile",
+    "ec2:ReplaceIamInstanceProfileAssociation",
+    "cloudformation:CreateStack",
+    "cloudformation:UpdateStack",
+    "datapipeline:CreatePipeline",
+    "datapipeline:PutPipelineDefinition",
+    "glue:CreateDevEndpoint",
+    "glue:UpdateDevEndpoint",
+    "codestar:CreateProject",
+    "codecommit:CreateRepository",
+    "ssm:SendCommand",
+    "ssm:StartSession",
+]
+ESCALATION_COMBOS: List[Dict[str, Any]] = [
+    {
+        "name": "PassRole + Lambda Invoke",
+        "actions": ["iam:PassRole", "lambda:InvokeFunction"],
+        "description": "Attacker can pass a privileged role to a Lambda function and invoke it",
+        "severity": "critical",
+    },
+    {
+        "name": "PassRole + EC2 RunInstances",
+        "actions": ["iam:PassRole", "ec2:RunInstances"],
+        "description": "Attacker can launch an EC2 instance with a privileged IAM role",
+        "severity": "critical",
+    },
+    {
+        "name": "CreatePolicyVersion + SetDefaultPolicyVersion",
+        "actions": ["iam:CreatePolicyVersion", "iam:SetDefaultPolicyVersion"],
+        "description": "Attacker can create and activate a new policy version granting full access",
+        "severity": "critical",
+    },
+    {
+        "name": "AttachUserPolicy + AdministratorAccess",
+        "actions": ["iam:AttachUserPolicy"],
+        "description": "Can attach any managed policy including AdministratorAccess to users",
+        "severity": "high",
+    },
+    {
+        "name": "PutUserPolicy + Wildcard",
+        "actions": ["iam:PutUserPolicy"],
+        "description": "Can inject inline policies with wildcard permissions",
+        "severity": "high",
+    },
+    {
+        "name": "CloudFormation Stack Manipulation",
+        "actions": ["cloudformation:CreateStack", "iam:PassRole"],
+        "description": "Attacker can deploy a CloudFormation stack with a privileged role",
+        "severity": "critical",
+    },
+    {
+        "name": "SSM Session Start",
+        "actions": ["ssm:StartSession"],
+        "description": "Can start interactive sessions on EC2 instances without SSH",
+        "severity": "high",
+    },
+    {
+        "name": "Glue Dev Endpoint",
+        "actions": ["glue:CreateDevEndpoint", "iam:PassRole"],
+        "description": "Can create a Glue dev endpoint with a privileged role for code execution",
+        "severity": "critical",
+    },
+]

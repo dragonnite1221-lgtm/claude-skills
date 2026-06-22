@@ -1,122 +1,123 @@
 ---
-title: "Product Skills — Agent Skills & Codex Plugins"
-description: "17 product skills — product management agent skill and Claude Code plugin for PRDs, discovery, analytics, and roadmaps. Works with Claude Code, Codex CLI, Gemini CLI, and OpenClaw."
----
+    title: "Product Skills — Agent Skills & Codex Plugins"
+    description: "17 product skills — product management agent skill and Claude Code plugin for PRDs, discovery, analytics, and roadmaps. Works with Claude Code, Codex CLI, Gemini CLI, and OpenClaw."
+    ---
 
-<div class="domain-header" markdown>
+    <div class="domain-header" markdown>
 
-# :material-lightbulb-outline: Product
+    # :material-lightbulb-outline: Product
 
-<p class="domain-count">17 skills in this domain</p>
+    <p class="domain-count">17 skills in this domain</p>
 
-</div>
+    </div>
 
-<div class="install-banner" markdown>
-<span class="install-label">Install all:</span> <code>claude /plugin install product-skills</code>
-</div>
+    <div class="install-banner" markdown>
+    <span class="install-label">Install all:</span> <code>claude /plugin install product-skills</code>
+    </div>
 
-<div class="grid cards" markdown>
-
--   **[Agile Product Owner](agile-product-owner.md)**
+    <div class="grid cards" markdown>
+    
+    -   **[Agile Product Owner](agile-product-owner.md)**
 
     ---
 
     Backlog management and sprint execution toolkit for product owners, including user story generation, acceptance crite...
-
--   **[Apple HIG Expert](apple-hig-expert.md)**
-
-    ---
-
-    You are a Senior Apple Design Lead with decades of experience shipping award-winning apps on the App Store. Your goal...
-
--   **[Code → PRD: Reverse-Engineer Any Codebase into Product Requirements](code-to-prd.md)**
+    
+    -   **[Apple HIG Expert](apple-hig-expert.md)**
 
     ---
 
-    - 3-phase workflow: global scan → page-by-page analysis → structured document generation
+    Design and audit apps that feel natively integrated into the Apple ecosystem while
+    
+    -   **[Code → PRD: Reverse-Engineer Any Codebase into Product Requirements](code-to-prd.md)**
 
--   **[Competitive Teardown](competitive-teardown.md)**
+    ---
+
+    Read a codebase, understand every page/endpoint's business purpose, and produce a PRD in
+    
+    -   **[Competitive Teardown](competitive-teardown.md)**
 
     ---
 
     Tier: POWERFUL
-
--   **[Experiment Designer](experiment-designer.md)**
+    
+    -   **[Experiment Designer](experiment-designer.md)**
 
     ---
 
     Design, prioritize, and evaluate product experiments with clear hypotheses and defensible decisions.
-
--   **[Landing Page Generator](landing-page-generator.md)**
+    
+    -   **[Landing Page Generator](landing-page-generator.md)**
 
     ---
 
     Generate high-converting landing pages from a product description. Output complete Next.js/React components with mult...
-
--   **[Product Analytics](product-analytics.md)**
+    
+    -   **[Product Analytics](product-analytics.md)**
 
     ---
 
     Define, track, and interpret product metrics across discovery, growth, and mature product stages.
-
--   **[Product Discovery](product-discovery.md)**
+    
+    -   **[Product Discovery](product-discovery.md)**
 
     ---
 
     Run structured discovery to identify high-value opportunities and de-risk product bets.
-
--   **[Product Manager Toolkit](product-manager-toolkit.md)**
+    
+    -   **[Product Manager Toolkit](product-manager-toolkit.md)**
 
     ---
 
-    Essential tools and frameworks for modern product management, from discovery to delivery.
-
--   **[Product Strategist](product-strategist.md)**
+    Tools and frameworks for product management from discovery to delivery. Two stdlib-only
+    
+    -   **[Product Strategist](product-strategist.md)**
 
     ---
 
     Strategic toolkit for Head of Product to drive vision, alignment, and organizational excellence.
-
--   **[Product Team Skills](product-team.md)**
+    
+    -   **[Product Team Skills](product-team.md)**
 
     ---
 
     8 production-ready product skills covering product management, UX/UI design, and SaaS development.
-
--   **[Research Summarizer](research-summarizer.md)**
+    
+    -   **[Research Summarizer](research-summarizer.md)**
 
     ---
 
     > Read less. Understand more. Cite correctly.
-
--   **[Roadmap Communicator](roadmap-communicator.md)**
+    
+    -   **[Roadmap Communicator](roadmap-communicator.md)**
 
     ---
 
     Create clear roadmap communication artifacts for internal and external stakeholders.
-
--   **[SaaS Scaffolder](saas-scaffolder.md)**
+    
+    -   **[SaaS Scaffolder](saas-scaffolder.md)**
 
     ---
 
     Tier: POWERFUL
-
--   **[Spec to Repo](spec-to-repo.md)**
+    
+    -   **[Spec to Repo](spec-to-repo.md)**
 
     ---
 
     Turn a natural-language project specification into a complete, runnable starter repository. Not a template filler — a...
-
--   **[UI Design System](ui-design-system.md)**
+    
+    -   **[UI Design System](ui-design-system.md)**
 
     ---
 
     Generate design tokens, create color palettes, calculate typography scales, build component systems, and prepare deve...
-
--   **[UX Researcher & Designer](ux-researcher-designer.md)**
+    
+    -   **[UX Researcher & Designer](ux-researcher-designer.md)**
 
     ---
 
     Generate user personas from research data, create journey maps, plan usability tests, and synthesize research finding...
-
-</div>
+    
+    </div>
+    
