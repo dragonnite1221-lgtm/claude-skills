@@ -165,6 +165,7 @@ This skill is marked `context: fork` so other skills can chain into it:
 - `references/obsidian-setup.md` — Obsidian plugins, hotkeys, vault config
 - `references/cross-tool-setup.md` — per-tool setup (Codex, Cursor, Antigravity, etc.)
 - `references/memex-principles.md` — Bush's Memex, why the LLM changes the maintenance math
+- `references/graph-from-structured-sources.md` — growing the graph from structured data APIs: declarative entity extraction, typed deterministic relations, health/lint/digest, telemetry isolation, bulk ingest
 
 ## Templates (`assets/`)
 
