@@ -1,6 +1,6 @@
 ---
 name: "changelog-generator"
-description: "Changelog Generator"
+description: "Generate consistent, auditable changelogs and release notes from Conventional Commits, with semantic version bump detection, Keep a Changelog rendering, and strict commit-message linting. Use when preparing release notes, automating changelog updates in CI, enforcing conventional commit style, or deciding the next semantic version. Triggers: 'generate changelog', 'release notes', 'conventional commits', 'what version should this be', 'lint commit messages', 'Keep a Changelog'."
 ---
 
 # Changelog Generator

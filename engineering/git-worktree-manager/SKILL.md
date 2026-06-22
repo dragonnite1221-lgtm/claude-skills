@@ -1,6 +1,6 @@
 ---
 name: "git-worktree-manager"
-description: "Git Worktree Manager"
+description: "Set up and manage Git worktrees for safe parallel development with branch isolation, automatic non-conflicting port allocation, environment file sync, and safe cleanup of stale or merged worktrees. Use when running multiple branches or agents concurrently, needing isolated dev servers for feature/hotfix/PR validation, or wanting repeatable worktree cleanup. Triggers: 'git worktree', 'parallel branches', 'isolated dev environment', 'run multiple branches locally', 'clean up worktrees', 'worktree port allocation'."
 ---
 
 # Git Worktree Manager

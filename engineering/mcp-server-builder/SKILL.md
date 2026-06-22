@@ -1,6 +1,6 @@
 ---
 name: "mcp-server-builder"
-description: "MCP Server Builder"
+description: "Scaffold and validate production-ready MCP (Model Context Protocol) servers from API contracts, generating Python or TypeScript implementations from OpenAPI specs and checking tool definitions for schema quality. Use when building an MCP server, exposing an existing API as MCP tools, converting an OpenAPI spec to an MCP manifest, or validating MCP tool definitions before shipping. Triggers: 'build an MCP server', 'create MCP tools', 'OpenAPI to MCP', 'MCP server scaffold', 'validate MCP tool definitions', 'expose API as MCP'."
 ---
 
 # MCP Server Builder
