@@ -1,6 +1,6 @@
 # Business & Growth Skills - Claude Code Guidance
 
-This guide covers the 3 production-ready business and growth skills and their Python automation tools.
+This guide covers the 4 production-ready business and growth skills and their Python automation tools.
 
 ## Business & Growth Skills Overview
 
@@ -8,6 +8,7 @@ This guide covers the 3 production-ready business and growth skills and their Py
 1. **customer-success-manager/** - Customer health scoring, churn risk analysis, expansion opportunities (3 Python tools)
 2. **sales-engineer/** - Technical discovery, RFP analysis, competitive positioning, POC planning (3 Python tools)
 3. **revenue-operations/** - Pipeline analysis, forecast accuracy, GTM efficiency metrics (3 Python tools)
+4. **contract-and-proposal-writer/** - Proposal drafting, contract structuring, and deal documentation
 
 **Total Tools:** 9 Python automation tools, 9 knowledge bases, 19+ templates
 
@@ -184,5 +185,5 @@ python revenue-operations/scripts/gtm_efficiency_calculator.py gtm_data.json --f
 ---
 
 **Last Updated:** February 2026
-**Skills Deployed:** 3/3 business & growth skills production-ready
+**Skills Deployed:** 4/4 business & growth skills production-ready
 **Total Tools:** 9 Python automation tools
