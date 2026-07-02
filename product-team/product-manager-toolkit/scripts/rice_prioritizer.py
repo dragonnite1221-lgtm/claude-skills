@@ -7,6 +7,7 @@ RICE = (Reach x Impact x Confidence) / Effort
 
 import json
 import csv
+import sys
 from typing import List, Dict, Tuple
 import argparse
 
@@ -36,6 +37,22 @@ class RICECalculator:
             'xs': 1
         }
     
+    @staticmethod
+    def _lookup(mapping: Dict, value: str, default, field_name: str):
+        """Look up a scale value, warning to stderr on unrecognized input.
+
+        Prevents silently scoring an unknown label at the default (which would
+        distort priorities without any signal to the user).
+        """
+        key = str(value).lower()
+        if key not in mapping:
+            print(
+                f"Warning: unrecognized {field_name} '{value}' — using default "
+                f"'{default}'. Expected one of: {', '.join(mapping)}.",
+                file=sys.stderr,
+            )
+        return mapping.get(key, default)
+
     def calculate_rice(self, reach: int, impact: str, confidence: str, effort: str) -> float:
         """
         Calculate RICE score
@@ -46,9 +63,9 @@ class RICECalculator:
             confidence: high/medium/low (percentage)
             effort: xl/l/m/s/xs (person-months)
         """
-        impact_score = self.impact_map.get(impact.lower(), 1.0)
-        confidence_score = self.confidence_map.get(confidence.lower(), 50) / 100
-        effort_score = self.effort_map.get(effort.lower(), 5)
+        impact_score = self._lookup(self.impact_map, impact, 1.0, "impact")
+        confidence_score = self._lookup(self.confidence_map, confidence, 50, "confidence") / 100
+        effort_score = self._lookup(self.effort_map, effort, 5, "effort")
         
         if effort_score == 0:
             return 0
@@ -205,14 +222,32 @@ def format_output(features: List[Dict], analysis: Dict, roadmap: List[Dict]) -> 
     return "\n".join(output)
 
 def load_features_from_csv(filepath: str) -> List[Dict]:
-    """Load features from CSV file"""
+    """Load features from CSV file.
+
+    Exits with a clear message (instead of a raw traceback) when the file is
+    missing or a reach value is non-numeric.
+    """
     features = []
-    with open(filepath, 'r') as f:
+    try:
+        f = open(filepath, 'r')
+    except OSError as e:
+        print(f"Error: cannot read CSV '{filepath}': {e}", file=sys.stderr)
+        sys.exit(1)
+    with f:
         reader = csv.DictReader(f)
-        for row in reader:
+        for i, row in enumerate(reader, start=2):  # header is line 1
+            raw_reach = (row.get('reach') or '0').strip()
+            try:
+                reach = int(float(raw_reach))
+            except ValueError:
+                print(
+                    f"Error: non-numeric reach '{raw_reach}' on CSV line {i}.",
+                    file=sys.stderr,
+                )
+                sys.exit(1)
             feature = {
                 'name': row.get('name', ''),
-                'reach': int(row.get('reach', 0)),
+                'reach': reach,
                 'impact': row.get('impact', 'medium'),
                 'confidence': row.get('confidence', 'medium'),
                 'effort': row.get('effort', 'm'),
