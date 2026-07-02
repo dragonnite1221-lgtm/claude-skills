@@ -1,8 +1,16 @@
 ---
 name: "report"
 description: >-
-  Generate test report. Use when user says "test report", "results summary",
-  "test status", "show results", "test dashboard", or "how did tests go".
+  Generate a Playwright test report and route it to whatever the project already
+  uses, no new tooling. Runs the suite (or reuses existing test-results/ and
+  playwright-report/), parses the JSON reporter for passed/failed/skipped/flaky
+  counts, durations and per-browser breakdown, then emits a markdown report to
+  test-reports/ and auto-routes by what is configured: TestRail push when
+  TESTRAIL_URL is set, a Slack summary when SLACK_WEBHOOK_URL is set, PR-artifact
+  results under .github/workflows/, or the HTML report. Adds trend analysis when
+  prior reports exist. Use when the user runs /pw:report or says "test report",
+  "results summary", "test status", "show results", "test dashboard", or "how did
+  tests go".
 ---
 
 # Smart Test Reporting

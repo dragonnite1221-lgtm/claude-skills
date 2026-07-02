@@ -1,6 +1,6 @@
 ---
 name: "board"
-description: "Read, write, and browse the AgentHub message board for agent coordination."
+description: "AgentHub /hub:board command — interact with the append-only message board (.agenthub/board/) that coordinator and subagents use to communicate. Lists channels with post counts, reads a channel's posts in chronological order with YAML frontmatter, posts a new message, or replies to a thread by post-id. Channels: dispatch (coordinator → agents task assignments), progress (agents → coordinator status), results (final summaries + merge notes). Use when: you want to inspect, post to, or thread on agent coordination messages — 'check the board', 'what did the agents report', 'post to progress', 'read the results channel'."
 command: /hub:board
 ---
 

@@ -1,165 +1,78 @@
 ---
 name: "changelog-generator"
-description: "Changelog Generator"
+description: "Generate Keep-a-Changelog release notes from Conventional Commits and infer the SemVer bump (major/minor/patch) with generate_changelog.py — reads commits from a git range (--from-tag/--to-tag or --from-ref/--to-ref), stdin, or --input file; renders markdown or JSON; prepends into CHANGELOG.md with --write. Lint commit subjects with commit_linter.py (non-zero exit in --strict) to gate PRs. Supports feat/fix/perf/refactor/docs/test/build/ci/chore/security/deprecated/remove and breaking-change detection (type!: or BREAKING CHANGE:). Use when cutting a release, automating release notes in CI, or blocking malformed commit messages — e.g. 'generate a changelog from v1.3.0 to v1.4.0', 'what version bump do these commits need', 'lint my commit messages'."
 ---
 
 # Changelog Generator
 
-**Tier:** POWERFUL  
-**Category:** Engineering  
-**Domain:** Release Management / Documentation
+Produce consistent, auditable release notes from Conventional Commits. Commit
+parsing, semver bump logic, and changelog rendering are separated so teams can
+automate releases while keeping editorial control. Two stdlib-only tools.
 
-## Overview
+## Tools
 
-Use this skill to produce consistent, auditable release notes from Conventional Commits. It separates commit parsing, semantic bump logic, and changelog rendering so teams can automate releases without losing editorial control.
+| Tool | Purpose |
+|------|---------|
+| `scripts/generate_changelog.py` | Conventional commits → Keep-a-Changelog entry + semver bump |
+| `scripts/commit_linter.py` | Validate commit subject format (PR gate with `--strict`) |
 
-## Core Capabilities
+## Workflow
 
-- Parse commit messages using Conventional Commit rules
-- Detect semantic bump (`major`, `minor`, `patch`) from commit stream
-- Render Keep a Changelog sections (`Added`, `Changed`, `Fixed`, etc.)
-- Generate release entries from git ranges or provided commit input
-- Enforce commit format with a dedicated linter script
-- Support CI integration via machine-readable JSON output
-
-## When to Use
-
-- Before publishing a release tag
-- During CI to generate release notes automatically
-- During PR checks to block invalid commit message formats
-- In monorepos where package changelogs require scoped filtering
-- When converting raw git history into user-facing notes
-
-## Key Workflows
-
-### 1. Generate Changelog Entry From Git
+Lint first to gate the range, then generate. If the linter reports violations,
+fix the commits and re-run; if generation finds no valid commits, it fails early
+rather than emitting empty notes.
 
 ```bash
-python3 scripts/generate_changelog.py \
-  --from-tag v1.3.0 \
-  --to-tag v1.4.0 \
-  --next-version v1.4.0 \
-  --format markdown
-```
-
-### 2. Generate Entry From stdin/File Input
-
-```bash
-git log v1.3.0..v1.4.0 --pretty=format:'%s' | \
-  python3 scripts/generate_changelog.py --next-version v1.4.0 --format markdown
-
-python3 scripts/generate_changelog.py --input commits.txt --next-version v1.4.0 --format json
-```
-
-### 3. Update `CHANGELOG.md`
-
-```bash
-python3 scripts/generate_changelog.py \
-  --from-tag v1.3.0 \
-  --to-tag HEAD \
-  --next-version v1.4.0 \
-  --write CHANGELOG.md
-```
-
-### 4. Lint Commits Before Merge
-
-```bash
+# 1. Lint commits for the release range (CI gate; --strict exits non-zero on violations).
 python3 scripts/commit_linter.py --from-ref origin/main --to-ref HEAD --strict --format text
-```
-
-Or file/stdin:
-
-```bash
 python3 scripts/commit_linter.py --input commits.txt --strict
 cat commits.txt | python3 scripts/commit_linter.py --format json
+
+# 2. Generate an entry from a git tag range.
+python3 scripts/generate_changelog.py \
+  --from-tag v1.3.0 --to-tag v1.4.0 --next-version v1.4.0 --format markdown
+
+# 3. Or from stdin / a file.
+git log v1.3.0..v1.4.0 --pretty=format:'%s' | \
+  python3 scripts/generate_changelog.py --next-version v1.4.0 --format markdown
+python3 scripts/generate_changelog.py --input commits.txt --next-version v1.4.0 --format json
+
+# 4. Prepend the entry into CHANGELOG.md (keeps prior sections).
+python3 scripts/generate_changelog.py \
+  --from-tag v1.3.0 --to-tag HEAD --next-version v1.4.0 --write CHANGELOG.md
 ```
 
-## Conventional Commit Rules
+`generate_changelog.py` also takes `--from-ref/--to-ref` and `--date YYYY-MM-DD`.
+Tag the release only after the changelog is generated and approved.
 
-Supported types:
+## Conventional Commit rules
 
-- `feat`, `fix`, `perf`, `refactor`, `docs`, `test`, `build`, `ci`, `chore`
-- `security`, `deprecated`, `remove`
+Types: `feat`, `fix`, `perf`, `refactor`, `docs`, `test`, `build`, `ci`,
+`chore`, `security`, `deprecated`, `remove`. Breaking change via `type(scope)!:`
+or a `BREAKING CHANGE:` footer/body. SemVer mapping: breaking → `major`,
+non-breaking `feat` → `minor`, all others → `patch`.
 
-Breaking changes:
+## Output quality checks
 
-- `type(scope)!: summary`
-- Footer/body includes `BREAKING CHANGE:`
+- Each bullet is user-meaningful, not implementation noise.
+- Breaking changes include a migration action.
+- Security fixes isolated in a `Security` section; empty sections omitted; duplicates removed.
 
-SemVer mapping:
+## Common pitfalls
 
-- breaking -> `major`
-- non-breaking `feat` -> `minor`
-- all others -> `patch`
+1. Mixing merge-commit messages into release parsing.
+2. Vague summaries that can't become release notes.
+3. No migration guidance for breaking changes.
+4. Treating docs/chore changes as user-facing features.
+5. Overwriting historical sections instead of prepending.
 
-## Script Interfaces
-
-- `python3 scripts/generate_changelog.py --help`
-  - Reads commits from git or stdin/`--input`
-  - Renders markdown or JSON
-  - Optional in-place changelog prepend
-- `python3 scripts/commit_linter.py --help`
-  - Validates commit format
-  - Returns non-zero in `--strict` mode on violations
-
-## Common Pitfalls
-
-1. Mixing merge commit messages with release commit parsing
-2. Using vague commit summaries that cannot become release notes
-3. Failing to include migration guidance for breaking changes
-4. Treating docs/chore changes as user-facing features
-5. Overwriting historical changelog sections instead of prepending
-
-## Best Practices
-
-1. Keep commits small and intent-driven.
-2. Scope commit messages (`feat(api): ...`) in multi-package repos.
-3. Enforce linter checks in PR pipelines.
-4. Review generated markdown before publishing.
-5. Tag releases only after changelog generation succeeds.
-6. Keep an `[Unreleased]` section for manual curation when needed.
+In monorepos, scope commits to package names (`feat(api): ...`) and filter the
+stream by scope for package-specific releases; keep infra-wide changes in the
+root changelog.
 
 ## References
 
-- [references/ci-integration.md](references/ci-integration.md)
-- [references/changelog-formatting-guide.md](references/changelog-formatting-guide.md)
-- [references/monorepo-strategy.md](references/monorepo-strategy.md)
+- [references/ci-integration.md](references/ci-integration.md) — PR linting + tag-push release automation
+- [references/changelog-formatting-guide.md](references/changelog-formatting-guide.md) — Keep a Changelog sections and wording
+- [references/monorepo-strategy.md](references/monorepo-strategy.md) — scoped/per-package changelog strategy
 - [README.md](README.md)
-
-## Release Governance
-
-Use this release flow for predictability:
-
-1. Lint commit history for target release range.
-2. Generate changelog draft from commits.
-3. Manually adjust wording for customer clarity.
-4. Validate semver bump recommendation.
-5. Tag release only after changelog is approved.
-
-## Output Quality Checks
-
-- Each bullet is user-meaningful, not implementation noise.
-- Breaking changes include migration action.
-- Security fixes are isolated in `Security` section.
-- Sections with no entries are omitted.
-- Duplicate bullets across sections are removed.
-
-## CI Policy
-
-- Run `commit_linter.py --strict` on all PRs.
-- Block merge on invalid conventional commits.
-- Auto-generate draft release notes on tag push.
-- Require human approval before writing into `CHANGELOG.md` on main branch.
-
-## Monorepo Guidance
-
-- Prefer commit scopes aligned to package names.
-- Filter commit stream by scope for package-specific releases.
-- Keep infra-wide changes in root changelog.
-- Store package changelogs near package roots for ownership clarity.
-
-## Failure Handling
-
-- If no valid conventional commits found: fail early, do not generate misleading empty notes.
-- If git range invalid: surface explicit range in error output.
-- If write target missing: create safe changelog header scaffolding.

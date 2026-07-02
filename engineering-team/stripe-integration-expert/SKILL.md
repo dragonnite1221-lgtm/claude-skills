@@ -1,46 +1,34 @@
 ---
 name: "stripe-integration-expert"
-description: "Stripe Integration Expert"
+description: "Implement production Stripe billing with TypeScript SDK patterns for Next.js App Router (Express/Django variants): the subscription lifecycle state machine (trial → active → past_due → canceled), Checkout Sessions, plan upgrade/downgrade with proration preview, usage-based metered billing, the customer portal, and a complete idempotent webhook handler with signature verification and a processed-events table. Includes Stripe CLI local testing (`stripe listen`, `stripe trigger`) and feature-gating helpers. Use when adding subscription billing to an app, handling proration on plan changes, building usage/seat-based billing, or debugging webhook delivery — e.g. 'add Stripe subscriptions', 'handle the checkout.session.completed webhook', 'preview proration before upgrade'."
 ---
 
 # Stripe Integration Expert
 
-**Tier:** POWERFUL  
-**Category:** Engineering Team  
-**Domain:** Payments / Billing Infrastructure
+Implement production-grade Stripe integrations: subscriptions with trials and
+proration, usage-based billing, checkout sessions, idempotent webhook handlers,
+the customer portal, and invoicing. Examples target Next.js App Router; the same
+patterns apply to Express and Django.
 
----
+## Capabilities
 
-## Overview
-
-Implement production-grade Stripe integrations: subscriptions with trials and proration, one-time payments, usage-based billing, checkout sessions, idempotent webhook handlers, customer portal, and invoicing. Covers Next.js, Express, and Django patterns.
-
----
-
-## Core Capabilities
-
-- Subscription lifecycle management (create, upgrade, downgrade, cancel, pause)
-- Trial handling and conversion tracking
-- Proration calculation and credit application
+- Subscription lifecycle: create, upgrade, downgrade, cancel, pause
+- Trial handling and conversion tracking (anti-abuse via `hasHadTrial`)
+- Proration calculation, preview, and credit application
 - Usage-based billing with metered pricing
 - Idempotent webhook handlers with signature verification
-- Customer portal integration
-- Invoice generation and PDF access
-- Full Stripe CLI local testing setup
+- Customer portal integration and invoice/PDF access
+- Stripe CLI local testing
 
----
+## When to use
 
-## When to Use
-
-- Adding subscription billing to any web app
+- Adding subscription billing to a web app
 - Implementing plan upgrades/downgrades with proration
 - Building usage-based or seat-based billing
 - Debugging webhook delivery failures
 - Migrating from one billing model to another
 
----
-
-## Subscription Lifecycle State Machine
+## Subscription lifecycle state machine
 
 ```
 FREE_TRIAL ──paid──► ACTIVE ──cancel──► CANCEL_PENDING ──period_end──► CANCELED
@@ -114,7 +102,7 @@ export async function POST(req: Request) {
   if (!stripeCustomerId) {
     const customer = await stripe.customers.create({
       email: user.email,
-      name: "username-undefined"
+      name: user.name ?? undefined,
       metadata: { userId: user.id },
     })
     stripeCustomerId = customer.id
@@ -438,6 +426,13 @@ stripe events list --limit 10
 # Decline: 4000 0000 0000 9995
 # Insufficient funds: 4000 0000 0000 9995
 ```
+
+Verification loop for the webhook handler:
+
+1. `stripe listen --forward-to localhost:3000/api/webhooks/stripe` (copy the `whsec_…` it prints into `STRIPE_WEBHOOK_SECRET`).
+2. `stripe trigger checkout.session.completed` — confirm a 200 in the `listen` output and the expected DB write.
+3. If you get a 400 (bad signature) the secret is stale — re-copy from step 1. If a 500, the handler threw; fix it and re-trigger (Stripe will retry, and the idempotency table makes re-runs safe).
+4. Re-trigger the same event to verify the second delivery is skipped via the processed-events table.
 
 ---
 
