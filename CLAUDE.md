@@ -6,7 +6,7 @@ This file provides guidance to Claude Code (claude.ai/code) when working with co
 
 This is a **comprehensive skills library** for Claude AI and Claude Code - reusable, production-ready skill packages that bundle domain expertise, best practices, analysis tools, and strategic frameworks. The repository provides modular skills that teams can download and use directly in their workflows.
 
-**Current Scope:** 235 production-ready skills across 9 domains with 314 Python automation tools, 435 reference guides, 28 agents, and 27 slash commands.
+**Current Scope:** 239 production-ready skills across 9 domains with 324 Python automation tools, 443 reference guides, 30 agents, and 29 slash commands. (Counts are `SKILL.md` / `scripts/*.py` / `references/**/*.md` / `agents/*.md` / `commands/*.md` file counts in the source tree, excluding the `.gemini/` and `.codex/` mirrors.)
 
 **Key Distinction**: This is NOT a traditional application. It's a library of skill packages meant to be extracted and deployed by users into their own Claude workflows.
 
@@ -130,7 +130,7 @@ See [standards/git/git-workflow-standards.md](standards/git/git-workflow-standar
 - **llm-wiki plugin** — new POWERFUL-tier skill implementing Karpathy's LLM Wiki pattern. Second brain for Claude Code + Obsidian where the LLM incrementally ingests sources into a persistent, interlinked markdown vault. Ships SKILL.md (with `context: fork`), 3 sub-agents (wiki-ingestor, wiki-librarian, wiki-linter), 5 slash commands (/wiki-init, /wiki-ingest, /wiki-query, /wiki-lint, /wiki-log), 8 stdlib-only Python tools, 8 reference guides, full vault templates, and a worked example. Cross-tool compatible with Claude Code, Codex CLI, Cursor, Antigravity, OpenCode, Gemini CLI.
 - **tc-tracker** — new engineering skill: task context tracker with lifecycle, handoff format, schema, and 5 Python tools (tc_init, tc_create, tc_update, tc_status, tc_validator) plus `/tc` slash command
 - **apple-hig-expert** — new product skill: Apple Human Interface Guidelines expert with Liquid Glass aesthetic focus. Audits iOS/macOS/visionOS apps with `hig_checker` Python tool and comprehensive reference docs on visual design, platform specifics, and accessibility
-- 235 total skills, 314 Python tools, 435 references, 28 agents, 27 commands
+- 239 total skills, 324 Python tools, 443 references, 30 agents, 29 commands
 
 **Version:** v2.2.0
 
@@ -161,9 +161,9 @@ See [standards/git/git-workflow-standards.md](standards/git/git-workflow-standar
 
 ## Roadmap
 
-**Phase 1-3 Complete:** 235 production-ready skills deployed across 9 domains
+**Phase 1-3 Complete:** 239 production-ready skills deployed across 9 domains
 - Engineering Core (37), Engineering POWERFUL (45), Product (16), Marketing (44), PM (9), C-Level (34), RA/QM (14), Business & Growth (5), Finance (4)
-- 314 Python automation tools, 435 reference guides, 28 agents, 27 commands
+- 324 Python automation tools, 443 reference guides, 30 agents, 29 commands
 - Complete enterprise coverage from engineering through regulatory compliance, sales, customer success, and finance
 - MkDocs Material docs site with 293+ indexed pages for SEO
 
@@ -216,4 +216,4 @@ This repository publishes skills to **ClawHub** (clawhub.com) as the distributio
 
 **Last Updated:** April 11, 2026
 **Version:** v2.3.0
-**Status:** 235 skills deployed across 9 domains, 30 marketplace plugins, docs site live
+**Status:** 239 skills deployed across 9 domains, 35 marketplace plugins, docs site live
