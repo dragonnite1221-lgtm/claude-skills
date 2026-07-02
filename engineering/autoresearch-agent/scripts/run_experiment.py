@@ -74,7 +74,7 @@ def safe_rollback(project_root, expected_commit, reason):
 
     Guards against silently destroying user work by refusing to `reset --hard`
     when either (a) HEAD is not the experiment commit this run created, or
-    (b) the working tree has uncommitted changes. Returns True if rolled back.
+    (b) the working tree has uncommitted tracked changes. Returns True if rolled back.
     """
     current = get_current_commit(str(project_root))
     if expected_commit and current != expected_commit:
@@ -82,11 +82,11 @@ def safe_rollback(project_root, expected_commit, reason):
               f"experiment commit {expected_commit}. Leaving the repo untouched so "
               "an unrelated commit is not discarded; roll back manually if needed.")
         return False
-    dirty = working_tree_changes(project_root)
-    if dirty:
-        print(f"  WARNING: skipping rollback ({reason}) — {len(dirty)} uncommitted "
-              "change(s) present. Refusing `git reset --hard` to avoid data loss. "
-              "Commit or stash them, then roll back manually.")
+    dirty = working_tree_changes(project_root) or []
+    tracked = [l for l in dirty if not l.startswith("??")]
+    if tracked:
+        print(f"  WARNING: skipping rollback ({reason}) — {len(tracked)} uncommitted "
+              "tracked change(s); refusing reset. Commit/stash first (untracked OK).")
         return False
     run_git(["reset", "--hard", "HEAD~1"], cwd=str(project_root))
     return True
