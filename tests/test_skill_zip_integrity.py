@@ -36,11 +36,19 @@ def test_zip_matches_source_folder(zip_rel: str) -> None:
     src_dir = zip_path.parent / base
     assert src_dir.is_dir(), f"{zip_rel}: no sibling source folder '{base}/'"
 
-    # Source files, keyed by the arc-name they should have inside the zip.
+    # Only git-tracked source files are expected to ship — untracked
+    # __pycache__/*.pyc and other local noise are not part of the package.
+    tracked = subprocess.check_output(
+        ["git", "ls-files", "-z", str(src_dir.relative_to(REPO_ROOT))],
+        cwd=REPO_ROOT,
+        text=True,
+    ).split("\0")
     src_files = {
-        str(Path(base) / p.relative_to(src_dir)): p.read_bytes()
-        for p in src_dir.rglob("*")
-        if p.is_file()
+        str(Path(base) / (REPO_ROOT / t).relative_to(src_dir)): (
+            REPO_ROOT / t
+        ).read_bytes()
+        for t in tracked
+        if t
     }
 
     with zipfile.ZipFile(zip_path) as zf:

@@ -31,7 +31,14 @@ def regenerate() -> int:
         if not src_dir.is_dir():
             print(f"skip (no source folder): {rel}")
             continue
-        files = sorted(p for p in src_dir.rglob("*") if p.is_file())
+        # Only git-tracked files ship — never untracked __pycache__/*.pyc,
+        # .DS_Store, or other local build noise that rglob would sweep in.
+        tracked = subprocess.check_output(
+            ["git", "ls-files", "-z", str(src_dir.relative_to(REPO_ROOT))],
+            cwd=REPO_ROOT,
+            text=True,
+        ).split("\0")
+        files = sorted(REPO_ROOT / t for t in tracked if t)
         with zipfile.ZipFile(zip_path, "w", compression=zipfile.ZIP_DEFLATED) as zf:
             for f in files:
                 arc = str(Path(base) / f.relative_to(src_dir))
