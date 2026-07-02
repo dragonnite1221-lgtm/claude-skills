@@ -116,10 +116,15 @@ class VisionModelTrainer:
             # Try to read classes from data.yaml
             data_yaml = self.data_dir / 'data.yaml'
             if data_yaml.exists():
-                import yaml
-                with open(data_yaml, 'r') as f:
-                    data = yaml.safe_load(f)
-                    analysis['annotations']['classes'] = data.get('names', [])
+                try:
+                    import yaml
+                except ImportError:
+                    print("Note: PyYAML not installed — skipping data.yaml class parsing "
+                          "(install with: pip install pyyaml).", file=sys.stderr)
+                else:
+                    with open(data_yaml, 'r') as f:
+                        data = yaml.safe_load(f)
+                        analysis['annotations']['classes'] = data.get('names', [])
 
         # Generate recommendations
         total_images = sum(analysis['images'].values())
@@ -439,7 +444,12 @@ class VisionModelTrainer:
 
         if self.framework == 'ultralytics':
             # YOLO uses YAML
-            import yaml
+            try:
+                import yaml
+            except ImportError:
+                print("Error: PyYAML is required to write ultralytics/YOLO configs "
+                      "(install with: pip install pyyaml).", file=sys.stderr)
+                sys.exit(1)
             with open(output_path, 'w') as f:
                 yaml.dump(self.config, f, default_flow_style=False, sort_keys=False)
         else:

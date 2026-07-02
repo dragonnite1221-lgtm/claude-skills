@@ -5,6 +5,33 @@ All notable changes to the Claude Skills Library will be documented in this file
 The format is based on [Keep a Changelog](https://keepachangelog.com/en/1.0.0/),
 and this project adheres to [Semantic Versioning](https://semver.org/spec/v2.0.0.html).
 
+## [2.3.0] - 2026-04-11
+
+### Added
+
+**llm-wiki plugin (POWERFUL-tier):** Implements Karpathy's LLM Wiki pattern — a
+second brain for Claude Code + Obsidian where the LLM incrementally ingests
+sources into a persistent, interlinked markdown vault. Ships `SKILL.md`
+(with `context: fork`), 3 sub-agents (wiki-ingestor, wiki-librarian,
+wiki-linter), 5 slash commands (`/wiki-init`, `/wiki-ingest`, `/wiki-query`,
+`/wiki-lint`, `/wiki-log`), 8 stdlib-only Python tools, 8 reference guides,
+full vault templates, and a worked example. Cross-tool compatible with Claude
+Code, Codex CLI, Cursor, Antigravity, OpenCode, and Gemini CLI.
+
+**tc-tracker (engineering):** Task context tracker with lifecycle, handoff
+format, and schema, plus 5 Python tools (`tc_init`, `tc_create`, `tc_update`,
+`tc_status`, `tc_validator`) and a `/tc` slash command.
+
+**apple-hig-expert (product):** Apple Human Interface Guidelines expert with a
+Liquid Glass aesthetic focus. Audits iOS/macOS/visionOS apps with the
+`hig_checker` Python tool and reference docs on visual design, platform
+specifics, and accessibility.
+
+### Changed
+
+- Inventory totals as of this release: 239 skills, 324 Python tools, 443
+  references, 30 agents, 29 commands, 35 marketplace plugins.
+
 ## [2.2.0] - 2026-03-31
 
 ### Added — Security Skills Suite & Self-Eval

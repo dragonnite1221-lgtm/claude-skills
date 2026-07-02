@@ -42,15 +42,15 @@ claude-code-skills/
 ├── .claude-plugin/            # Plugin registry (marketplace.json)
 ├── agents/                    # 25 agents across all domains
 ├── commands/                  # 22 slash commands (changelog, tdd, saas-health, prd, code-to-prd, plugin-audit, sprint-plan, etc.)
-├── engineering-team/          # 37 core engineering skills + Playwright Pro + Self-Improving Agent + Security Suite
-├── engineering/               # 45 POWERFUL-tier advanced skills (incl. AgentHub, self-eval, llm-wiki, tc-tracker)
+├── engineering-team/          # 36 core engineering skills + Playwright Pro + Self-Improving Agent + Security Suite
+├── engineering/               # 46 POWERFUL-tier advanced skills (incl. AgentHub, self-eval, llm-wiki, tc-tracker)
 ├── product-team/              # 16 product skills (incl. apple-hig-expert) + Python tools
 ├── marketing-skill/           # 44 marketing skills (7 pods) + Python tools
-├── c-level-advisor/           # 34 C-level advisory skills (10 roles + orchestration)
-├── project-management/        # 9 PM skills + Atlassian MCP
-├── ra-qm-team/                # 14 RA/QM compliance skills
-├── business-growth/           # 5 business & growth skills + Python tools
-├── finance/                   # 4 finance skills + Python tools
+├── c-level-advisor/           # 28 C-level advisory skills (10 roles + orchestration)
+├── project-management/        # 8 PM skills + Atlassian MCP
+├── ra-qm-team/                # 13 RA/QM compliance skills
+├── business-growth/           # 4 business & growth skills + Python tools
+├── finance/                   # 3 finance skills + Python tools
 ├── eval-workspace/            # Skill evaluation results (Tessl)
 ├── standards/                 # 5 standards library files
 ├── templates/                 # Reusable templates
@@ -113,7 +113,12 @@ See [standards/git/git-workflow-standards.md](standards/git/git-workflow-standar
 
 ## Development Environment
 
-**No build system or test frameworks** - intentional design choice for portability.
+**Deployed skills carry no build system or runtime dependencies** — that
+portability is intentional. The *repository itself* is integration-tested: a
+`pytest` suite under `tests/` (see `pyproject.toml` and `requirements-dev.txt`)
+validates SKILL.md frontmatter, file references, and zip/source integrity. Run
+it with `python -m pytest`. Keep the deployed skills dependency-free even though
+the repo uses pytest for its own quality gate.
 
 **Python Scripts:**
 - Use standard library only (minimal dependencies)
@@ -205,13 +210,13 @@ This repository publishes skills to **ClawHub** (clawhub.com) as the distributio
 2. **Never rename repo folders or local skill names** to match ClawHub slugs. The repo is the source of truth.
 3. **No paid/commercial service dependencies.** Skills must not require paid third-party API keys or commercial services unless provided by the project itself. Free-tier APIs and BYOK (bring-your-own-key) patterns are acceptable.
 4. **Rate limit: 5 new skills per hour** on ClawHub. Batch publishes must respect this. Use the drip timer (`clawhub-drip.timer`) for bulk operations.
-5. **plugin.json schema** — ONLY these fields: `name`, `description`, `version`, `author`, `homepage`, `repository`, `license`, `skills: "./"`. No extra fields.
-6. **Version follows repo versioning.** ClawHub package versions must match the repo release version (currently v2.2.0+).
+5. **plugin.json schema** — ONLY these fields: `name`, `description`, `version`, `author`, `homepage`, `repository`, `license`, `skills: "./"`. No extra fields. **Exception:** `.codex-plugin/plugin.json` targets the OpenAI Codex ecosystem (not ClawHub) and intentionally carries extra `keywords`/`interface` fields plus `skills: "./.codex/skills/"`; the 8-field ClawHub schema does not apply to it.
+6. **Version follows repo versioning.** ClawHub package versions must match the repo release version (currently v2.3.0). All `plugin.json` files (including `.codex-plugin/`) are bumped together at release; a stale version in any of them is a bug.
 
 ## Anti-Patterns to Avoid
 
 - Creating dependencies between skills (keep each self-contained)
-- Adding complex build systems or test frameworks (maintain simplicity)
+- Adding build systems or runtime dependencies to the *deployed skills* (the repo's own `pytest` gate is fine — keep shipped skills simple and portable)
 - Generic advice (focus on specific, actionable frameworks)
 - LLM calls in scripts (defeats portability and speed)
 - Over-documenting file structure (skills are simple by design)

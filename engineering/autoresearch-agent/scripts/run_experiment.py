@@ -61,6 +61,37 @@ def get_current_commit(path):
     return commit
 
 
+def working_tree_changes(project_root):
+    """Return porcelain lines for uncommitted changes ([] if clean, None if unknown)."""
+    code, out, _ = run_git(["status", "--porcelain"], cwd=str(project_root))
+    if code != 0:
+        return None
+    return [l for l in out.splitlines() if l.strip()]
+
+
+def safe_rollback(project_root, expected_commit, reason):
+    """Discard the experiment commit (HEAD) only when it is provably safe.
+
+    Guards against silently destroying user work by refusing to `reset --hard`
+    when either (a) HEAD is not the experiment commit this run created, or
+    (b) the working tree has uncommitted tracked changes. Returns True if rolled back.
+    """
+    current = get_current_commit(str(project_root))
+    if expected_commit and current != expected_commit:
+        print(f"  WARNING: skipping rollback ({reason}) — HEAD {current} is not the "
+              f"experiment commit {expected_commit}. Leaving the repo untouched so "
+              "an unrelated commit is not discarded; roll back manually if needed.")
+        return False
+    dirty = working_tree_changes(project_root) or []
+    tracked = [l for l in dirty if not l.startswith("??")]
+    if tracked:
+        print(f"  WARNING: skipping rollback ({reason}) — {len(tracked)} uncommitted "
+              "tracked change(s); refusing reset. Commit/stash first (untracked OK).")
+        return False
+    run_git(["reset", "--hard", "HEAD~1"], cwd=str(project_root))
+    return True
+
+
 def get_best_metric(experiment_dir, direction):
     """Read the best metric from results.tsv."""
     tsv = experiment_dir / "results.tsv"
@@ -185,6 +216,10 @@ def run_single(project_root, experiment_dir, config, exp_num, dry_run=False, des
     if not description:
         description = get_description_from_diff(str(project_root))
 
+    # Record the experiment commit up front so rollback can verify it never
+    # discards an unrelated commit.
+    start_commit = get_current_commit(str(project_root))
+
     # Run evaluation
     print(f"  Running: {eval_cmd} (budget: {time_budget}m)")
     ret_code, elapsed = run_evaluation(project_root, eval_cmd, time_budget, log_file)
@@ -194,8 +229,7 @@ def run_single(project_root, experiment_dir, config, exp_num, dry_run=False, des
     # Timeout
     if ret_code == -1:
         print(f"  TIMEOUT after {elapsed:.0f}s — discarding")
-        run_git(["checkout", "--", "."], cwd=str(project_root))
-        run_git(["reset", "--hard", "HEAD~1"], cwd=str(project_root))
+        safe_rollback(project_root, start_commit, "timeout")
         log_result(experiment_dir, commit, None, "crash", f"timeout_{elapsed:.0f}s")
         return "crash"
 
@@ -204,7 +238,7 @@ def run_single(project_root, experiment_dir, config, exp_num, dry_run=False, des
         tail = read_last_lines(log_file, 5)
         print(f"  CRASH (exit {ret_code}) after {elapsed:.0f}s")
         print(f"  Last output: {tail[:200]}")
-        run_git(["reset", "--hard", "HEAD~1"], cwd=str(project_root))
+        safe_rollback(project_root, start_commit, "crash")
         log_result(experiment_dir, commit, None, "crash", f"exit_{ret_code}")
         return "crash"
 
@@ -212,7 +246,7 @@ def run_single(project_root, experiment_dir, config, exp_num, dry_run=False, des
     metric_val = extract_metric(log_file, metric_grep)
     if metric_val is None:
         print(f"  Could not parse {metric_name} from run.log")
-        run_git(["reset", "--hard", "HEAD~1"], cwd=str(project_root))
+        safe_rollback(project_root, start_commit, "metric_parse_failed")
         log_result(experiment_dir, commit, None, "crash", "metric_parse_failed")
         return "crash"
 
@@ -230,7 +264,7 @@ def run_single(project_root, experiment_dir, config, exp_num, dry_run=False, des
         return "keep"
     else:
         print(f"  DISCARD — no improvement")
-        run_git(["reset", "--hard", "HEAD~1"], cwd=str(project_root))
+        safe_rollback(project_root, start_commit, "no_improvement")
         best_str = f"{best:.4f}" if best is not None else "?"
         log_result(experiment_dir, commit, metric_val, "discard",
                    f"no_improvement_{metric_val:.4f}_vs_{best_str}")

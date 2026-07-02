@@ -1,0 +1,4 @@
+# Reviewed intended behavior — auditable auditor suppression.
+# conversion_audit.py fetches the user-supplied --url (http/https validated) to
+# audit its conversion elements; the outbound request IS the tool purpose.
+NET-EXFIL scripts/conversion_audit.py:373

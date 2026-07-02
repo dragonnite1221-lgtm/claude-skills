@@ -1,0 +1,3 @@
+# Reviewed intended behavior — auditable auditor suppression.
+# seo_checker.py fetches the user-supplied --url to run on-page SEO checks.
+NET-EXFIL scripts/seo_checker.py:321

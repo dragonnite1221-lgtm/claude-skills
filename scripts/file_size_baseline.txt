@@ -12,7 +12,7 @@
 557 business-growth/sales-engineer/scripts/rfp_response_analyzer.py
 451 c-level-advisor/ceo-advisor/scripts/financial_scenario_analyzer.py
 609 c-level-advisor/ceo-advisor/scripts/strategy_analyzer.py
-402 c-level-advisor/cfo-advisor/scripts/burn_rate_calculator.py
+515 c-level-advisor/cfo-advisor/scripts/burn_rate_calculator.py
 490 c-level-advisor/cfo-advisor/scripts/fundraising_model.py
 529 c-level-advisor/cfo-advisor/scripts/unit_economics_analyzer.py
 613 c-level-advisor/chro-advisor/scripts/comp_benchmarker.py
@@ -54,7 +54,7 @@
 835 engineering-team/gcp-cloud-architect/scripts/deployment_manager.py
 390 engineering-team/google-workspace-cli/scripts/auth_setup_guide.py
 245 engineering-team/google-workspace-cli/scripts/gws_doctor.py
-399 engineering-team/google-workspace-cli/scripts/gws_recipe_runner.py
+400 engineering-team/google-workspace-cli/scripts/gws_recipe_runner.py
 332 engineering-team/google-workspace-cli/scripts/output_analyzer.py
 309 engineering-team/google-workspace-cli/scripts/workspace_audit.py
 914 engineering-team/incident-commander/scripts/incident_classifier.py
@@ -78,8 +78,8 @@
 645 engineering-team/senior-backend/scripts/api_scaffolder.py
 858 engineering-team/senior-backend/scripts/database_migration_tool.py
 1699 engineering-team/senior-computer-vision/scripts/dataset_pipeline_builder.py
-557 engineering-team/senior-computer-vision/scripts/inference_optimizer.py
-576 engineering-team/senior-computer-vision/scripts/vision_model_trainer.py
+563 engineering-team/senior-computer-vision/scripts/inference_optimizer.py
+586 engineering-team/senior-computer-vision/scripts/vision_model_trainer.py
 1636 engineering-team/senior-data-engineer/scripts/data_quality_validator.py
 1685 engineering-team/senior-data-engineer/scripts/etl_performance_optimizer.py
 1053 engineering-team/senior-data-engineer/scripts/pipeline_orchestrator.py
@@ -129,7 +129,7 @@
 1661 engineering/api-design-reviewer/scripts/api_scorecard.py
 1102 engineering/api-design-reviewer/scripts/breaking_change_detector.py
 393 engineering/autoresearch-agent/scripts/log_results.py
-280 engineering/autoresearch-agent/scripts/run_experiment.py
+314 engineering/autoresearch-agent/scripts/run_experiment.py
 383 engineering/autoresearch-agent/scripts/setup_experiment.py
 520 engineering/browser-automation/scripts/anti_detection_checker.py
 324 engineering/browser-automation/scripts/form_automation_builder.py
@@ -237,7 +237,7 @@
 301 marketing-skill/launch-strategy/scripts/launch_readiness_scorer.py
 219 marketing-skill/marketing-context/scripts/context_validator.py
 217 marketing-skill/onboarding-cro/scripts/activation_funnel_analyzer.py
-427 marketing-skill/page-cro/scripts/conversion_audit.py
+438 marketing-skill/page-cro/scripts/conversion_audit.py
 271 marketing-skill/paid-ads/scripts/ad_health_scorer.py
 304 marketing-skill/paid-ads/scripts/roas_calculator.py
 283 marketing-skill/pricing-strategy/scripts/pricing_modeler.py
@@ -245,10 +245,10 @@
 235 marketing-skill/prompt-engineer-toolkit/scripts/prompt_versioner.py
 420 marketing-skill/referral-program/scripts/referral_roi_calculator.py
 442 marketing-skill/schema-markup/scripts/schema_validator.py
-361 marketing-skill/seo-audit/scripts/seo_checker.py
+372 marketing-skill/seo-audit/scripts/seo_checker.py
 255 marketing-skill/seo-audit/scripts/seo_health_scorer.py
 320 marketing-skill/signup-flow-cro/scripts/funnel_drop_analyzer.py
-375 marketing-skill/site-architecture/scripts/sitemap_analyzer.py
+374 marketing-skill/site-architecture/scripts/sitemap_analyzer.py
 399 marketing-skill/social-media-manager/scripts/social_calendar_generator.py
 235 marketing-skill/x-twitter-growth/scripts/competitor_analyzer.py
 210 marketing-skill/x-twitter-growth/scripts/content_planner.py
@@ -261,7 +261,7 @@
 299 product-team/competitive-teardown/scripts/competitive_matrix_builder.py
 568 product-team/landing-page-generator/scripts/landing_page_scaffolder.py
 452 product-team/product-manager-toolkit/scripts/customer_interview_analyzer.py
-296 product-team/product-manager-toolkit/scripts/rice_prioritizer.py
+331 product-team/product-manager-toolkit/scripts/rice_prioritizer.py
 592 product-team/product-strategist/scripts/okr_cascade_generator.py
 309 product-team/research-summarizer/scripts/extract_citations.py
 244 product-team/research-summarizer/scripts/format_summary.py
@@ -288,7 +288,7 @@
 618 ra-qm-team/fda-consultant-specialist/scripts/qsr_compliance_checker.py
 541 ra-qm-team/gdpr-dsgvo-expert/scripts/data_subject_rights_tracker.py
 670 ra-qm-team/gdpr-dsgvo-expert/scripts/dpia_generator.py
-443 ra-qm-team/gdpr-dsgvo-expert/scripts/gdpr_compliance_checker.py
+447 ra-qm-team/gdpr-dsgvo-expert/scripts/gdpr_compliance_checker.py
 398 ra-qm-team/information-security-manager-iso27001/scripts/compliance_checker.py
 403 ra-qm-team/information-security-manager-iso27001/scripts/risk_assessment.py
 279 ra-qm-team/isms-audit-expert/scripts/isms_audit_scheduler.py

@@ -21,6 +21,13 @@ Production computer vision engineering skill for object detection, image segment
 
 ## Quick Start
 
+> **Optional dependencies:** the scripts run on the standard library for their
+> core output. Two features degrade gracefully when a package is missing:
+> `vision_model_trainer.py` needs **PyYAML** (`pip install pyyaml`) to read
+> `data.yaml` classes and to write ultralytics/YOLO configs, and
+> `inference_optimizer.py` uses **torch/onnx/numpy** when present (with safe
+> fallbacks otherwise).
+
 ```bash
 # Generate training configuration for YOLO or Faster R-CNN
 python scripts/vision_model_trainer.py models/ --task detection --arch yolov8

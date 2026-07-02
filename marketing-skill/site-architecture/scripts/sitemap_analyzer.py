@@ -17,7 +17,6 @@ Stdlib only — no external dependencies.
 import json
 import sys
 import re
-import select
 import urllib.request
 import urllib.error
 from collections import Counter, defaultdict

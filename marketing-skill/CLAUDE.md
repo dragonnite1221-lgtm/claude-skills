@@ -2,7 +2,7 @@
 
 ## For All Agents (Claude Code, Codex CLI, OpenClaw)
 
-This directory contains 43 marketing skills organized into specialist pods.
+This directory contains 44 marketing skills organized into specialist pods.
 
 ### How to Use
 
@@ -33,7 +33,7 @@ No pip install needed. Scripts include embedded samples for demo mode (run with 
 
 ### Anti-Patterns
 
-❌ Don't read all 43 SKILL.md files
+❌ Don't read all 44 SKILL.md files
 ❌ Don't skip marketing-context.md if it exists
 ❌ Don't use content-creator (deprecated → use content-production)
 ❌ Don't install pip packages for Python tools

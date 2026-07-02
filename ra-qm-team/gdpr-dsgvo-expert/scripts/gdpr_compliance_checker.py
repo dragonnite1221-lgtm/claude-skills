@@ -30,7 +30,9 @@ PERSONAL_DATA_PATTERNS = {
         "risk": "medium"
     },
     "ip_address": {
-        "pattern": r"\b(?:\d{1,3}\.){3}\d{1,3}\b",
+        # Validate each octet is 0-255 so version strings like "2.14.302.5"
+        # (octet > 255) no longer false-match as IPs.
+        "pattern": r"\b(?:(?:25[0-5]|2[0-4]\d|1?\d?\d)\.){3}(?:25[0-5]|2[0-4]\d|1?\d?\d)\b",
         "category": "online_identifier",
         "gdpr_article": "Art. 4(1), Recital 30",
         "risk": "medium"
@@ -54,7 +56,9 @@ PERSONAL_DATA_PATTERNS = {
         "risk": "high"
     },
     "german_id": {
-        "pattern": r"\b[A-Z0-9]{9}\b",
+        # Require a mix of at least one letter AND one digit so that all-letter
+        # constants (e.g. CONSTANTS) and all-digit tokens no longer false-match.
+        "pattern": r"\b(?=[A-Z0-9]{9}\b)(?=[A-Z0-9]*[A-Z])(?=[A-Z0-9]*\d)[A-Z0-9]{9}\b",
         "category": "government_id",
         "gdpr_article": "Art. 4(1)",
         "risk": "high"

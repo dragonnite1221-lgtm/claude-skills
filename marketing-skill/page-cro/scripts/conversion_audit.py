@@ -13,6 +13,8 @@ import json
 import re
 import sys
 import urllib.request
+import urllib.error
+from urllib.parse import urlparse
 from html.parser import HTMLParser
 
 
@@ -362,8 +364,17 @@ def main():
         with open(args.file, "r", encoding="utf-8", errors="replace") as f:
             html = f.read()
     elif args.url:
-        with urllib.request.urlopen(args.url, timeout=10) as resp:
-            html = resp.read().decode("utf-8", errors="replace")
+        scheme = urlparse(args.url).scheme.lower()
+        if scheme not in ("http", "https"):
+            print(f"Error: only http(s) URLs are supported (got '{scheme or 'none'}').",
+                  file=sys.stderr)
+            sys.exit(1)
+        try:
+            with urllib.request.urlopen(args.url, timeout=10) as resp:
+                html = resp.read().decode("utf-8", errors="replace")
+        except (urllib.error.URLError, urllib.error.HTTPError, ValueError, OSError) as e:
+            print(f"Error: failed to fetch {args.url}: {e}", file=sys.stderr)
+            sys.exit(1)
     else:
         html = DEMO_HTML
         if not args.json:
