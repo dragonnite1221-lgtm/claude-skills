@@ -16,6 +16,7 @@ Stdlib only. No dependencies.
 import argparse
 import csv
 import io
+import json
 import sys
 from dataclasses import dataclass, field
 from datetime import date, timedelta
@@ -283,6 +284,93 @@ def export_csv(scenarios: list[tuple[str, list[MonthResult]]]) -> str:
 
 
 # ---------------------------------------------------------------------------
+# JSON input / output
+# ---------------------------------------------------------------------------
+
+def _parse_date(value) -> Optional[date]:
+    if not value:
+        return None
+    y, m, d = (int(x) for x in str(value).split("-"))
+    return date(y, m, d)
+
+
+def configs_from_json(data: dict) -> list[ModelConfig]:
+    """Build ModelConfig scenarios from a JSON payload.
+
+    Accepts either {"scenarios": [ {...}, ... ]} or a single scenario object.
+    """
+    scenarios = data.get("scenarios") if isinstance(data, dict) else None
+    if scenarios is None:
+        scenarios = [data]
+    configs: list[ModelConfig] = []
+    for s in scenarios:
+        hiring = [
+            HiringEntry(
+                month=int(h["month"]),
+                role=h.get("role", ""),
+                department=h.get("department", ""),
+                annual_salary=float(h["annual_salary"]),
+                benefits_pct=float(h.get("benefits_pct", 0.22)),
+                recruiting_cost=float(h.get("recruiting_cost", 0.0)),
+            )
+            for h in s.get("hiring_plan", [])
+        ]
+        configs.append(ModelConfig(
+            name=s.get("name", "Scenario"),
+            starting_cash=float(s["starting_cash"]),
+            starting_mrr=float(s["starting_mrr"]),
+            starting_headcount=int(s["starting_headcount"]),
+            avg_loaded_salary=float(s["avg_loaded_salary"]),
+            base_non_headcount_opex=float(s["base_non_headcount_opex"]),
+            gross_margin_pct=float(s["gross_margin_pct"]),
+            mrr_growth_rate=float(s["mrr_growth_rate"]),
+            hiring_plan=hiring,
+            model_months=int(s.get("model_months", 24)),
+            start_date=_parse_date(s.get("start_date")),
+        ))
+    return configs
+
+
+def _safe(value: float):
+    """Convert non-finite floats to None so the payload is valid JSON."""
+    return value if value not in (float("inf"), float("-inf")) else None
+
+
+def results_to_json(scenarios: list[tuple[str, list[MonthResult], "RunwayCalculator"]]) -> dict:
+    out = {"scenarios": []}
+    for name, results, calc in scenarios:
+        out["scenarios"].append({
+            "name": name,
+            "months_modeled": len(results),
+            "cash_out": calc.cash_out_date(results),
+            "ending_cash": round(results[-1].cash_end, 2),
+            "final_runway_months": _safe(round(results[-1].runway_months, 2)),
+            "starting_mrr": round(results[0].mrr, 2),
+            "ending_mrr": round(results[-1].mrr, 2),
+            "ending_headcount": results[-1].headcount,
+            "burn_multiple": _safe(round(calc.burn_multiple(results), 2)),
+            "monthly": [
+                {
+                    "month": r.month,
+                    "label": r.label,
+                    "mrr": round(r.mrr, 2),
+                    "gross_profit": round(r.gross_profit, 2),
+                    "headcount": r.headcount,
+                    "headcount_cost": round(r.headcount_cost, 2),
+                    "other_opex": round(r.other_opex, 2),
+                    "gross_burn": round(r.gross_burn, 2),
+                    "net_burn": round(r.net_burn, 2),
+                    "cash_start": round(r.cash_start, 2),
+                    "cash_end": round(r.cash_end, 2),
+                    "runway_months": _safe(round(r.runway_months, 2)),
+                }
+                for r in results
+            ],
+        })
+    return out
+
+
+# ---------------------------------------------------------------------------
 # Sample data
 # ---------------------------------------------------------------------------
 
@@ -349,13 +437,38 @@ def make_sample_configs() -> list[ModelConfig]:
 
 def main() -> None:
     parser = argparse.ArgumentParser(description="Startup Burn Rate & Runway Calculator")
+    parser.add_argument("input", nargs="?",
+                        help="JSON file with scenario config(s). Omit to use built-in sample.")
     parser.add_argument("--csv", action="store_true", help="Export full monthly data as CSV to stdout")
+    parser.add_argument("--format", choices=["text", "json"], default="text",
+                        help="Output format (default: text)")
     parser.add_argument("--scenario", choices=["bull", "base", "bear", "distress", "all"], default="all")
     args = parser.parse_args()
 
-    configs = make_sample_configs()
+    if args.input:
+        try:
+            with open(args.input, "r", encoding="utf-8") as f:
+                configs = configs_from_json(json.load(f))
+        except OSError as e:
+            print(f"Error: cannot read '{args.input}': {e}", file=sys.stderr)
+            sys.exit(1)
+        except (json.JSONDecodeError, KeyError, ValueError) as e:
+            print(f"Error: invalid scenario JSON in '{args.input}': {e}", file=sys.stderr)
+            sys.exit(1)
+    else:
+        configs = make_sample_configs()
+
     if args.scenario != "all":
         configs = [c for c in configs if args.scenario.upper() in c.name.upper()]
+
+    # JSON output: structured payload, no human-readable banner.
+    if args.format == "json":
+        scenarios = []
+        for cfg in configs:
+            calc = RunwayCalculator(cfg)
+            scenarios.append((cfg.name, calc.run(), calc))
+        print(json.dumps(results_to_json(scenarios), indent=2))
+        return
 
     all_results: list[tuple[str, list[MonthResult]]] = []
 

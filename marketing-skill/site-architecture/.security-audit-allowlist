@@ -1,0 +1,3 @@
+# Reviewed intended behavior — auditable auditor suppression.
+# sitemap_analyzer.py fetches the user-supplied sitemap/page source to analyze.
+NET-EXFIL scripts/sitemap_analyzer.py:315

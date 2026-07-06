@@ -1,153 +1,8 @@
 {
   "version": "1.0.0",
   "name": "gemini-cli-skills",
-  "total_skills": 297,
+  "total_skills": 239,
   "skills": [
-    {
-      "name": "README",
-      "category": "agent",
-      "description": "Agent from personas"
-    },
-    {
-      "name": "TEMPLATE",
-      "category": "agent",
-      "description": "One paragraph describing what this agent does, who it's for, and when to activate it."
-    },
-    {
-      "name": "content-strategist",
-      "category": "agent",
-      "description": "Builds content engines that rank, convert, and compound. Thinks in systems \u2014 topic clusters, not individual posts. Every piece earns its place or gets killed."
-    },
-    {
-      "name": "cs-agile-product-owner",
-      "category": "agent",
-      "description": "Agile product owner agent for epic breakdown, sprint planning, backlog refinement, and INVEST-compliant user story generation"
-    },
-    {
-      "name": "cs-ceo-advisor",
-      "category": "agent",
-      "description": "Strategic leadership advisor for CEOs covering vision, strategy, board management, investor relations, and organizational culture"
-    },
-    {
-      "name": "cs-content-creator",
-      "category": "agent",
-      "description": "AI-powered content creation specialist for brand voice consistency, SEO optimization, and multi-platform content strategy"
-    },
-    {
-      "name": "cs-cto-advisor",
-      "category": "agent",
-      "description": "Technical leadership advisor for CTOs covering technology strategy, team scaling, architecture decisions, and engineering excellence"
-    },
-    {
-      "name": "cs-demand-gen-specialist",
-      "category": "agent",
-      "description": "Demand generation and customer acquisition specialist for lead generation, conversion optimization, and multi-channel acquisition campaigns"
-    },
-    {
-      "name": "cs-engineering-lead",
-      "category": "agent",
-      "description": "Engineering Team Lead agent for coordinating QA, security, data engineering, ML, and frontend/backend teams. Orchestrates engineering-team skills for team-level technical decisions. Spawn when users need team coordination, tech stack evaluation, incident response, or cross-functional engineering work."
-    },
-    {
-      "name": "cs-financial-analyst",
-      "category": "agent",
-      "description": "Financial Analyst agent for DCF valuation, financial modeling, budgeting, forecasting, and SaaS metrics (ARR, MRR, churn, CAC, LTV, NRR). Orchestrates finance skills. Spawn when users need financial analysis, valuation models, budget planning, ratio analysis, SaaS health checks, or unit economics projections."
-    },
-    {
-      "name": "cs-growth-strategist",
-      "category": "agent",
-      "description": "Growth Strategist agent for revenue operations, sales engineering, customer success, and business development. Orchestrates business-growth skills. Spawn when users need pipeline analysis, churn prevention, expansion scoring, sales demos, or proposal writing."
-    },
-    {
-      "name": "cs-karpathy-reviewer",
-      "category": "agent",
-      "description": "Reviews staged git changes against Karpathy's 4 coding principles. Runs complexity_checker on changed files, diff_surgeon on the diff, and produces a verdict with specific fix recommendations. Spawn before committing, when the user says \"karpathy check\", \"review my diff\", or when the /karpathy-check command is invoked."
-    },
-    {
-      "name": "cs-product-analyst",
-      "category": "agent",
-      "description": "Product analytics agent for KPI definition, dashboard setup, experiment design, and test result interpretation."
-    },
-    {
-      "name": "cs-product-manager",
-      "category": "agent",
-      "description": "Product management agent for feature prioritization, customer discovery, PRD development, and roadmap planning using RICE framework"
-    },
-    {
-      "name": "cs-product-strategist",
-      "category": "agent",
-      "description": "Product strategy agent for quarterly OKR planning, competitive landscape analysis, product vision development, and strategy pivot evaluation"
-    },
-    {
-      "name": "cs-project-manager",
-      "category": "agent",
-      "description": "Project Manager agent for sprint planning, Jira/Confluence workflows, Scrum ceremonies, and stakeholder reporting. Orchestrates project-management skills."
-    },
-    {
-      "name": "cs-quality-regulatory",
-      "category": "agent",
-      "description": "Quality & Regulatory agent for ISO 13485 QMS, MDR compliance, FDA submissions, GDPR/DSGVO, and ISMS audits. Orchestrates ra-qm-team skills. Spawn when users need regulatory strategy, audit preparation, CAPA management, risk management, or compliance documentation."
-    },
-    {
-      "name": "cs-senior-engineer",
-      "category": "agent",
-      "description": "Senior Engineer agent for architecture decisions, code review, DevOps, and API design. Orchestrates engineering and engineering-team skills for technical implementation work. Spawn when users need system design, code quality review, CI/CD pipeline setup, or infrastructure decisions."
-    },
-    {
-      "name": "cs-ux-researcher",
-      "category": "agent",
-      "description": "UX research agent for research planning, persona generation, journey mapping, and usability test analysis"
-    },
-    {
-      "name": "cs-wiki-ingestor",
-      "category": "agent",
-      "description": "Dispatched sub-agent that ingests a new source into an LLM Wiki vault. Reads the source, proposes TL;DR and key claims, identifies which entity/concept/synthesis pages will be touched, flags contradictions with existing pages, and \u2014 after user confirmation \u2014 writes the source summary, updates cross-references across 5-15 pages, regenerates the index, and appends a standardized log entry. Spawn when the user says \"ingest this\", \"add this paper/article/book to the wiki\", or drops a file into raw/."
-    },
-    {
-      "name": "cs-wiki-librarian",
-      "category": "agent",
-      "description": "Dispatched sub-agent that answers queries against an LLM Wiki vault. Reads index.md first, drills into 3-10 relevant pages across categories, synthesizes an answer with inline [[wikilink]] citations, and offers to file the answer back into the wiki as a new comparison or synthesis page. Spawn when the user asks a substantive question the wiki might answer, says \"what does the wiki say about X\", \"compare A and B across my sources\", or wants to explore a topic."
-    },
-    {
-      "name": "cs-wiki-linter",
-      "category": "agent",
-      "description": "Dispatched sub-agent that runs a periodic health check on an LLM Wiki vault. Runs mechanical checks via scripts (orphans, broken links, stale pages, missing frontmatter, duplicate titles, log gaps), does semantic checks (contradictions, stale claims, cross-reference gaps, concepts missing their own page), and produces a markdown report with suggested actions. Spawn weekly, after batch ingests, or when the user says \"check the wiki\" / \"lint my wiki\" / \"audit the vault\"."
-    },
-    {
-      "name": "cs-workspace-admin",
-      "category": "agent",
-      "description": "Google Workspace administration agent using the gws CLI. Orchestrates workspace setup, Gmail/Drive/Sheets/Calendar automation, security audits, and recipe execution. Spawn when users need Google Workspace automation, gws CLI help, or workspace administration."
-    },
-    {
-      "name": "devops-engineer",
-      "category": "agent",
-      "description": "Builds infrastructure that scales without babysitting. Automates everything worth automating. Monitors before it breaks. Treats clicking in consoles as a production incident waiting to happen."
-    },
-    {
-      "name": "finance-lead",
-      "category": "agent",
-      "description": "Startup CFO who builds models that survive contact with reality. Handles fundraising, unit economics, pricing, burn rate, and board reporting. Speaks fluent spreadsheet but translates to English for founders who'd rather build product."
-    },
-    {
-      "name": "growth-marketer",
-      "category": "agent",
-      "description": "Growth marketing specialist for bootstrapped startups and indie hackers. Builds content engines, optimizes funnels, runs launch sequences, and finds scalable acquisition channels \u2014 all on a budget that makes enterprise marketers cry."
-    },
-    {
-      "name": "product-manager",
-      "category": "agent",
-      "description": "Ships outcomes, not features. Writes specs engineers actually read. Prioritizes ruthlessly. Kills darlings when the data says so. Operates at the intersection of user needs, business goals, and engineering reality."
-    },
-    {
-      "name": "solo-founder",
-      "category": "agent",
-      "description": "Your co-founder who doesn't exist yet. Covers product, engineering, marketing, and strategy for one-person startups \u2014 because nobody's stopping you from making bad decisions and somebody should."
-    },
-    {
-      "name": "startup-cto",
-      "category": "agent",
-      "description": "Technical co-founder who's been through two startups and learned what actually matters. Makes architecture decisions, selects tech stacks, builds engineering culture, and prepares for technical due diligence \u2014 all while shipping fast with a small team."
-    },
     {
       "name": "business-growth-bundle",
       "category": "business-growth",
@@ -156,7 +11,7 @@
     {
       "name": "contract-and-proposal-writer",
       "category": "business-growth",
-      "description": "Contract & Proposal Writer"
+      "description": "Draft jurisdiction-aware business and legal documents as structured Markdown: freelance/dev contracts (fixed-price & hourly), consulting retainers, SaaS partnership agreements, project proposals, SOWs, NDAs (mutual/one-way), and MSAs, plus an Art. 28 GDPR Data Processing Addendum. Covers US (Delaware/work-for-hire), EU (GDPR), UK (post-Brexit English law), and DACH (BGB, Nutzungsrechte, HGB non-competes) clauses, with a key-clauses matrix (payment, IP, liability cap, termination, dispute resolution) and ready-to-fill [BRACKETED] templates. Includes pandoc commands to convert the Markdown to DOCX. Use when the user needs a client contract, proposal, SOW, NDA, MSA, or retainer fast, asks 'draft a freelance contract', 'write an NDA', or 'I need a GDPR DPA'. Not a substitute for legal counsel."
     },
     {
       "name": "customer-success-manager",
@@ -344,151 +199,6 @@
       "description": "/em -stress-test \u2014 Business Assumption Stress Testing"
     },
     {
-      "name": "changelog",
-      "category": "command",
-      "description": "Generate changelogs from git history and validate conventional commits. Usage: /changelog <generate|lint> [options]"
-    },
-    {
-      "name": "cmd-a11y-audit",
-      "category": "command",
-      "description": "Scan a frontend project for WCAG 2.2 accessibility violations and fix them. Usage: /a11y-audit [path]"
-    },
-    {
-      "name": "cmd-code-to-prd",
-      "category": "command",
-      "description": "Reverse-engineer a frontend codebase into a PRD. Usage: /code-to-prd [path]"
-    },
-    {
-      "name": "cmd-focused-fix",
-      "category": "command",
-      "description": "Deep-dive feature repair \u2014 systematically fix an entire feature/module across all its files and dependencies. Usage: /focused-fix <feature-path>"
-    },
-    {
-      "name": "competitive-matrix",
-      "category": "command",
-      "description": "Build competitive analysis matrices with scoring and gap analysis. Usage: /competitive-matrix <analyze> [options]"
-    },
-    {
-      "name": "financial-health",
-      "category": "command",
-      "description": "Run financial ratio analysis, DCF valuation, budget variance analysis, and rolling forecasts. Usage: /financial-health <ratios|dcf|budget|forecast> <data.json>"
-    },
-    {
-      "name": "google-workspace",
-      "category": "command",
-      "description": "Google Workspace CLI operations: setup diagnostics, security audit, recipe discovery, and output analysis. Usage: /google-workspace <setup|audit|recipe|analyze> [options]"
-    },
-    {
-      "name": "karpathy-check",
-      "category": "command",
-      "description": "Run Karpathy's 4-principle review on staged changes or the last commit. Checks complexity, diff noise, hidden assumptions, and goal verification. Usage /karpathy-check [--last-commit]"
-    },
-    {
-      "name": "okr",
-      "category": "command",
-      "description": "Generate OKR cascades from company strategy to team objectives. Usage: /okr generate <strategy>"
-    },
-    {
-      "name": "persona",
-      "category": "command",
-      "description": "Generate data-driven user personas for UX research and product design. Usage: /persona generate [options]"
-    },
-    {
-      "name": "pipeline",
-      "category": "command",
-      "description": "Detect stack and generate CI/CD pipeline configs. Usage: /pipeline <detect|generate> [options]"
-    },
-    {
-      "name": "plugin-audit",
-      "category": "command",
-      "description": "|"
-    },
-    {
-      "name": "prd",
-      "category": "command",
-      "description": "Quick PRD generation command. Usage: /prd <feature-or-problem>"
-    },
-    {
-      "name": "project-health",
-      "category": "command",
-      "description": "Portfolio health dashboard and risk matrix analysis. Usage: /project-health <dashboard|risk> [options]"
-    },
-    {
-      "name": "retro",
-      "category": "command",
-      "description": "Analyze sprint retrospectives for patterns and action item tracking. Usage: /retro analyze <retro_data.json>"
-    },
-    {
-      "name": "rice",
-      "category": "command",
-      "description": "RICE feature prioritization with scoring and capacity planning. Usage: /rice prioritize <features.csv> [options]"
-    },
-    {
-      "name": "saas-health",
-      "category": "command",
-      "description": "Calculate SaaS health metrics (ARR, MRR, churn, CAC, LTV, NRR) and benchmark against industry standards. Usage: /saas-health <metrics|quick-ratio|simulate> [options]"
-    },
-    {
-      "name": "seo-auditor",
-      "category": "command",
-      "description": "|"
-    },
-    {
-      "name": "sprint-health",
-      "category": "command",
-      "description": "Sprint health scoring and velocity analysis for agile teams. Usage: /sprint-health <analyze|velocity> [options]"
-    },
-    {
-      "name": "sprint-plan",
-      "category": "command",
-      "description": "Sprint planning shortcut. Usage: /sprint-plan <goal> [capacity]"
-    },
-    {
-      "name": "tc",
-      "category": "command",
-      "description": "Track technical changes with structured records, a state machine, and session handoff. Usage: /tc <init|create|update|status|resume|close|export|dashboard> [args]"
-    },
-    {
-      "name": "tdd",
-      "category": "command",
-      "description": "Generate tests, analyze coverage, and run TDD workflows. Usage: /tdd <generate|coverage|validate> [options]"
-    },
-    {
-      "name": "tech-debt",
-      "category": "command",
-      "description": "Scan, prioritize, and report technical debt. Usage: /tech-debt <scan|prioritize|report> [options]"
-    },
-    {
-      "name": "user-story",
-      "category": "command",
-      "description": "Generate user stories with acceptance criteria and sprint planning. Usage: /user-story <generate|sprint> [options]"
-    },
-    {
-      "name": "wiki-ingest",
-      "category": "command",
-      "description": "Ingest a source file from raw/ into the LLM Wiki \u2014 read, discuss, write summary page, update cross-references across 5-15 pages, regenerate index, append to log. Usage /wiki-ingest <path-to-source>"
-    },
-    {
-      "name": "wiki-init",
-      "category": "command",
-      "description": "Bootstrap a fresh LLM Wiki vault with the three-layer structure, schema files, and starter templates. Usage /wiki-init <path> --topic \"<topic>\" [--tool all|claude-code|codex|cursor|antigravity]"
-    },
-    {
-      "name": "wiki-lint",
-      "category": "command",
-      "description": "Run a health check on the LLM Wiki vault \u2014 mechanical checks (orphans, broken links, stale pages, missing frontmatter, log gap, duplicates) plus semantic checks (contradictions, cross-reference gaps, concepts missing their own page). Outputs a markdown report with suggested actions. Usage /wiki-lint [--stale-days N] [--log-gap-days N]"
-    },
-    {
-      "name": "wiki-log",
-      "category": "command",
-      "description": "Show recent entries from the LLM Wiki log (wiki/log.md). Uses the standardized ## [YYYY-MM-DD] header format so grep + tail works. Usage /wiki-log [--last N] [--op ingest|query|lint|...]"
-    },
-    {
-      "name": "wiki-query",
-      "category": "command",
-      "description": "Query the LLM Wiki \u2014 reads index.md first, drills into 3-10 relevant pages, synthesizes an answer with inline [[wikilink]] citations, and offers to file the answer back as a new comparison or synthesis page. Usage /wiki-query \"<question>\""
-    },
-    {
       "name": "a11y-audit",
       "category": "engineering",
       "description": "Accessibility audit skill for scanning, fixing, and verifying WCAG 2.2 Level A and AA compliance across React, Next.js, Vue, Angular, Svelte, and plain HTML codebases. Use when auditing accessibility, fixing a11y violations, checking color contrast, generating compliance reports, or integrating accessibility checks into CI/CD pipelines."
@@ -516,7 +226,7 @@
     {
       "name": "browserstack",
       "category": "engineering",
-      "description": ">-"
+      "description": "Run Playwright tests on the BrowserStack cloud grid for cross-browser and cross-device coverage. Adds CDP wsEndpoint connectOptions projects (Chrome/ Firefox/WebKit on Windows/macOS) to playwright.config.ts, runs the cloud suite, pulls per-session build results (status, browser/OS, video and log URLs) and lists available browsers via the browserstack_get_builds, browserstack_get_sessions and browserstack_get_browsers MCP tools, and sets up BrowserStack Local tunnels for localhost/staging. Requires BROWSERSTACK_USERNAME and BROWSERSTACK_ACCESS_KEY env vars. Use when the user runs /pw:browserstack or says \"browserstack\", \"cross-browser\", \"cloud testing\", \"browser matrix\", \"test on safari\", or \"browser compatibility\"."
     },
     {
       "name": "cloud-security",
@@ -531,12 +241,12 @@
     {
       "name": "coverage",
       "category": "engineering",
-      "description": ">-"
+      "description": "Analyze test coverage gaps. Use when user says \"test coverage\", \"what's not tested\", \"coverage gaps\", \"missing tests\", \"coverage report\", or \"what needs testing\"."
     },
     {
       "name": "email-template-builder",
       "category": "engineering",
-      "description": "Email Template Builder"
+      "description": "Build production transactional email systems with React Email (.tsx) templates \u2014 welcome, verification, password reset, invoice, notification, digest \u2014 wired to a unified send function for Resend, Postmark, SendGrid, or AWS SES. Covers the 600px inline-style email layout, dark-mode media queries, typed i18n locale files, UTM/open-click tracking, a deliverability/spam checklist (SPF/DKIM/DMARC), and the `email dev` preview server. Use when setting up transactional email for a product, adding a new email type, fixing deliverability or rendering issues, or asked to 'build a welcome email', 'create an invoice email template', or 'set up React Email with Resend'."
     },
     {
       "name": "engineering-team-bundle",
@@ -546,7 +256,7 @@
     {
       "name": "epic-design",
       "category": "engineering",
-      "description": ">"
+      "description": "Build immersive, cinematic 2.5D interactive websites using scroll storytelling, parallax depth, text animations, and premium scroll effects with CSS + GSAP \u2014 no WebGL. Inspects every image asset (inspect-assets.py), judges whether each background needs removing, assigns a 0\u20135 depth layer, then generates a self-contained HTML page with GPU-safe animations and reduced-motion fallbacks (validated by validate-layers.js). Covers 45+ techniques across 8 categories: parallax, pinned/scrub timelines, clip-path reveals, floating products between sections, card stacks, iris/curtain transitions, word-by-word text lighting, and split-converge typography. Use for landing pages, product sites, and hero sections, or on phrases like \"make it feel alive\", \"Apple-style animation\", \"sections that overlap\", \"product rises between sections\", \"immersive\", or \"scrollytelling\"."
     },
     {
       "name": "extract",
@@ -556,7 +266,7 @@
     {
       "name": "fix",
       "category": "engineering",
-      "description": ">-"
+      "description": "Fix failing or flaky Playwright tests. Use when user says \"fix test\", \"flaky test\", \"test failing\", \"debug test\", \"test broken\", \"test passes sometimes\", or \"intermittent failure\"."
     },
     {
       "name": "gcp-cloud-architect",
@@ -566,7 +276,7 @@
     {
       "name": "generate",
       "category": "engineering",
-      "description": ">-"
+      "description": "Generate production-ready Playwright tests from a user story, URL, component path, or feature description ($ARGUMENTS). Explores the project for playwright.config.ts (testDir, baseURL), existing tests, page objects, fixtures and auth setup, picks a matching template (auth, CRUD, checkout, search, forms, dashboard, API, accessibility), and writes .spec.ts/.spec.js that follow the locator priority (getByRole first), web-first assertions and no waitForTimeout, plus any needed page objects, fixtures or test-data, then runs the test to verify. Use when the user runs /pw:generate or says \"write tests\", \"generate tests\", \"add tests for\", \"test this component\", \"e2e test\", \"create test for\", or \"test this page\"."
     },
     {
       "name": "google-workspace-cli",
@@ -576,7 +286,7 @@
     {
       "name": "incident-commander",
       "category": "engineering",
-      "description": "Incident Commander Skill"
+      "description": "Run technology incidents end to end: classify severity (SEV1\u2013SEV4) from impact/urgency and emit escalation paths, reconstruct a chronological timeline from scattered timestamped events with phase detection and gap analysis, and generate blameless Post-Incident Reviews using 5 Whys, Fishbone, Timeline, or Bow-Tie RCA. Six stdlib-only Python tools read JSON (file or stdin) and output text/JSON/markdown. Use when triaging or commanding a live incident, deciding a severity level, building an incident timeline from logs, drafting stakeholder/exec/customer comms, or writing a postmortem/PIR \u2014 e.g. 'classify this incident', 'reconstruct the timeline', 'generate a postmortem'."
     },
     {
       "name": "incident-response",
@@ -586,12 +296,12 @@
     {
       "name": "init",
       "category": "engineering",
-      "description": ">-"
+      "description": "Scaffold a production-ready Playwright setup: detects the framework (Next.js/React-Vite/Vue-Nuxt/Angular) and TS vs JS from package.json and tsconfig.json, installs @playwright/test, generates playwright.config.ts with framework-specific baseURL/webServer plus retries, traces and chromium/firefox/ webkit projects, creates the e2e/ folder (fixtures, pages, test-data, example spec), adds a GitHub Actions or GitLab CI workflow, updates .gitignore and npm scripts, then runs the example test to verify. Use when the user runs /pw:init or says \"set up playwright\", \"add e2e tests\", \"configure playwright\", \"init playwright\", \"testing setup\", or \"add test infrastructure\"."
     },
     {
       "name": "migrate",
       "category": "engineering",
-      "description": ">-"
+      "description": "Migrate a Cypress or Selenium/WebDriver suite to Playwright file by file. Auto-detects the source (cypress/ dir or cypress.config, selenium/webdriver deps, Python selenium imports), assesses scope and batches large suites, runs /pw:init if Playwright is missing, then converts using cypress-mapping.md / selenium-mapping.md (cy.visit\u2192page.goto, cy.get\u2192getByRole, driver.findElement \u2192locator, WebDriverWait\u2192expect().toBeVisible), upgrades CSS/XPath selectors to role-based locators, ports custom commands to fixtures and page objects, runs each converted file to verify, and cleans up old deps/config/CI. Accepts \"from cypress\", \"from selenium\", or a file path in $ARGUMENTS. Use when the user runs /pw:migrate or says \"cypress\", \"selenium\", \"migrate tests\", \"convert tests\", \"switch to playwright\", or \"replace selenium\"."
     },
     {
       "name": "ms365-tenant-manager",
@@ -621,12 +331,12 @@
     {
       "name": "report",
       "category": "engineering",
-      "description": ">-"
+      "description": "Generate a Playwright test report and route it to whatever the project already uses, no new tooling. Runs the suite (or reuses existing test-results/ and playwright-report/), parses the JSON reporter for passed/failed/skipped/flaky counts, durations and per-browser breakdown, then emits a markdown report to test-reports/ and auto-routes by what is configured: TestRail push when TESTRAIL_URL is set, a Slack summary when SLACK_WEBHOOK_URL is set, PR-artifact results under .github/workflows/, or the HTML report. Adds trend analysis when prior reports exist. Use when the user runs /pw:report or says \"test report\", \"results summary\", \"test status\", \"show results\", \"test dashboard\", or \"how did tests go\"."
     },
     {
       "name": "review",
       "category": "engineering",
-      "description": "Analyze auto-memory for promotion candidates, stale entries, consolidation opportunities, and health metrics."
+      "description": "Review Playwright tests for quality. Use when user says \"review tests\", \"check test quality\", \"audit tests\", \"improve tests\", \"test code review\", or \"playwright best practices check\"."
     },
     {
       "name": "security-pen-testing",
@@ -656,7 +366,7 @@
     {
       "name": "senior-data-engineer",
       "category": "engineering",
-      "description": "Data engineering skill for building scalable data pipelines, ETL/ELT systems, and data infrastructure. Expertise in Python, SQL, Spark, Airflow, dbt, Kafka, and modern data stack. Includes data modeling, pipeline orchestration, data quality, and DataOps. Use when designing data architectures, building data pipelines, optimizing data workflows, implementing data governance, or troubleshooting data issues."
+      "description": "Build scalable data pipelines, ETL/ELT systems, and data infrastructure with Python, SQL, Spark, Airflow, dbt, and Kafka. Covers dimensional data modeling, pipeline orchestration, data quality frameworks, and DataOps. Use when designing a data architecture (batch vs streaming, warehouse vs lakehouse), building or scheduling data pipelines, adding data quality checks or data contracts, tuning slow Spark or SQL jobs, or troubleshooting failing DAGs and schema drift."
     },
     {
       "name": "senior-data-scientist",
@@ -706,7 +416,7 @@
     {
       "name": "skills-review",
       "category": "engineering",
-      "description": ">-"
+      "description": "Analyze auto-memory for promotion candidates, stale entries, consolidation opportunities, and health metrics."
     },
     {
       "name": "snowflake-development",
@@ -721,7 +431,7 @@
     {
       "name": "stripe-integration-expert",
       "category": "engineering",
-      "description": "Stripe Integration Expert"
+      "description": "Implement production Stripe billing with TypeScript SDK patterns for Next.js App Router (Express/Django variants): the subscription lifecycle state machine (trial \u2192 active \u2192 past_due \u2192 canceled), Checkout Sessions, plan upgrade/downgrade with proration preview, usage-based metered billing, the customer portal, and a complete idempotent webhook handler with signature verification and a processed-events table. Includes Stripe CLI local testing (`stripe listen`, `stripe trigger`) and feature-gating helpers. Use when adding subscription billing to an app, handling proration on plan changes, building usage/seat-based billing, or debugging webhook delivery \u2014 e.g. 'add Stripe subscriptions', 'handle the checkout.session.completed webhook', 'preview proration before upgrade'."
     },
     {
       "name": "tdd-guide",
@@ -736,7 +446,7 @@
     {
       "name": "testrail",
       "category": "engineering",
-      "description": ">-"
+      "description": "Bidirectionally sync Playwright with TestRail: imports cases into generated tests (linked via a 'testrail' annotation like C12345), runs the suite with the JSON reporter and pushes pass/fail/skip results to a run, creates runs, updates case steps, and reports linked-vs-unlinked coverage. Drives the testrail_get_cases, testrail_add_result, testrail_add_run and testrail_update_case MCP tools. Requires TESTRAIL_URL, TESTRAIL_USER and TESTRAIL_API_KEY env vars. Use when the user runs /pw:testrail (import / push / run / status / update) or says \"testrail\", \"test management\", \"test cases\", \"test run\", \"sync test cases\", \"push results to testrail\", or \"import from testrail\"."
     },
     {
       "name": "threat-detection",
@@ -751,7 +461,7 @@
     {
       "name": "agent-workflow-designer",
       "category": "engineering-advanced",
-      "description": "Agent Workflow Designer"
+      "description": "Design multi-agent workflows and generate ready-to-edit JSON skeleton configs for five orchestration patterns \u2014 sequential, parallel (fan-out/fan-in), router, orchestrator (planner + specialists), and evaluator (generator + quality-gate loop) \u2014 each pre-wired with retry, timeout, and dependency fields. Use when a task is too complex for one prompt and you need specialist agents with explicit handoff contracts, when you're choosing between fan-out vs router vs planner topologies, or when you say things like 'design an agent pipeline', 'scaffold a multi-agent workflow', or 'set up an orchestrator with validation loops'. Runs scripts/workflow_scaffolder.py (Python stdlib only)."
     },
     {
       "name": "agenthub",
@@ -761,7 +471,7 @@
     {
       "name": "api-design-reviewer",
       "category": "engineering-advanced",
-      "description": "API Design Reviewer"
+      "description": "Review REST API designs from OpenAPI/Swagger specs. api_linter.py checks resource naming, HTTP method usage, status codes, error-format consistency, and documentation coverage; breaking_change_detector.py diffs two spec versions to catch removed endpoints/fields, type changes, and newly-required fields (with an --exit-on-breaking CI gate); api_scorecard.py grades the design A\u2013F across consistency, documentation, security, usability, and performance. Use when the user wants to review or lint an API spec, check whether an API change is a breaking change, score API design quality, or gate API changes in CI \u2014 e.g. \"review my OpenAPI spec\", \"is this a breaking change?\", \"lint this API\", or \"score my API design\"."
     },
     {
       "name": "api-test-suite-builder",
@@ -774,6 +484,11 @@
       "description": "Autonomous experiment loop that optimizes any file by a measurable metric. Inspired by Karpathy's autoresearch. The agent edits a target file, runs a fixed evaluation, keeps improvements (git commit), discards failures (git reset), and loops indefinitely. Use when: user wants to optimize code speed, reduce bundle/image size, improve test pass rate, optimize prompts, improve content quality (headlines, copy, CTR), or run any measurable improvement loop. Requires: a target file, an evaluation command that outputs a metric, and a git repo."
     },
     {
+      "name": "autoresearch-agent-skills-status",
+      "category": "engineering-advanced",
+      "description": "Render the autoresearch experiment dashboard from results.tsv \u2014 per-experiment runs, kept count, best metric, percent change from start, and status \u2014 plus active-loop info (interval, cron id) read from loop.json. Scopes to one experiment, a domain, or all, and exports the view as markdown or CSV. Use when the user runs /ar:status or asks 'show experiment status', 'how is the optimization going', 'autoresearch dashboard', 'is the loop still running', or 'export experiment results'. (For multi-agent competition sessions use /hub:status instead.)"
+    },
+    {
       "name": "behuman",
       "category": "engineering-advanced",
       "description": "Use when the user wants more human-like AI responses \u2014 less robotic, less listy, more authentic. Triggers: 'behuman', 'be real', 'like a human', 'more human', 'less AI', 'talk like a person', 'mirror mode', 'stop being so AI', or when conversations are emotionally charged (grief, job loss, relationship advice, fear). NOT for technical questions, code generation, or factual lookups."
@@ -781,7 +496,7 @@
     {
       "name": "board",
       "category": "engineering-advanced",
-      "description": "Read, write, and browse the AgentHub message board for agent coordination."
+      "description": "AgentHub /hub:board command \u2014 interact with the append-only message board (.agenthub/board/) that coordinator and subagents use to communicate. Lists channels with post counts, reads a channel's posts in chronological order with YAML frontmatter, posts a new message, or replies to a thread by post-id. Channels: dispatch (coordinator \u2192 agents task assignments), progress (agents \u2192 coordinator status), results (final summaries + merge notes). Use when: you want to inspect, post to, or thread on agent coordination messages \u2014 'check the board', 'what did the agents report', 'post to progress', 'read the results channel'."
     },
     {
       "name": "browser-automation",
@@ -791,12 +506,12 @@
     {
       "name": "changelog-generator",
       "category": "engineering-advanced",
-      "description": "Changelog Generator"
+      "description": "Generate Keep-a-Changelog release notes from Conventional Commits and infer the SemVer bump (major/minor/patch) with generate_changelog.py \u2014 reads commits from a git range (--from-tag/--to-tag or --from-ref/--to-ref), stdin, or --input file; renders markdown or JSON; prepends into CHANGELOG.md with --write. Lint commit subjects with commit_linter.py (non-zero exit in --strict) to gate PRs. Supports feat/fix/perf/refactor/docs/test/build/ci/chore/security/deprecated/remove and breaking-change detection (type!: or BREAKING CHANGE:). Use when cutting a release, automating release notes in CI, or blocking malformed commit messages \u2014 e.g. 'generate a changelog from v1.3.0 to v1.4.0', 'what version bump do these commits need', 'lint my commit messages'."
     },
     {
       "name": "ci-cd-pipeline-builder",
       "category": "engineering-advanced",
-      "description": "CI/CD Pipeline Builder"
+      "description": "Detect a repository's stack from lockfiles and manifests (npm/yarn/pnpm via package-lock/yarn.lock/pnpm-lock, Python via requirements.txt/pyproject.toml, Go via go.mod) and generate a ready-to-commit GitHub Actions or GitLab CI pipeline with lint/test/build stages, runtime setup, and dependency caching keyed to the detected package manager. Use when bootstrapping CI for a new repo, replacing brittle copy-pasted pipeline YAML, migrating between GitHub Actions and GitLab CI, or checking that pipeline steps match the actual stack \u2014 e.g. 'set up CI for this project', 'generate a GitHub Actions workflow', or 'migrate my pipeline to GitLab'."
     },
     {
       "name": "code-tour",
@@ -806,7 +521,7 @@
     {
       "name": "codebase-onboarding",
       "category": "engineering-advanced",
-      "description": "Codebase Onboarding"
+      "description": "Scan an unfamiliar repository and draft onboarding documentation for new engineers, tech leads, or contractors. codebase_analyzer.py walks the repo to detect languages by extension, key config files (package.json, requirements.txt, Dockerfile, go.mod, etc.), the largest files, and the directory tree, emitting text or --json facts. Reference templates turn those facts into a README/onboarding packet with setup, architecture, key files, common tasks, and debugging sections, tailored by audience. Use when the user wants to onboard onto a new codebase, write or refresh onboarding/handoff docs, or asks 'document this repo for new hires', 'what does this project use', or 'generate an onboarding guide'."
     },
     {
       "name": "data-quality-auditor",
@@ -831,7 +546,7 @@
     {
       "name": "dependency-auditor",
       "category": "engineering-advanced",
-      "description": "Dependency Auditor"
+      "description": "Audit project dependencies for security vulnerabilities (CVE matching with CVSS scores), license compliance/conflicts, and safe upgrade paths across 8+ ecosystems \u2014 npm (package.json/lock, yarn.lock), Python (requirements.txt/poetry.lock), Go (go.mod), Rust (Cargo.lock), Ruby, Maven, PHP, .NET. Use when the user wants to scan dependencies for CVEs, check licenses (GPL/MIT/Apache compatibility), find outdated packages, plan version upgrades with breaking-change risk, or gate dependency security in CI \u2014 e.g. 'audit my dependencies', 'are any of my packages vulnerable', 'check license compliance', or 'plan a safe upgrade'."
     },
     {
       "name": "docker-development",
@@ -846,12 +561,12 @@
     {
       "name": "env-secrets-manager",
       "category": "engineering-advanced",
-      "description": "Env & Secrets Manager"
+      "description": "Audit a repository working tree for hardcoded secret leaks (AWS keys, Stripe/Slack/GitHub tokens, JWTs, private keys, credentialed connection strings) with severity-ranked findings, and guide `.env`/`.env.example`/`.gitignore` hygiene, credential rotation, and CI secret injection. Use when the user wants to scan for leaked secrets before pushing, check that no credentials are hardcoded, set safe env conventions for contributors, plan a rotation after a leak, or wire secret scanning into CI \u2014 e.g. 'scan my repo for secrets', 'did I commit an API key', or 'how do I rotate a leaked credential'."
     },
     {
       "name": "eval",
       "category": "engineering-advanced",
-      "description": "Evaluate and rank agent results by metric or LLM judge for an AgentHub session."
+      "description": "AgentHub /hub:eval command \u2014 rank the competing subagents in a session by metric mode (run an eval command in each worktree, parse the metric, sort by direction), LLM-judge mode (compare git diffs and result posts on correctness/simplicity/quality), or hybrid (metric first, judge to break sub-10% ties). Updates session state to evaluating and points to /hub:merge with the winner. Use when: agents have finished and you want to score, compare, or pick the best result before merging \u2014 'rank the agents', 'which approach won', 'evaluate the session', 'judge the diffs'."
     },
     {
       "name": "focused-fix",
@@ -861,7 +576,7 @@
     {
       "name": "git-worktree-manager",
       "category": "engineering-advanced",
-      "description": "Git Worktree Manager"
+      "description": "Create and tear down isolated git worktrees for parallel branch work \u2014 auto-allocates non-conflicting ports (app/DB/Redis) per worktree, persists them to .worktree-ports.json, copies .env* files from the main repo, optionally installs deps, and safely removes stale/merged/clean worktrees. Use when running 2+ branches locally at once, giving each agent or terminal its own isolated dev server, shipping a hotfix while a feature branch is dirty, or replacing ad-hoc `rm -rf` worktree cleanup \u2014 e.g. 'set up a worktree for this feature', 'run two branches in parallel', or 'clean up old worktrees'."
     },
     {
       "name": "helm-chart-builder",
@@ -896,7 +611,7 @@
     {
       "name": "mcp-server-builder",
       "category": "engineering-advanced",
-      "description": "MCP Server Builder"
+      "description": "Generate a production-ready MCP server scaffold (Python or TypeScript) from an OpenAPI spec with openapi_to_mcp.py \u2014 converts paths/operations into an MCP tool manifest + starter server, deriving tool names from operationId. Validate the manifest with mcp_validator.py (duplicate names, missing descriptions, invalid schema shape, empty required fields, naming hygiene; non-zero exit in --strict). Use when exposing a REST API to an LLM agent, replacing brittle browser automation with typed tools, bootstrapping an MCP server from an OpenAPI/Swagger spec, or gating MCP tool quality in CI \u2014 e.g. 'build an MCP server from this openapi.json', 'turn our API into MCP tools', 'validate my MCP tool manifest'."
     },
     {
       "name": "merge",
@@ -906,22 +621,22 @@
     {
       "name": "migration-architect",
       "category": "engineering-advanced",
-      "description": "Migration Architect"
+      "description": "Plan zero-downtime system, database, and infrastructure migrations from a JSON migration spec. migration_planner.py generates a phased plan with validation gates, risk assessment, and timeline; compatibility_checker.py diffs before/after database schemas or API specs to flag breaking and potentially-breaking changes; rollback_generator.py turns a plan into a step-by-step rollback runbook. Applies expand-contract, strangler-fig, dual-write, CDC, blue-green, and canary patterns. Use when the user wants to plan a migration, check schema or API backward compatibility, assess migration risk, or generate a rollback runbook \u2014 e.g. \"plan a zero-downtime migration\", \"is this schema change breaking?\", \"migrate Postgres to the cloud\", or \"generate a rollback plan\"."
     },
     {
       "name": "monorepo-navigator",
       "category": "engineering-advanced",
-      "description": "Monorepo Navigator"
+      "description": "Detect a monorepo's tool (Turborepo, Nx, pnpm/yarn workspaces, Lerna), enumerate its workspaces, and build the internal package dependency graph from a repo path using monorepo_analyzer.py (text or --json). Guides cross-package impact analysis, selective/affected-only builds and tests, remote caching, multi-repo\u2192monorepo migration with git history preserved, Changesets publishing, and workspace-aware CLAUDE.md setup. Use when shared packages make builds slow, when you need to know which apps break if a shared package changes, when migrating polyrepo\u2192monorepo, or when setting up coordinated npm publishing \u2014 e.g. 'analyze my monorepo structure', 'which packages are affected by this change', 'set up Turborepo caching'."
     },
     {
       "name": "observability-designer",
       "category": "engineering-advanced",
-      "description": "Observability Designer (POWERFUL)"
+      "description": "Design production observability \u2014 SLI/SLO frameworks, dashboards, and alert tuning \u2014 from a service-description JSON. slo_designer.py turns service type/criticality/user-facing into SLIs, SLO targets, error budgets, and multi-window burn-rate alerts. dashboard_generator.py emits a Grafana-compatible dashboard with golden-signals/RED/USE panels and role-based views (sre/developer/executive/ops). alert_optimizer.py analyzes an existing alert config for noise, duplicates, coverage gaps, and bad thresholds and emits an optimized config (JSON or HTML report). Use when the user wants to define SLOs/error budgets, build a Grafana dashboard, reduce alert fatigue, or asks 'set up monitoring for this service', 'what SLOs should this API have', or 'my alerts are too noisy'."
     },
     {
       "name": "performance-profiler",
       "category": "engineering-advanced",
-      "description": "Performance Profiler"
+      "description": "Find and fix performance bottlenecks in Node.js, Python, and Go apps with a measure-first discipline. performance_profiler.py scans a project directory for risk indicators \u2014 dependency counts, bundle-like artifacts and build dirs, and large files over a --large-file-threshold-kb \u2014 in text or --json. references/profiling-recipes.md gives the real profiling commands: clinic.js/0x flamegraphs and heap snapshots for Node, py-spy/cProfile/memory_profiler for Python, pprof for Go, plus EXPLAIN ANALYZE and k6/Artillery load tests. Use when an app is slow, P99 exceeds SLA, memory grows (suspected leak), bundle size jumped, or before a traffic spike \u2014 e.g. 'why is this endpoint slow', 'profile this service', 'find the memory leak', or 'load test before launch'."
     },
     {
       "name": "pr-review-expert",
@@ -956,7 +671,7 @@
     {
       "name": "runbook-generator",
       "category": "engineering-advanced",
-      "description": "Runbook Generator"
+      "description": "Scaffold a markdown operational runbook for a service from its name using runbook_generator.py \u2014 emits standard sections (Overview, Preconditions, Start/Stop Procedure, Health Checks, Deployment Checklist, Rollback, Incident Response, Escalation, Post-Incident) with copy-paste command placeholders. Use when a service has no runbook and needs a baseline, when on-call onboarding needs standardized ops docs, or when runbooks are inconsistent across teams \u2014 e.g. 'create a runbook for payments-api', 'generate an on-call/incident-response doc', 'scaffold a deployment + rollback runbook'."
     },
     {
       "name": "sample-skill",
@@ -981,12 +696,12 @@
     {
       "name": "skill-security-auditor",
       "category": "engineering-advanced",
-      "description": ">"
+      "description": "Security audit and vulnerability scanner for AI agent skills before installation. Use when: (1) evaluating a skill from an untrusted source, (2) auditing a skill directory or git repo URL for malicious code, (3) pre-install security gate for Claude Code plugins, OpenClaw skills, or Codex skills, (4) scanning Python scripts for dangerous patterns like os.system, eval, subprocess, network exfiltration, (5) detecting prompt injection in SKILL.md files, (6) checking dependency supply chain risks, (7) verifying file system access stays within skill boundaries. Triggers: \"audit this skill\", \"is this skill safe\", \"scan skill for security\", \"check skill before install\", \"skill security check\", \"skill vulnerability scan\"."
     },
     {
       "name": "skill-tester",
       "category": "engineering-advanced",
-      "description": "Skill Tester"
+      "description": "Validate and quality-score Claude skill packages before publishing. Checks SKILL.md frontmatter (name + description) and structure, runs each Python tool for syntax/argparse/main-guard/stdlib-only compliance, scores documentation and structure 0-100, and audits for dangerous patterns. Use when the user wants to test, validate, lint, or quality-check a skill, verify a SKILL.md, or gate skills in CI before release \u2014 e.g. 'validate my skill', 'is this skill ready to publish', 'skill quality score', or 'check this SKILL.md'."
     },
     {
       "name": "skills-init",
@@ -1001,12 +716,7 @@
     {
       "name": "skills-status",
       "category": "engineering-advanced",
-      "description": "Show DAG state, agent progress, and branch status for an AgentHub session."
-    },
-    {
-      "name": "skills-status",
-      "category": "engineering-advanced",
-      "description": "Show experiment dashboard with results, active loops, and progress."
+      "description": "AgentHub /hub:status command \u2014 show the live state of a multi-agent session: session overview (task, agent count, base branch, state), per-agent git branches with commit counts and frontier/leaf status from the DAG analyzer, and recent message-board progress/results activity. Then advises whether to wait or move to /hub:eval. Use when: you want to see how the competing subagents are progressing, which branches exist, or who has finished \u2014 'how are the agents doing', 'session status', 'are the agents done', 'show the DAG'. (For autoresearch experiment dashboards, use /ar:status instead.)"
     },
     {
       "name": "spawn",
@@ -1131,7 +841,7 @@
     {
       "name": "content-strategy",
       "category": "marketing",
-      "description": "When the user wants to plan a content strategy, decide what content to create, or figure out what topics to cover. Also use when the user mentions \\\"content strategy,\\\" \\\"what should I write about,\\\" \\\"content ideas,\\\" \\\"blog strategy,\\\" \\\"topic clusters,\\\" or \\\"content planning.\\\" For writing individual pieces, see copywriting. For SEO-specific audits, see seo-audit."
+      "description": "When the user wants to plan a content strategy, decide what content to create, or figure out what topics to cover. Also use when the user mentions \"content strategy,\" \"what should I write about,\" \"content ideas,\" \"blog strategy,\" \"topic clusters,\" or \"content planning.\" For writing individual pieces, see copywriting. For SEO-specific audits, see seo-audit."
     },
     {
       "name": "copy-editing",
@@ -1141,7 +851,7 @@
     {
       "name": "copywriting",
       "category": "marketing",
-      "description": "When the user wants to write, rewrite, or improve marketing copy for any page \u2014 including homepage, landing pages, pricing pages, feature pages, about pages, or product pages. Also use when the user says \\\"write copy for,\\\" \\\"improve this copy,\\\" \\\"rewrite this page,\\\" \\\"marketing copy,\\\" \\\"headline help,\\\" or \\\"CTA copy.\\\" For email copy, see email-sequence. For popup copy, see popup-cro."
+      "description": "When the user wants to write, rewrite, or improve marketing copy for any page \u2014 including homepage, landing pages, pricing pages, feature pages, about pages, or product pages. Also use when the user says \"write copy for,\" \"improve this copy,\" \"rewrite this page,\" \"marketing copy,\" \"headline help,\" or \"CTA copy.\" For email copy, see email-sequence. For popup copy, see popup-cro."
     },
     {
       "name": "email-sequence",
@@ -1296,12 +1006,12 @@
     {
       "name": "apple-hig-expert",
       "category": "product",
-      "description": "Expert guidance on Apple Human Interface Guidelines (HIG). Covers iOS, macOS, and visionOS with 2026 Liquid Glass aesthetics and accessibility-first design."
+      "description": "Design and audit apps against Apple's Human Interface Guidelines (HIG) for iOS, macOS, watchOS, and visionOS, with the 2026 Liquid Glass aesthetic (translucent materials, depth, fluid motion) and accessibility-first rules (44pt tap targets, VoiceOver semantics, contrast). Runs hig_checker.py to verify contrast ratios (WCAG), tap-target sizes, and batch element checks, then produces a 0-100 HIG scorecard with prioritized fixes. Use when the user says 'audit my iOS app', 'check HIG compliance', 'is this accessible / VoiceOver-ready', 'design a visionOS ornament', 'review my mockup against Apple guidelines', or asks about San Francisco typography, semantic colors, navigation patterns (tab bars, sidebars, ornaments), or Liquid Glass materials."
     },
     {
       "name": "code-to-prd",
       "category": "product",
-      "description": "|"
+      "description": "Reverse-engineer a frontend, backend, or fullstack codebase into a complete Product\nRequirements Document. Scans routes/pages, components, state, API calls, database models,\nenums, and mock-vs-real data with codebase_analyzer.py, then scaffolds a structured prd/\ndirectory (README, per-page docs, enum dictionary, API inventory) with prd_scaffolder.py \u2014\ndetailed enough for an engineer or AI agent to reconstruct every page and endpoint in\nbusiness language. Use when the user says \"generate a PRD from this code\",\n\"reverse-engineer requirements\", \"document this codebase / its pages / API endpoints\",\n\"extract product specs from code\", or \"create a functional inventory\". Covers React, Vue,\nAngular, Svelte, Next.js, Nuxt, SvelteKit, Remix, Astro, NestJS, Express, Fastify,\nDjango/DRF, FastAPI, and Flask."
     },
     {
       "name": "competitive-teardown",
@@ -1331,7 +1041,7 @@
     {
       "name": "product-manager-toolkit",
       "category": "product",
-      "description": "Comprehensive toolkit for product managers including RICE prioritization, customer interview analysis, PRD templates, discovery frameworks, and go-to-market strategies. Use for feature prioritization, user research synthesis, requirement documentation, and product strategy development."
+      "description": "Product management toolkit covering RICE prioritization, customer-interview synthesis, PRD authoring, discovery frameworks, and go-to-market. Runs rice_prioritizer.py to score features by (Reach x Impact x Confidence) / Effort with portfolio balance and quarterly capacity planning, and customer_interview_analyzer.py to extract pain points, feature requests, jobs-to-be-done, sentiment, themes, and quotes from transcripts. Ships PRD templates (standard, one-page, brief, agile epic) and framework references (RICE, MoSCoW, Kano, JTBD). Use when the user says 'prioritize these features', 'run RICE', 'build a roadmap from this backlog', 'analyze this customer interview', 'synthesize user research', 'write a PRD', or 'plan sprint capacity'."
     },
     {
       "name": "product-strategist",
@@ -1490,10 +1200,6 @@
     }
   ],
   "categories": {
-    "agent": {
-      "count": 29,
-      "description": "Agent resources"
-    },
     "business-growth": {
       "count": 5,
       "description": "Business-growth resources"
@@ -1501,10 +1207,6 @@
     "c-level": {
       "count": 34,
       "description": "C-level resources"
-    },
-    "command": {
-      "count": 29,
-      "description": "Command resources"
     },
     "engineering": {
       "count": 51,

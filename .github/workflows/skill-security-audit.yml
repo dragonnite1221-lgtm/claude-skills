@@ -59,10 +59,11 @@ jobs:
             case "$dir" in
               .github/*|.claude/*|.codex/*|.gemini/*|docs/*|scripts/*|commands/*|standards/*|eval-workspace/*) continue ;;
             esac
-            # Check if this directory has a SKILL.md (is a skill)
-            skill_root=$(echo "$file" | cut -d'/' -f1)
-            # Walk up to find the skill root that contains SKILL.md
-            for candidate in "$skill_root" "$dir"; do
+            # Check if this directory has a SKILL.md (is a skill).
+            # Audit at skill granularity only — domain roots (which also
+            # carry a bundle SKILL.md) are intentionally not scanned, so a
+            # domain-level doc edit doesn't audit every skill in the domain.
+            for candidate in "$dir"; do
               if [ -f "$candidate/SKILL.md" ] && [[ ! " ${SEEN[*]} " =~ " $candidate " ]]; then
                 SKILLS+=("$candidate")
                 SEEN+=("$candidate")

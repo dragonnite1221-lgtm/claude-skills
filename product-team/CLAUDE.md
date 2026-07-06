@@ -55,13 +55,22 @@ python product-manager-toolkit/scripts/rice_prioritizer.py features.csv --capaci
 python product-manager-toolkit/scripts/rice_prioritizer.py features.csv --output json
 ```
 
-**CSV Format:**
+**CSV Format:** `reach` is numeric; `impact`, `confidence`, and `effort` use
+named scales (the script maps them to numbers — numeric values are NOT accepted
+and will fall back to defaults with a warning).
+
+- `impact`: `massive` | `high` | `medium` | `low` | `minimal`
+- `confidence`: `high` | `medium` | `low`
+- `effort`: `xl` | `l` | `m` | `s` | `xs`
+
 ```csv
-feature,reach,impact,confidence,effort
-User Dashboard,500,3,0.8,5
-API Rate Limiting,1000,2,0.9,3
-Dark Mode,300,1,1.0,2
+name,reach,impact,confidence,effort,description
+User Dashboard,500,high,high,m,Redesign the main dashboard
+API Rate Limiting,1000,medium,high,s,Add per-key rate limiting
+Dark Mode,300,low,high,xs,Ship a dark theme
 ```
+
+Generate a ready-to-edit sample with `python rice_prioritizer.py sample`.
 
 ### 2. Customer Interview Analyzer (`product-manager-toolkit/scripts/customer_interview_analyzer.py`)
 

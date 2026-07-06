@@ -1,6 +1,6 @@
 ---
 name: "status"
-description: "Show experiment dashboard with results, active loops, and progress."
+description: "Render the autoresearch experiment dashboard from results.tsv — per-experiment runs, kept count, best metric, percent change from start, and status — plus active-loop info (interval, cron id) read from loop.json. Scopes to one experiment, a domain, or all, and exports the view as markdown or CSV. Use when the user runs /ar:status or asks 'show experiment status', 'how is the optimization going', 'autoresearch dashboard', 'is the loop still running', or 'export experiment results'. (For multi-agent competition sessions use /hub:status instead.)"
 command: /ar:status
 ---
 

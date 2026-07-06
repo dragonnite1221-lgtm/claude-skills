@@ -16,6 +16,7 @@ Usage:
 
 import argparse
 import json
+import shlex
 import subprocess
 import sys
 from dataclasses import dataclass, field, asdict
@@ -318,7 +319,7 @@ def run_recipe(name: str, dry_run: bool):
             continue
         print(f"  $ {cmd}")
         try:
-            result = subprocess.run(cmd, shell=True, capture_output=True, text=True, timeout=30)
+            result = subprocess.run(shlex.split(cmd), capture_output=True, text=True, timeout=30)
             if result.stdout:
                 print(result.stdout)
             if result.returncode != 0 and result.stderr:

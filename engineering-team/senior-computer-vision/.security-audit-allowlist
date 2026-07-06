@@ -1,0 +1,4 @@
+# Reviewed intended behavior — auditable auditor suppressions.
+# _temp_coco is a tool-created intermediate dir under output_path used for the
+# two-step COCO format conversion; the rmtree only removes that tool-owned path.
+FS-ABUSE scripts/dataset_pipeline_builder.py:812

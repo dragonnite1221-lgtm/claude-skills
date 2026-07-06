@@ -1,9 +1,16 @@
 ---
 name: "browserstack"
 description: >-
-  Run tests on BrowserStack. Use when user mentions "browserstack",
-  "cross-browser", "cloud testing", "browser matrix", "test on safari",
-  "test on firefox", or "browser compatibility".
+  Run Playwright tests on the BrowserStack cloud grid for cross-browser and
+  cross-device coverage. Adds CDP wsEndpoint connectOptions projects (Chrome/
+  Firefox/WebKit on Windows/macOS) to playwright.config.ts, runs the cloud
+  suite, pulls per-session build results (status, browser/OS, video and log
+  URLs) and lists available browsers via the browserstack_get_builds,
+  browserstack_get_sessions and browserstack_get_browsers MCP tools, and sets up
+  BrowserStack Local tunnels for localhost/staging. Requires
+  BROWSERSTACK_USERNAME and BROWSERSTACK_ACCESS_KEY env vars. Use when the user
+  runs /pw:browserstack or says "browserstack", "cross-browser", "cloud
+  testing", "browser matrix", "test on safari", or "browser compatibility".
 ---
 
 # BrowserStack Integration

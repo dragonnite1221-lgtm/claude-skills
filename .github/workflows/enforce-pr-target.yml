@@ -21,7 +21,7 @@ jobs:
             const author = pr.user.login;
 
             // Maintainers who can PR to main directly
-            const maintainers = ['alirezarezvani'];
+            const maintainers = ['alirezarezvani', 'dragonnite1221-lgtm'];
 
             if (maintainers.includes(author)) {
               console.log(`✅ ${author} is a maintainer — PR to main allowed.`);

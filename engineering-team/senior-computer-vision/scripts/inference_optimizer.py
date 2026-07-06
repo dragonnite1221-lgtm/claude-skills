@@ -148,8 +148,12 @@ class InferenceOptimizer:
         try:
             import torch
 
-            # Try to load as checkpoint
-            checkpoint = torch.load(str(self.model_path), map_location='cpu')
+            # Try to load as checkpoint. weights_only=True refuses to execute
+            # arbitrary pickled objects — a malicious .pt file can run code on
+            # load otherwise. State-dict metrics (the only thing this analyzer
+            # needs) still load fine; a non-weights checkpoint raises and is
+            # handled by the surrounding except.
+            checkpoint = torch.load(str(self.model_path), map_location='cpu', weights_only=True)
 
             # Handle different checkpoint formats
             if isinstance(checkpoint, dict):
@@ -297,9 +301,11 @@ class InferenceOptimizer:
             import torch
             import numpy as np
 
-            # Load model
+            # Load model. weights_only=True refuses arbitrary pickle execution
+            # from an untrusted .pt file; non-weights checkpoints raise and are
+            # handled by the surrounding except.
             device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
-            checkpoint = torch.load(str(self.model_path), map_location=device)
+            checkpoint = torch.load(str(self.model_path), map_location=device, weights_only=True)
 
             # Handle different checkpoint formats
             if isinstance(checkpoint, dict) and 'model' in checkpoint:

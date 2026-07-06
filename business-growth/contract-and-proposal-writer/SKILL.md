@@ -1,37 +1,19 @@
 ---
 name: "contract-and-proposal-writer"
-description: "Contract & Proposal Writer"
+description: "Draft jurisdiction-aware business and legal documents as structured Markdown: freelance/dev contracts (fixed-price & hourly), consulting retainers, SaaS partnership agreements, project proposals, SOWs, NDAs (mutual/one-way), and MSAs, plus an Art. 28 GDPR Data Processing Addendum. Covers US (Delaware/work-for-hire), EU (GDPR), UK (post-Brexit English law), and DACH (BGB, Nutzungsrechte, HGB non-competes) clauses, with a key-clauses matrix (payment, IP, liability cap, termination, dispute resolution) and ready-to-fill [BRACKETED] templates. Includes pandoc commands to convert the Markdown to DOCX. Use when the user needs a client contract, proposal, SOW, NDA, MSA, or retainer fast, asks 'draft a freelance contract', 'write an NDA', or 'I need a GDPR DPA'. Not a substitute for legal counsel."
 ---
 
 # Contract & Proposal Writer
 
-**Tier:** POWERFUL  
-**Category:** Business Growth  
-**Domain:** Legal Documents, Business Development, Client Relations
+Generate professional, jurisdiction-aware business documents: freelance contracts, project
+proposals, SOWs, NDAs, MSAs, retainers, and SaaS partnership agreements. Outputs structured
+Markdown with DOCX conversion instructions. Covers US (Delaware), EU (GDPR), UK, and DACH
+(German law) jurisdictions, including GDPR Data Processing Addenda for EU/DACH.
 
----
+**Not a substitute for legal counsel.** Use these templates as strong starting points;
+review with an attorney for high-value or complex engagements.
 
-## Overview
-
-Generate professional, jurisdiction-aware business documents: freelance contracts, project proposals, SOWs, NDAs, and MSAs. Outputs structured Markdown with docx conversion instructions. Covers US (Delaware), EU (GDPR), UK, and DACH (German law) jurisdictions.
-
-**Not a substitute for legal counsel.** Use these templates as strong starting points; review with an attorney for high-value or complex engagements.
-
----
-
-## Core Capabilities
-
-- Freelance development contracts (fixed-price & hourly)
-- Project proposals with timeline/budget breakdown
-- Statements of Work (SOW) with deliverables matrix
-- NDAs (mutual & one-way)
-- Master Service Agreements (MSA)
-- Jurisdiction-specific clauses (US/EU/UK/DACH)
-- GDPR Data Processing Addenda (EU/DACH)
-
----
-
-## Key Clauses Reference
+## Key clauses reference
 
 | Clause | Options |
 |--------|---------|
