@@ -70,13 +70,7 @@ def working_tree_changes(project_root):
 
 
 def safe_rollback(project_root, expected_commit, reason):
-    """Undo the experiment commit with a history-preserving revert.
-
-    The revert is attempted only when HEAD is still the evaluated commit and the
-    tracked worktree is clean. Unlike ``reset --hard HEAD~1``, this preserves the
-    original commit and records the undo, so a mistaken classification cannot
-    erase committed work. Returns True only after a successful revert.
-    """
+    """Revert the unchanged evaluated HEAD only from a clean tracked worktree."""
     current = get_current_commit(str(project_root))
     if expected_commit and current != expected_commit:
         print(f"  WARNING: skipping rollback ({reason}) — HEAD {current} is not the "
@@ -89,9 +83,7 @@ def safe_rollback(project_root, expected_commit, reason):
         print(f"  WARNING: skipping rollback ({reason}) — {len(tracked)} uncommitted "
               "tracked change(s); refusing revert. Commit/stash first (untracked OK).")
         return False
-    code, _, error = run_git(
-        ["revert", "--no-edit", expected_commit], cwd=str(project_root), timeout=60
-    )
+    code, _, error = run_git(["revert", "--no-edit", expected_commit], cwd=str(project_root), timeout=60)
     if code == 0:
         return True
     # A conflict must not leave the repository in an in-progress revert state.
