@@ -656,7 +656,7 @@
     {
       "name": "release-manager",
       "category": "engineering-advanced",
-      "description": "Use when the user asks to plan releases, manage changelogs, coordinate deployments, create release branches, or automate versioning."
+      "description": "Manages software release workflows and produces CHANGELOG.md entries, semantic-version recommendations, release-readiness plans, deployment checklists, and rollback/hotfix procedures. Use when planning a release, analyzing conventional commits, coordinating a release branch or git tag, or preparing deployment and recovery artifacts."
     },
     {
       "name": "resume",
