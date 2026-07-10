@@ -21,19 +21,24 @@ TARGET_FILE = "dist/main.js"
 # BUILD_CMD = "npm run build"
 # --- END CONFIG ---
 
+build_cmd = globals().get("BUILD_CMD")
+docker_build_cmd = globals().get("DOCKER_BUILD_CMD")
+docker_image = globals().get("DOCKER_IMAGE")
+target_dir = globals().get("TARGET_DIR")
+
 # Build if needed
-if "BUILD_CMD" in dir() or "BUILD_CMD" in globals():
-    result = subprocess.run(BUILD_CMD, shell=True, capture_output=True)
+if build_cmd:
+    result = subprocess.run(build_cmd, shell=True, capture_output=True)
     if result.returncode != 0:
         print(f"Build failed: {result.stderr.decode()[:200]}", file=sys.stderr)
         sys.exit(1)
 
 # Measure
-if "DOCKER_IMAGE" in dir() or "DOCKER_IMAGE" in globals():
-    if "DOCKER_BUILD_CMD" in dir():
-        subprocess.run(DOCKER_BUILD_CMD, shell=True, capture_output=True)
+if docker_image:
+    if docker_build_cmd:
+        subprocess.run(docker_build_cmd, shell=True, capture_output=True)
     result = subprocess.run(
-        f"docker image inspect {DOCKER_IMAGE} --format '{{{{.Size}}}}'",
+        f"docker image inspect {docker_image} --format '{{{{.Size}}}}'",
         shell=True, capture_output=True, text=True
     )
     try:
@@ -41,10 +46,10 @@ if "DOCKER_IMAGE" in dir() or "DOCKER_IMAGE" in globals():
     except ValueError:
         print(f"Could not parse size from: {result.stdout[:100]}", file=sys.stderr)
         sys.exit(1)
-elif "TARGET_DIR" in dir() or "TARGET_DIR" in globals():
+elif target_dir:
     size_bytes = sum(
         os.path.getsize(os.path.join(dp, f))
-        for dp, _, fns in os.walk(TARGET_DIR) for f in fns
+        for dp, _, fns in os.walk(target_dir) for f in fns
     )
 elif os.path.exists(TARGET_FILE):
     size_bytes = os.path.getsize(TARGET_FILE)

@@ -13,6 +13,7 @@ Output: release readiness report + checklist + rollback runbook + announcement d
 
 import argparse
 import json
+import re
 import sys
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Any, Union
@@ -389,615 +390,101 @@ class ReleasePlanner:
                 feature_stats['low_test_coverage'] += 1
                 assessment['warnings'].append(
                     f"Feature '{feature.title}' has low test coverage: "
-                    f"{feature.test_coverage_actual}% < {feature.test_coverage_required}%"
-                )
-        
-        assessment['feature_summary'] = feature_stats
-        
-        # Assess quality gates
-        gate_stats = {
-            'total': len(self.quality_gates),
-            'passed': 0,
-            'failed': 0,
-            'pending': 0,
-            'required_failed': 0
-        }
-        
-        for gate in self.quality_gates:
-            max_score += 5  # Each gate worth 5 points
-            
-            if gate.status == ComponentStatus.READY:
-                gate_stats['passed'] += 1
-                total_score += 5
-            elif gate.status == ComponentStatus.FAILED:
-                gate_stats['failed'] += 1
-                if gate.required:
-                    gate_stats['required_failed'] += 1
-                    assessment['blocking_issues'].append(
-                        f"Required quality gate '{gate.name}' failed"
-                    )
-            else:
-                gate_stats['pending'] += 1
-                if gate.required:
-                    assessment['warnings'].append(
-                        f"Required quality gate '{gate.name}' is pending"
-                    )
-        
-        assessment['quality_gate_summary'] = gate_stats
-        
-        # Timeline assessment
-        if self.target_date:
-            # Handle timezone-aware datetime comparison
-            now = datetime.now(self.target_date.tzinfo) if self.target_date.tzinfo else datetime.now()
-            days_until_release = (self.target_date - now).days
-            assessment['timeline_assessment'] = {
-                'target_date': self.target_date.isoformat(),
-                'days_remaining': days_until_release,
-                'timeline_status': 'on_track' if days_until_release > 0 else 'overdue'
-            }
-            
-            if days_until_release < 0:
-                assessment['blocking_issues'].append(f"Release is {abs(days_until_release)} days overdue")
-            elif days_until_release < 3 and feature_stats['blocked'] > 0:
-                assessment['blocking_issues'].append("Not enough time to resolve blocked features")
-        
-        # Calculate overall readiness score
-        if max_score > 0:
-            assessment['readiness_score'] = (total_score / max_score) * 100
-        
-        # Determine overall status
-        if assessment['blocking_issues']:
-            assessment['overall_status'] = 'blocked'
-        elif assessment['warnings']:
-            assessment['overall_status'] = 'at_risk'
-        else:
-            assessment['overall_status'] = 'ready'
-        
-        # Generate recommendations
-        if feature_stats['missing_approvals'] > 0:
-            assessment['recommendations'].append("Obtain required approvals for pending features")
-        
-        if feature_stats['low_test_coverage'] > 0:
-            assessment['recommendations'].append("Improve test coverage for features below threshold")
-        
-        if gate_stats['pending'] > 0:
-            assessment['recommendations'].append("Complete pending quality gate validations")
-        
-        if feature_stats['high_risk'] > 0:
-            assessment['recommendations'].append("Review high-risk features for additional validation")
-        
-        return assessment
-    
-    def _check_feature_approvals(self, feature: Feature) -> List[str]:
-        """Check which approvals are missing for a feature."""
-        missing = []
-        
-        # Determine required approvals based on risk level
-        required = self.required_approvals.copy()
-        if feature.risk_level in [RiskLevel.HIGH, RiskLevel.CRITICAL]:
-            required = self.high_risk_approval_requirements.copy()
-        
-        if 'pm_approved' in required and not feature.pm_approved:
-            missing.append('PM approval')
-        
-        if 'qa_approved' in required and not feature.qa_approved:
-            missing.append('QA approval')
-        
-        if 'security_approved' in required and not feature.security_approved:
-            missing.append('Security approval')
-        
-        return missing
-    
-    def generate_release_checklist(self) -> List[Dict]:
-        """Generate comprehensive release checklist."""
-        checklist = []
-        
-        # Pre-release validation
-        checklist.extend([
-            {
-                'category': 'Pre-Release Validation',
-                'item': 'All features implemented and tested',
-                'status': 'ready' if all(f.status == ComponentStatus.READY for f in self.features) else 'pending',
-                'details': f"{len([f for f in self.features if f.status == ComponentStatus.READY])}/{len(self.features)} features ready"
-            },
-            {
-                'category': 'Pre-Release Validation', 
-                'item': 'Breaking changes documented',
-                'status': 'ready' if self._check_breaking_change_docs() else 'pending',
-                'details': f"{len([f for f in self.features if f.breaking_changes])} features have breaking changes"
-            },
-            {
-                'category': 'Pre-Release Validation',
-                'item': 'Migration scripts tested',
-                'status': 'ready' if self._check_migrations() else 'pending',
-                'details': f"{len([f for f in self.features if f.requires_migration])} features require migrations"
-            }
-        ])
-        
-        # Quality gates
-        for gate in self.quality_gates:
-            checklist.append({
-                'category': 'Quality Gates',
-                'item': gate.name,
-                'status': gate.status.value,
-                'details': gate.details,
-                'required': gate.required
-            })
-        
-        # Approvals
-        approval_items = [
-            ('Product Manager sign-off', self._check_pm_approvals()),
-            ('QA validation complete', self._check_qa_approvals()), 
-            ('Security team clearance', self._check_security_approvals())
-        ]
-        
-        for item, status in approval_items:
-            checklist.append({
-                'category': 'Approvals',
-                'item': item,
-                'status': 'ready' if status else 'pending'
-            })
-        
-        # Documentation
-        doc_items = [
-            'CHANGELOG.md updated',
-            'API documentation updated', 
-            'User documentation updated',
-            'Migration guide written',
-            'Rollback procedure documented'
-        ]
-        
-        for item in doc_items:
-            checklist.append({
-                'category': 'Documentation',
-                'item': item,
-                'status': 'pending'  # Would need integration with docs system to check
-            })
-        
-        # Deployment preparation
-        deployment_items = [
-            'Database migrations prepared',
-            'Environment variables configured',
-            'Monitoring alerts updated',
-            'Rollback plan tested',
-            'Stakeholders notified'
-        ]
-        
-        for item in deployment_items:
-            checklist.append({
-                'category': 'Deployment',
-                'item': item,
-                'status': 'pending'
-            })
-        
-        return checklist
-    
-    def _check_breaking_change_docs(self) -> bool:
-        """Check if breaking changes are properly documented."""
-        features_with_breaking_changes = [f for f in self.features if f.breaking_changes]
-        return all(len(f.breaking_changes) > 0 for f in features_with_breaking_changes)
-    
-    def _check_migrations(self) -> bool:
-        """Check migration readiness."""
-        features_with_migrations = [f for f in self.features if f.requires_migration]
-        return all(f.status == ComponentStatus.READY for f in features_with_migrations)
-    
-    def _check_pm_approvals(self) -> bool:
-        """Check PM approvals."""
-        return all(f.pm_approved for f in self.features if f.risk_level != RiskLevel.LOW)
-    
-    def _check_qa_approvals(self) -> bool:
-        """Check QA approvals.""" 
-        return all(f.qa_approved for f in self.features)
-    
-    def _check_security_approvals(self) -> bool:
-        """Check security approvals."""
-        high_risk_features = [f for f in self.features if f.risk_level in [RiskLevel.HIGH, RiskLevel.CRITICAL]]
-        return all(f.security_approved for f in high_risk_features)
-    
-    def generate_communication_plan(self) -> Dict:
-        """Generate stakeholder communication plan."""
-        plan = {
-            'internal_notifications': [],
-            'external_notifications': [],
-            'timeline': [],
-            'channels': {},
-            'templates': {}
-        }
-        
-        # Group stakeholders by type
-        internal_stakeholders = [s for s in self.stakeholders if s.role in 
-                               ['developer', 'qa', 'pm', 'devops', 'security']]
-        external_stakeholders = [s for s in self.stakeholders if s.role in 
-                               ['customer', 'partner', 'support']]
-        
-        # Internal notifications
-        for stakeholder in internal_stakeholders:
-            plan['internal_notifications'].append({
-                'recipient': stakeholder.name,
-                'role': stakeholder.role,
-                'method': stakeholder.notification_type,
-                'content_type': 'technical_details',
-                'timing': 'T-24h and T-0'
-            })
-        
-        # External notifications
-        for stakeholder in external_stakeholders:
-            plan['external_notifications'].append({
-                'recipient': stakeholder.name,
-                'role': stakeholder.role,
-                'method': stakeholder.notification_type,
-                'content_type': 'user_facing_changes',
-                'timing': 'T-48h and T+1h'
-            })
-        
-        # Communication timeline
-        if self.target_date:
-            timeline_items = [
-                (timedelta(days=-2), 'Send pre-release notification to external stakeholders'),
-                (timedelta(days=-1), 'Send deployment notification to internal teams'),
-                (timedelta(hours=-2), 'Final go/no-go decision'),
-                (timedelta(hours=0), 'Begin deployment'),
-                (timedelta(hours=1), 'Post-deployment status update'),
-                (timedelta(hours=24), 'Post-release summary')
-            ]
-            
-            for delta, description in timeline_items:
-                notification_time = self.target_date + delta
-                plan['timeline'].append({
-                    'time': notification_time.isoformat(),
-                    'description': description,
-                    'recipients': 'all' if 'all' in description.lower() else 'internal'
-                })
-        
-        # Communication channels
-        channels = {}
-        for stakeholder in self.stakeholders:
-            if stakeholder.notification_type not in channels:
-                channels[stakeholder.notification_type] = []
-            channels[stakeholder.notification_type].append(stakeholder.contact)
-        plan['channels'] = channels
-        
-        # Message templates
-        plan['templates'] = self._generate_message_templates()
-        
-        return plan
-    
-    def _generate_message_templates(self) -> Dict:
-        """Generate message templates for different audiences."""
-        breaking_changes = [f for f in self.features if f.breaking_changes]
-        new_features = [f for f in self.features if f.type == 'feature']
-        bug_fixes = [f for f in self.features if f.type == 'bugfix']
-        
-        templates = {
-            'internal_pre_release': {
-                'subject': f'Release {self.version} - Pre-deployment Notification',
-                'body': f"""Team,
+ß^´¶‰žËkºwµçHJBˆˆÈ^\›˜[›ÝYšXØ][ÛœÂˆ›ÜˆÝZÙZÛ\ˆ[ˆ^\›˜[ÜÝZÙZÛ\œÎ‚ˆ[–ÉÙ^\›˜[Û›ÝYšXØ][ÛœÉ×K˜\[™
+Âˆ	Ü™XÚ\Y[	ÎˆÝZÙZÛ\‹›˜[YKˆ	Ü›ÛIÎˆÝZÙZÛ\‹œ›ÛKˆ	ÛY]Ù	ÎˆÝZÙZÛ\‹››ÝYšXØ][Û—Ý\Kˆ	ØÛÛ[Ý\IÎˆ	Ý\Ù\—Ù˜XÚ[™×ØÚ[™Ù\ÉËˆ	Ý[Z[™ÉÎˆ	ÕM[™
+ÌZ	ÂˆJBˆˆÈÛÛ[][šXØ][Ûˆ[Y[[™BˆYˆÙ[‹\™Ù]Ù]N‚ˆ[Y[[™WÚ][\ÈHÂˆ
+[YY[J^\ÏKLŠK	ÔÙ[™™K\™[X\ÙH›ÝYšXØ][ÛˆÈ^\›˜[ÝZÙZÛ\œÉÊKˆ
+[YY[J^\ÏKLJK	ÔÙ[™\Þ[Y[›ÝYšXØ][ÛˆÈ[\›˜[X[\ÉÊKˆ
+[YY[JÝ\œÏKLŠK	Ñš[˜[ÛËÛ›ËYÛÈXÚ\Ú[Û‰ÊKˆ
+[YY[JÝ\œÏL
+K	Ð™YÚ[ˆ\Þ[Y[	ÊKˆ
+[YY[JÝ\œÏLJK	ÔÜÝY\Þ[Y[Ý]\È\]IÊKˆ
+[YY[JÝ\œÏL
+K	ÔÜÝ\™[X\ÙHÝ[[X\žIÊBˆBˆˆ›Üˆ[K\ØÜš\[Ûˆ[ˆ[Y[[™WÚ][\Î‚ˆ›ÝYšXØ][Û—Ý[YHHÙ[‹\™Ù]Ù]H
+È[Bˆ[–ÉÝ[Y[[™I×K˜\[™
+Âˆ	Ý[YIÎˆ›ÝYšXØ][Û—Ý[YKš\ÛÙ›Ü›X]
 
-We are preparing to deploy {self.release_name} version {self.version} on {self.target_date.strftime('%Y-%m-%d %H:%M UTC') if self.target_date else 'TBD'}.
+Kˆ	Ù\ØÜš\[Û‰Îˆ\ØÜš\[Û‹ˆ	Ü™XÚ\Y[ÉÎˆ	Ø[	ÈYˆ	Ø[	È[ˆ\ØÜš\[Û‹›ÝÙ\Š
+H[ÙH	Ú[\›˜[	ÂˆJBˆˆÈÛÛ[][šXØ][ÛˆÚ[›™[ÂˆÚ[›™[ÈHßBˆ›ÜˆÝZÙZÛ\ˆ[ˆÙ[‹œÝZÙZÛ\œÎ‚ˆYˆÝZÙZÛ\‹››ÝYšXØ][Û—Ý\H›Ý[ˆÚ[›™[Î‚ˆÚ[›™[ÖÜÝZÙZÛ\‹››ÝYšXØ][Û—Ý\WHH×BˆÚ[›™[ÖÜÝZÙZÛ\‹››ÝYšXØ][Û—Ý\WK˜\[™
+ÝZÙZÛ\‹˜ÛÛXÝ
+Bˆ[–ÉØÚ[›™[É×HHÚ[›™[ÂˆˆÈY\ÜØYÙH[\]\Âˆ[–ÉÝ[\]\É×HHÙ[‹—ÙÙ[™\˜]WÛY\ÜØYÙWÝ[\]\Ê
+Bˆˆ™]\›ˆ[‚ˆˆYˆÙÙ[™\˜]WÛY\ÜØYÙWÝ[\]\ÊÙ[ŠHOˆXÝ‚ˆˆˆ‘Ù[™\˜]HY\ÜØYÙH[\]\È›ÜˆY™™\™[]YY[˜Ù\Ëˆˆˆ‚ˆœ™XZÚ[™×ØÚ[™Ù\ÈHÙˆ›Üˆˆ[ˆÙ[‹™™X]\™\ÈYˆ‹˜œ™XZÚ[™×ØÚ[™Ù\×Bˆ™]×Ù™X]\™\ÈHÙˆ›Üˆˆ[ˆÙ[‹™™X]\™\ÈYˆ‹\HOH	Ù™X]\™I×BˆY×Ùš^\ÈHÙˆ›Üˆˆ[ˆÙ[‹™™X]\™\ÈYˆ‹\HOH	ØYÙš^	×Bˆˆ[\]\ÈHÂˆ	Ú[\›˜[Ü™WÜ™[X\ÙIÎˆÂˆ	ÜÝXš™XÝ	Îˆ‰Ô™[X\ÙHÜÙ[‹™\œÚ[ÛŸHH™KY\Þ[Y[›ÝYšXØ][Û‰Ëˆ	Ø›ÙIÎˆˆˆˆ•X[K‚•ÙH\™H™\\š[™ÈÈ\ÞHÜÙ[‹œ™[X\ÙWÛ˜[Y_H™\œÚ[ÛˆÜÙ[‹™\œÚ[ÛŸHÛˆÜÙ[‹\™Ù]Ù]KœÝ™[YJ	ÉVKI[KIY	R‰SHUÉÊHYˆÙ[‹\™Ù]Ù]H[ÙH	Õ‘	ßK‚‚’Ù^HÚ[™Ù\Î‚‹HÛ[Š™]×Ù™X]\™\Ê_H™]È™X]\™\Â‹HÛ[ŠY×Ùš^\Ê_HYÈš^\Â‹HÛ[Šœ™XZÚ[™×ØÚ[™Ù\Ê_Hœ™XZÚ[™ÈÚ[™Ù\Â‚”X\ÙH™]šY]ÈH™[X\ÙH›Ý\È[™™\\™H›Üˆ[žH™YYYÝ\ÜXÝ]š]Y\Ë‚‚”›Û˜XÚÈ[Žˆ]˜Z[X›H[ˆ™[X\ÙHØÝ[Y[][Û‚“Û‹XØ[ˆX\ÙH™H]˜Z[X›H\š[™È\Þ[Y[Ú[™ÝÂ‚™\Ý™YØ\™Ë”™[X\ÙHX[Hˆˆ‚ˆKˆ	Ù^\›˜[Ý\Ù\—Û›ÝYšXØ][Û‰ÎˆÂˆ	ÜÝXš™XÝ	Îˆ‰Ô›ÙXÝ\]HH™\œÚ[ÛˆÜÙ[‹™\œÚ[ÛŸH›ÝÈ]˜Z[X›IËˆ	Ø›ÙIÎˆˆˆˆ‘X\ˆ\Ù\œË‚•ÙIÜ™H^Ú]YÈ[››Ý[˜ÙH™\œÚ[ÛˆÜÙ[‹™\œÚ[ÛŸHÙˆÜÙ[‹œ™[X\ÙWÛ˜[Y_H\È›ÝÈ]˜Z[X›HB‚•Ú]	ÜÈ™]Î‚žØÚŠL
+Kš›Ú[Šˆ‹HÙ‹]_Hˆ›Üˆˆ[ˆ™]×Ù™X]\™\ÖÎWJ_B‚YÈš^\Î‚žØÚŠL
+Kš›Ú[Šˆ‹HÙ‹]_Hˆ›Üˆˆ[ˆY×Ùš^\ÖÎŒ×J_B‚žÉÒ[\Ü[ˆ\È™[X\ÙH[˜ÛY\Èœ™XZÚ[™ÈÚ[™Ù\ËˆX\ÙH™]šY]ÈHZYÜ˜][ÛˆÝZYK‰ÈYˆœ™XZÚ[™×ØÚ[™Ù\È[ÙH	ÉßB‚‘›Üˆ[™[X\ÙH›Ý\È[™ZYÜ˜][Ûˆ[œÝXÝ[ÛœËš\Ú]Ý\ˆØÝ[Y[][Û‹‚‚•[šÈ[ÝH›Üˆ\Ú[™ÈÝ\ˆ›ÙXÝB‚•H]™[ÜY[X[Hˆˆ‚ˆKˆ	Ü›Û˜XÚ×Û›ÝYšXØ][Û‰ÎˆÂˆ	ÜÝXš™XÝ	Îˆ‰ÕT‘ÑS•ˆ™[X\ÙHÜÙ[‹™\œÚ[ÛŸH›Û˜XÚÈ[š]X]Y	Ëˆ	Ø›ÙIÎˆˆˆˆUS•SÓŽˆ™[X\ÙH›Û˜XÚÈ[ˆ›ÙÜ™\ÜË‚‚”™[X\ÙNˆÜÙ[‹™\œÚ[ÛŸB”™X\ÛÛŽˆÕÈ‘H’SQB”›Û˜XÚÈ[š]X]YˆÙ]][YK››ÝÊ
+KœÝ™[YJ	ÉVKI[KIY	R‰SHUÉÊ_B‘\Ý[X]YÛÛ\][ÛŽˆÕÈ‘H’SQB‚Ý\œ™[Ý]\Îˆ›Û[™È˜XÚÈÈ™]š[Ý\ÈÝX›H™\œÚ[Û‚’[\XÝˆÕÈ‘H’SQB‚•ÙHÚ[›ÝšYH\]\È]™\žHMHZ[]\È[[›Û˜XÚÈ\ÈÛÛ\]K‚‚’[˜ÚY[ÛÛ[X[™\ŽˆÕÈ‘H’SQB”Ý]\ÈYÙNˆÕÈ‘H’SQHˆˆ‚ˆBˆBˆˆ™]\›ˆ[\]\ÂˆˆYˆÙ[™\˜]WÜ›Û˜XÚ×Ü[˜›ÛÚÊÙ[ŠHOˆXÝ‚ˆˆˆ‘Ù[™\˜]H]Z[Y›Û˜XÚÈ[˜›ÛÚËˆˆˆ‚ˆ[˜›ÛÚÈHÂˆ	ÛÝ™\šY]ÉÎˆÂˆ	Ü\œÜÙIÎˆ‰Ñ[Y\™Ù[˜ÞH›Û˜XÚÈ›ØÙY\™H›ÜˆÜÙ[‹œ™[X\ÙWÛ˜[Y_HžÜÙ[‹™\œÚ[ÛŸIËˆ	ÝšYÙÙ\œÉÎˆÂˆ	Ñ\œ›Üˆ˜]HÜZÙH
+Œž˜\Ù[[™H›ÜˆŒMHZ[]\ÊIËˆ	ÐÜš]XØ[[˜Ý[Û˜[]H˜Z[\™IËˆ	ÔÙXÝ\š]H[˜ÚY[	Ëˆ	Ñ]HÛÜœ\[Ûˆ]XÝY	Ëˆ	Ô\™›Ü›X[˜ÙHYÜ˜Y][Ûˆ
+L	H][˜ÞH[˜Ü™X\ÙJIËˆ	ÓX[X[XÚ\Ú[ÛˆžH[˜ÚY[ÛÛ[X[™\‰ÂˆKˆ	ÙXÚ\Ú[Û—ÛXZÙ\œÉÎˆÉÓÛ‹XØ[[™Ú[™Y\‰Ë	Ñ[™Ú[™Y\š[™ÈXY	Ë	Ò[˜ÚY[ÛÛ[X[™\‰×Kˆ	Ù\Ý[X]YÝÝ[Ý[YIÎˆÙ[‹—ØØ[Ý[]WÜ›Û˜XÚ×Ý[YJ
+BˆKˆ	Ü™\™\]Z\Ú]\ÉÎˆÂˆ	ÐÛÛ™š\›H›Û˜XÚÈ\È™XÙ\ÜØ\žH
+ÚXÚÈÚ][˜ÚY[ÛÛ[X[™\ŠIËˆ	Ó›ÝYžHÝZÙZÛ\œÈÙˆ›Û˜XÚÈXÚ\Ú[Û‰Ëˆ	Ñ[œÝ\™H]X˜\ÙH˜XÚÝ\È\™H]˜Z[X›IËˆ	Õ™\šYžH[Ûš]Üš[™ÈÞ\Ý[\È\™HÜ\˜][Û˜[	Ëˆ	Ò]™HÛÛ[][šXØ][ÛˆÚ[›™[È™XYIÂˆKˆ	ÜÝ\ÉÎˆ×Kˆ	Ý™\šYšXØ][Û‰ÎˆÂˆ	ÚX[ØÚXÚÜÉÎˆÂˆ	Ð\XØ][Ûˆ™\ÜÛ™ÈÈX[[™Ú[	Ëˆ	Ñ]X˜\ÙHÛÛ›™XÝ]š]HÛÛ™š\›YY	Ëˆ	Ð]][XØ][ÛˆÞ\Ý[H[˜Ý[Û˜[	Ëˆ	ÐÛÜ™H\Ù\ˆÛÜšÙ›ÝÜÈÛÜšÚ[™ÉËˆ	Ñ\œ›Üˆ˜]\È˜XÚÈÈ˜\Ù[[™IËˆ	Ô\™›Ü›X[˜ÙHY]šXÜÈÚ][ˆ›Ü›X[˜[™ÙIÂˆKˆ	Ü›Û˜XÚ×ØÛÛ™š\›X][Û‰ÎˆÂˆ	Ô™]š[Ý\È™\œÚ[Ûˆ[H\ÞYY	Ëˆ	Ñ]X˜\ÙH[ˆÛÛœÚ\Ý[Ý]IËˆ	Ð[Ù\šXÙ\ÈÛÛ[][šXØ][™È›Ü\›IËˆ	Ó[Ûš]Üš[™ÈÚÝÜÈÝX›HY]šXÜÉËˆ	ÔØ[\H\Ù\ˆÛÜšÙ›ÝÜÈ\ÝY	ÂˆBˆKˆ	ÜÜÝÜ›Û˜XÚÉÎˆÂˆ	Õ\]HÝ]\ÈYÙHÚ]™\ÛÛ][Û‰Ëˆ	Ó›ÝYžH[ÝZÙZÛ\œÈÙˆÝXØÙ\ÜÙ[›Û˜XÚÉËˆ	ÔØÚY[HÜÝZ[˜ÚY[™]šY]ÉËˆ	ÑØÝ[Y[\ÜÝY\È[˜ÛÝ[\™Y\š[™È›Û˜XÚÉËˆ	Ô[ˆ[™\ÝYØ][ÛˆÙˆ›ÛÝØ]\ÙIËˆ	Ñ]\›Z[™H[Y[[™H›Üˆ™^™[X\ÙH][\	ÂˆKˆ	Ù[Y\™Ù[˜ÞWØÛÛXÝÉÎˆ×BˆBˆˆÈÛÛ™\›Û˜XÚÈÝ\ÈÈ]Z[Y›Ü›X]ˆ›ÜˆÝ\[ˆÛÜY
+Ù[‹œ›Û˜XÚ×ÜÝ\ËÙ^O[[X™Hˆ›Ü™\ŠN‚ˆÝ\Ù]HHÂˆ	ÛÜ™\‰ÎˆÝ\›Ü™\‹ˆ	Ý]IÎˆÝ\™\ØÜš\[Û‹ˆ	Ù\Ý[X]YÝ[YIÎˆÝ\™\Ý[X]YÝ[YKˆ	Üš\Ú×Û]™[	ÎˆÝ\œš\Ú×Û]™[˜[YKˆ	Ú[œÝXÝ[ÛœÉÎˆÝ\™\ØÜš\[Û‹ˆ	ØÛÛ[X[™	ÎˆÝ\˜ÛÛ[X[™ˆ	Ý™\šYšXØ][Û‰ÎˆÝ\™\šYšXØ][Û‹ˆ	Ü›Û˜XÚ×ÜÜÜÚX›IÎˆÝ\œš\Ú×Û]™[OHš\ÚÓ]™[Ô’UPÐSˆBˆ[˜›ÛÚÖÉÜÝ\É×K˜\[™
+Ý\Ù]JBˆˆÈY[Y\™Ù[˜ÞHÛÛXÝÂˆÜš]XØ[ÜÝZÙZÛ\œÈHÜÈ›ÜˆÈ[ˆÙ[‹œÝZÙZÛ\œÈYˆË˜Üš]XØ[Ü]Bˆ›ÜˆÝZÙZÛ\ˆ[ˆÜš]XØ[ÜÝZÙZÛ\œÎ‚ˆ[˜›ÛÚÖÉÙ[Y\™Ù[˜ÞWØÛÛXÝÉ×K˜\[™
+Âˆ	Û˜[YIÎˆÝZÙZÛ\‹›˜[YKˆ	Ü›ÛIÎˆÝZÙZÛ\‹œ›ÛKˆ	ØÛÛXÝ	ÎˆÝZÙZÛ\‹˜ÛÛXÝˆ	ÛY]Ù	ÎˆÝZÙZÛ\‹››ÝYšXØ][Û—Ý\BˆJBˆˆ™]\›ˆ[˜›ÛÚÂˆˆYˆØØ[Ý[]WÜ›Û˜XÚ×Ý[YJÙ[ŠHOˆÝŽ‚ˆˆˆØ[Ý[]H\Ý[X]YÝ[›Û˜XÚÈ[YKˆˆˆ‚ˆÝ[ÛZ[]\ÈHˆ›ÜˆÝ\[ˆÙ[‹œ›Û˜XÚ×ÜÝ\Î‚ˆÈ\œÙH[YH\Ý[X]\ÈZÙHHZ[]\È‹ŒÌÙXÛÛ™È‹ŒHÝ\ˆ‚ˆ[YWÜÝˆHÝ\™\Ý[X]YÝ[YK›ÝÙ\Š
+BˆYˆ	ÛZ[]IÈ[ˆ[YWÜÝŽ‚ˆZ[]\ÈH[
+™KœÙX\˜Ú
+‰Ê
+ÊIË[YWÜÝŠK™Ü›Ý\
+JJBˆÝ[ÛZ[]\È
+ÏHZ[]\Âˆ[Yˆ	ÚÝ\‰È[ˆ[YWÜÝŽ‚ˆÝ\œÈH[
+™KœÙX\˜Ú
+‰Ê
+ÊIË[YWÜÝŠK™Ü›Ý\
+JJBˆÝ[ÛZ[]\È
+ÏHÝ\œÈ
+ˆŒˆ[Yˆ	ÜÙXÛÛ™	È[ˆ[YWÜÝŽ‚ˆÈ›Ý[™\ÙXÛÛ™ÈÈZ[]\ÂˆÝ[ÛZ[]\È
+ÏHBˆˆYˆÝ[ÛZ[]\ÈŒ‚ˆ™]\›ˆˆžÝÝ[ÛZ[]\ßHZ[]\È‚ˆ[ÙN‚ˆÝ\œÈHÝ[ÛZ[]\ÈËÈŒˆZ[]\ÈHÝ[ÛZ[]\È	HŒˆ™]\›ˆˆžÚÝ\œßZÛZ[]\ß[H‚‚‚™YˆXZ[Š
+N‚ˆˆˆ“XZ[ˆÓH[žHÚ[ˆˆˆ‚ˆ\œÙ\ˆH\™Ü\œÙK\™Ý[Y[\œÙ\Š\ØÜš\[ÛH\ÜÙ\ÜÈ™[X\ÙH™XY[™\ÜÈ[™Ù[™\˜]H™[X\ÙH[œÈŠBˆ\œÙ\‹˜YØ\™Ý[Y[
+	ËKZ[œ]	Ë	ËZIË™\]Z\™YUYKˆ[IÔ™[X\ÙH[ˆ”ÓÓˆš[IÊBˆ\œÙ\‹˜YØ\™Ý[Y[
+	ËK[Ý]]Y›Ü›X]	Ë	ËY‰ËˆÚÚXÙ\ÏVÉÚœÛÛ‰Ë	ÛX\šÙÝÛ‰Ë	Ý^	×KˆY˜][IÝ^	Ë[IÓÝ]]›Ü›X]	ÊBˆ\œÙ\‹˜YØ\™Ý[Y[
+	ËK[Ý]]	Ë	Ë[ÉË\O\Ý‹ˆ[IÓÝ]]š[H
+Y˜][ˆÝÝ]
+IÊBˆ\œÙ\‹˜YØ\™Ý[Y[
+	ËKZ[˜ÛYKXÚXÚÛ\Ý	ËXÝ[ÛIÜÝÜ™WÝYIËˆ[IÒ[˜ÛYH™[X\ÙHÚXÚÛ\Ý[ˆÝ]]	ÊBˆ\œÙ\‹˜YØ\™Ý[Y[
+	ËKZ[˜ÛYKXÛÛ[][šXØ][Û‰ËXÝ[ÛIÜÝÜ™WÝYIËˆ[IÒ[˜ÛYHÛÛ[][šXØ][Ûˆ[‰ÊBˆ\œÙ\‹˜YØ\™Ý[Y[
+	ËKZ[˜ÛYK\›Û˜XÚÉËXÝ[ÛIÜÝÜ™WÝYIËˆ[IÒ[˜ÛYH›Û˜XÚÈ[˜›ÛÚÉÊBˆ\œÙ\‹˜YØ\™Ý[Y[
+	ËK[Z[‹XÛÝ™\˜YÙIË\OY›Ø]Y˜][NŒˆ[IÓZ[š[][H\ÝÛÝ™\˜YÙH™\ÚÛ	ÊBˆˆ\™ÜÈH\œÙ\‹œ\œÙWØ\™ÜÊ
+BˆˆÈØY™[X\ÙH[‚ˆžN‚ˆÚ]Ü[Š\™ÜËš[œ]	Ü‰Ë[˜ÛÙ[™ÏIÝ]‹N	ÊH\ÈŽ‚ˆ[—Ù]HH‹œ™XY
 
-Key Changes:
-- {len(new_features)} new features
-- {len(bug_fixes)} bug fixes
-- {len(breaking_changes)} breaking changes
+Bˆ^Ù\^Ù\[Ûˆ\ÈN‚ˆš[
+ˆ‘\œ›Üˆ™XY[™È[œ]š[NˆÙ_H‹š[O\Þ\ËœÝ\œŠBˆÞ\Ë™^]
+JBˆˆÈ[š]X[^™H[›™\‚ˆ[›™\ˆH™[X\ÙT[›™\Š
+Bˆ[›™\‹›Z[—Ý\ÝØÛÝ™\˜YÙHH\™ÜË›Z[—ØÛÝ™\˜YÙBˆˆžN‚ˆ[›™\‹›ØYÜ™[X\ÙWÜ[Š[—Ù]JBˆ^Ù\^Ù\[Ûˆ\ÈN‚ˆš[
+ˆ‘\œ›ÜˆØY[™È™[X\ÙH[ŽˆÙ_H‹š[O\Þ\ËœÝ\œŠBˆÞ\Ë™^]
+JBˆˆÈÙ[™\˜]H\ÜÙ\ÜÛY[ˆ\ÜÙ\ÜÛY[H[›™\‹˜\ÜÙ\Ü×Ü™[X\ÙWÜ™XY[™\ÜÊ
+BˆˆÈÙ[™\˜]HÜ[Û˜[ÛÛ\Û™[ÂˆÚXÚÛ\ÝH[›™\‹™Ù[™\˜]WÜ™[X\ÙWØÚXÚÛ\Ý
 
-Please review the release notes and prepare for any needed support activities.
-
-Rollback plan: Available in release documentation
-On-call: Please be available during deployment window
-
-Best regards,
-Release Team"""
-            },
-            'external_user_notification': {
-                'subject': f'Product Update - Version {self.version} Now Available',
-                'body': f"""Dear Users,
-
-We're excited to announce version {self.version} of {self.release_name} is now available!
-
-What's New:
-{chr(10).join(f"- {f.title}" for f in new_features[:5])}
-
-Bug Fixes:
-{chr(10).join(f"- {f.title}" for f in bug_fixes[:3])}
-
-{'Important: This release includes breaking changes. Please review the migration guide.' if breaking_changes else ''}
-
-For full release notes and migration instructions, visit our documentation.
-
-Thank you for using our product!
-
-The Development Team"""
-            },
-            'rollback_notification': {
-                'subject': f'URGENT: Release {self.version} Rollback Initiated',
-                'body': f"""ATTENTION: Release rollback in progress.
-
-Release: {self.version}
-Reason: [TO BE FILLED]
-Rollback initiated: {datetime.now().strftime('%Y-%m-%d %H:%M UTC')}
-Estimated completion: [TO BE FILLED]
-
-Current status: Rolling back to previous stable version
-Impact: [TO BE FILLED]
-
-We will provide updates every 15 minutes until rollback is complete.
-
-Incident Commander: [TO BE FILLED]
-Status page: [TO BE FILLED]"""
-            }
-        }
-        
-        return templates
-    
-    def generate_rollback_runbook(self) -> Dict:
-        """Generate detailed rollback runbook."""
-        runbook = {
-            'overview': {
-                'purpose': f'Emergency rollback procedure for {self.release_name} v{self.version}',
-                'triggers': [
-                    'Error rate spike (>2x baseline for >15 minutes)',
-                    'Critical functionality failure',
-                    'Security incident',
-                    'Data corruption detected',
-                    'Performance degradation (>50% latency increase)',
-                    'Manual decision by incident commander'
-                ],
-                'decision_makers': ['On-call Engineer', 'Engineering Lead', 'Incident Commander'],
-                'estimated_total_time': self._calculate_rollback_time()
-            },
-            'prerequisites': [
-                'Confirm rollback is necessary (check with incident commander)',
-                'Notify stakeholders of rollback decision', 
-                'Ensure database backups are available',
-                'Verify monitoring systems are operational',
-                'Have communication channels ready'
-            ],
-            'steps': [],
-            'verification': {
-                'health_checks': [
-                    'Application responds to health endpoint',
-                    'Database connectivity confirmed',
-                    'Authentication system functional',
-                    'Core user workflows working',
-                    'Error rates back to baseline',
-                    'Performance metrics within normal range'
-                ],
-                'rollback_confirmation': [
-                    'Previous version fully deployed',
-                    'Database in consistent state',
-                    'All services communicating properly',
-                    'Monitoring shows stable metrics',
-                    'Sample user workflows tested'
-                ]
-            },
-            'post_rollback': [
-                'Update status page with resolution',
-                'Notify all stakeholders of successful rollback',
-                'Schedule post-incident review',
-                'Document issues encountered during rollback',
-                'Plan investigation of root cause',
-                'Determine timeline for next release attempt'
-            ],
-            'emergency_contacts': []
-        }
-        
-        # Convert rollback steps to detailed format
-        for step in sorted(self.rollback_steps, key=lambda x: x.order):
-            step_data = {
-                'order': step.order,
-                'title': step.description,
-                'estimated_time': step.estimated_time,
-                'risk_level': step.risk_level.value,
-                'instructions': step.description,
-                'command': step.command,
-                'verification': step.verification,
-                'rollback_possible': step.risk_level != RiskLevel.CRITICAL
-            }
-            runbook['steps'].append(step_data)
-        
-        # Add emergency contacts
-        critical_stakeholders = [s for s in self.stakeholders if s.critical_path]
-        for stakeholder in critical_stakeholders:
-            runbook['emergency_contacts'].append({
-                'name': stakeholder.name,
-                'role': stakeholder.role,
-                'contact': stakeholder.contact,
-                'method': stakeholder.notification_type
-            })
-        
-        return runbook
-    
-    def _calculate_rollback_time(self) -> str:
-        """Calculate estimated total rollback time."""
-        total_minutes = 0
-        for step in self.rollback_steps:
-            # Parse time estimates like "5 minutes", "30 seconds", "1 hour"
-            time_str = step.estimated_time.lower()
-            if 'minute' in time_str:
-                minutes = int(re.search(r'(\d+)', time_str).group(1))
-                total_minutes += minutes
-            elif 'hour' in time_str:
-                hours = int(re.search(r'(\d+)', time_str).group(1))
-                total_minutes += hours * 60
-            elif 'second' in time_str:
-                # Round up seconds to minutes
-                total_minutes += 1
-        
-        if total_minutes < 60:
-            return f"{total_minutes} minutes"
-        else:
-            hours = total_minutes // 60
-            minutes = total_minutes % 60
-            return f"{hours}h {minutes}m"
-
-
-def main():
-    """Main CLI entry point."""
-    parser = argparse.ArgumentParser(description="Assess release readiness and generate release plans")
-    parser.add_argument('--input', '-i', required=True,
-                       help='Release plan JSON file')
-    parser.add_argument('--output-format', '-f',
-                       choices=['json', 'markdown', 'text'], 
-                       default='text', help='Output format')
-    parser.add_argument('--output', '-o', type=str,
-                       help='Output file (default: stdout)')
-    parser.add_argument('--include-checklist', action='store_true',
-                       help='Include release checklist in output')
-    parser.add_argument('--include-communication', action='store_true', 
-                       help='Include communication plan')
-    parser.add_argument('--include-rollback', action='store_true',
-                       help='Include rollback runbook')
-    parser.add_argument('--min-coverage', type=float, default=80.0,
-                       help='Minimum test coverage threshold')
-    
-    args = parser.parse_args()
-    
-    # Load release plan
-    try:
-        with open(args.input, 'r', encoding='utf-8') as f:
-            plan_data = f.read()
-    except Exception as e:
-        print(f"Error reading input file: {e}", file=sys.stderr)
-        sys.exit(1)
-    
-    # Initialize planner
-    planner = ReleasePlanner()
-    planner.min_test_coverage = args.min_coverage
-    
-    try:
-        planner.load_release_plan(plan_data)
-    except Exception as e:
-        print(f"Error loading release plan: {e}", file=sys.stderr)
-        sys.exit(1)
-    
-    # Generate assessment
-    assessment = planner.assess_release_readiness()
-    
-    # Generate optional components
-    checklist = planner.generate_release_checklist() if args.include_checklist else None
-    communication = planner.generate_communication_plan() if args.include_communication else None
-    rollback = planner.generate_rollback_runbook() if args.include_rollback else None
-    
-    # Generate output
-    if args.output_format == 'json':
-        output_data = {
-            'assessment': assessment,
-            'checklist': checklist,
-            'communication_plan': communication,
-            'rollback_runbook': rollback
-        }
-        output_text = json.dumps(output_data, indent=2, default=str)
-    
-    elif args.output_format == 'markdown':
-        output_lines = [
-            f"# Release Readiness Report - {planner.release_name} v{planner.version}",
-            "",
-            f"**Overall Status:** {assessment['overall_status'].upper()}",
-            f"**Readiness Score:** {assessment['readiness_score']:.1f}%",
-            ""
-        ]
-        
-        if assessment['blocking_issues']:
-            output_lines.extend([
-                "## ðŸš« Blocking Issues",
-                ""
-            ])
-            for issue in assessment['blocking_issues']:
-                output_lines.append(f"- {issue}")
-            output_lines.append("")
-        
-        if assessment['warnings']:
-            output_lines.extend([
-                "## âš ï¸ Warnings",
-                ""
-            ])
-            for warning in assessment['warnings']:
-                output_lines.append(f"- {warning}")
-            output_lines.append("")
-        
-        # Feature summary
-        fs = assessment['feature_summary']
-        output_lines.extend([
-            "## Features Summary",
-            "",
-            f"- **Total:** {fs['total']}",
-            f"- **Ready:** {fs['ready']}",
-            f"- **In Progress:** {fs['in_progress']}",
-            f"- **Blocked:** {fs['blocked']}",
-            f"- **Breaking Changes:** {fs['breaking_changes']}",
-            ""
-        ])
-        
-        if checklist:
-            output_lines.extend([
-                "## Release Checklist",
-                ""
-            ])
-            current_category = ""
-            for item in checklist:
-                if item['category'] != current_category:
-                    current_category = item['category']
-                    output_lines.append(f"### {current_category}")
-                    output_lines.append("")
-                
-                status_icon = "âœ…" if item['status'] == 'ready' else "âŒ" if item['status'] == 'failed' else "â³"
-                output_lines.append(f"- {status_icon} {item['item']}")
-            output_lines.append("")
-        
-        output_text = '\n'.join(output_lines)
-    
-    else:  # text format
-        output_lines = [
-            f"Release Readiness Report",
-            f"========================",
-            f"Release: {planner.release_name} v{planner.version}",
-            f"Status: {assessment['overall_status'].upper()}",
-            f"Readiness Score: {assessment['readiness_score']:.1f}%",
-            ""
-        ]
-        
-        if assessment['blocking_issues']:
-            output_lines.extend(["BLOCKING ISSUES:", ""])
-            for issue in assessment['blocking_issues']:
-                output_lines.append(f"  âŒ {issue}")
-            output_lines.append("")
-        
-        if assessment['warnings']:
-            output_lines.extend(["WARNINGS:", ""])
-            for warning in assessment['warnings']:
-                output_lines.append(f"  âš ï¸  {warning}")
-            output_lines.append("")
-        
-        if assessment['recommendations']:
-            output_lines.extend(["RECOMMENDATIONS:", ""])
-            for rec in assessment['recommendations']:
-                output_lines.append(f"  ðŸ’¡ {rec}")
-            output_lines.append("")
-        
-        # Summary stats
-        fs = assessment['feature_summary']
-        gs = assessment['quality_gate_summary']
-        
-        output_lines.extend([
-            f"FEATURE SUMMARY:",
-            f"  Total: {fs['total']} | Ready: {fs['ready']} | Blocked: {fs['blocked']}",
-            f"  Breaking Changes: {fs['breaking_changes']} | Missing Approvals: {fs['missing_approvals']}",
-            "",
-            f"QUALITY GATES:",
-            f"  Total: {gs['total']} | Passed: {gs['passed']} | Failed: {gs['failed']}",
-            ""
-        ])
-        
-        output_text = '\n'.join(output_lines)
-    
-    # Write output
-    if args.output:
-        with open(args.output, 'w', encoding='utf-8') as f:
-            f.write(output_text)
-    else:
-        print(output_text)
-
-
-if __name__ == '__main__':
-    main()
+HYˆ\™ÜËš[˜ÛYWØÚXÚÛ\Ý[ÙH›Û™BˆÛÛ[][šXØ][ÛˆH[›™\‹™Ù[™\˜]WØÛÛ[][šXØ][Û—Ü[Š
+HYˆ\™ÜËš[˜ÛYWØÛÛ[][šXØ][Ûˆ[ÙH›Û™Bˆ›Û˜XÚÈH[›™\‹™Ù[™\˜]WÜ›Û˜XÚ×Ü[˜›ÛÚÊ
+HYˆ\™ÜËš[˜ÛYWÜ›Û˜XÚÈ[ÙH›Û™BˆˆÈÙ[™\˜]HÝ]]ˆYˆ\™ÜË›Ý]]Ù›Ü›X]OH	ÚœÛÛ‰Î‚ˆÝ]]Ù]HHÂˆ	Ø\ÜÙ\ÜÛY[	Îˆ\ÜÙ\ÜÛY[ˆ	ØÚXÚÛ\Ý	ÎˆÚXÚÛ\Ýˆ	ØÛÛ[][šXØ][Û—Ü[‰ÎˆÛÛ[][šXØ][Û‹ˆ	Ü›Û˜XÚ×Ü[˜›ÛÚÉÎˆ›Û˜XÚÂˆBˆÝ]]Ý^HœÛÛ‹™[\ÊÝ]]Ù]K[™[L‹Y˜][\ÝŠBˆˆ[Yˆ\™ÜË›Ý]]Ù›Ü›X]OH	ÛX\šÙÝÛ‰Î‚ˆÝ]]Û[™\ÈHÂˆˆˆÈ™[X\ÙH™XY[™\ÜÈ™\ÜHÜ[›™\‹œ™[X\ÙWÛ˜[Y_HžÜ[›™\‹™\œÚ[ÛŸH‹ˆˆ‹ˆˆŠŠ“Ý™\˜[Ý]\ÎŠŠˆØ\ÜÙ\ÜÛY[ÉÛÝ™\˜[ÜÝ]\É×K\\Š
+_H‹ˆˆŠŠ”™XY[™\ÜÈØÛÜ™NŠŠˆØ\ÜÙ\ÜÛY[ÉÜ™XY[™\Ü×ÜØÛÜ™I×N‹ŒYŸIH‹ˆˆ‚ˆBˆˆYˆ\ÜÙ\ÜÛY[ÉØ›ØÚÚ[™×Ú\ÜÝY\É×N‚ˆÝ]]Û[™\Ë™^[™
+ÂˆˆÈÈ<'æªÈ›ØÚÚ[™È\ÜÝY\È‹ˆˆ‚ˆJBˆ›Üˆ\ÜÝYH[ˆ\ÜÙ\ÜÛY[ÉØ›ØÚÚ[™×Ú\ÜÝY\É×N‚ˆÝ]]Û[™\Ë˜\[™
+ˆ‹HÚ\ÜÝY_HŠBˆÝ]]Û[™\Ë˜\[™
+ˆŠBˆˆYˆ\ÜÙ\ÜÛY[ÉÝØ\›š[™ÜÉ×N‚ˆÝ]]Û[™\Ë™^[™
+ÂˆˆÈÈ8¦¨;î#ÈØ\›š[™ÜÈ‹ˆˆ‚ˆJBˆ›ÜˆØ\›š[™È[ˆ\ÜÙ\ÜÛY[ÉÝØ\›š[™ÜÉ×N‚ˆÝ]]Û[™\Ë˜\[™
+ˆ‹HÝØ\›š[™ßHŠBˆÝ]]Û[™\Ë˜\[™
+ˆŠBˆˆÈ™X]\™HÝ[[X\žBˆœÈH\ÜÙ\ÜÛY[ÉÙ™X]\™WÜÝ[[X\žI×BˆÝ]]Û[™\Ë™^[™
+ÂˆˆÈÈ™X]\™\ÈÝ[[X\žH‹ˆˆ‹ˆˆ‹H
+Š•Ý[ŠŠˆÙœÖÉÝÝ[	×_H‹ˆˆ‹H
+Š”™XYNŠŠˆÙœÖÉÜ™XYI×_H‹ˆˆ‹H
+Š’[ˆ›ÙÜ™\ÜÎŠŠˆÙœÖÉÚ[—Ü›ÙÜ™\ÜÉ×_H‹ˆˆ‹H
+Š›ØÚÙYŠŠˆÙœÖÉØ›ØÚÙY	×_H‹ˆˆ‹H
+Šœ™XZÚ[™ÈÚ[™Ù\ÎŠŠˆÙœÖÉØœ™XZÚ[™×ØÚ[™Ù\É×_H‹ˆˆ‚ˆJBˆˆYˆÚXÚÛ\Ý‚ˆÝ]]Û[™\Ë™^[™
+ÂˆˆÈÈ™[X\ÙHÚXÚÛ\Ý‹ˆˆ‚ˆJBˆÝ\œ™[ØØ]YÛÜžHHˆ‚ˆ›Üˆ][H[ˆÚXÚÛ\Ý‚ˆYˆ][VÉØØ]YÛÜžI×HOHÝ\œ™[ØØ]YÛÜžN‚ˆÝ\œ™[ØØ]YÛÜžHH][VÉØØ]YÛÜžI×BˆÝ]]Û[™\Ë˜\[™
+ˆˆÈÈÈØÝ\œ™[ØØ]YÛÜž_HŠBˆÝ]]Û[™\Ë˜\[™
+ˆŠBˆˆÝ]\×ÚXÛÛˆH¸§!HˆYˆ][VÉÜÝ]\É×HOH	Ü™XYIÈ[ÙH¸§cˆYˆ][VÉÜÝ]\É×HOH	Ù˜Z[Y	È[ÙH¸£ìÈ‚ˆÝ]]Û[™\Ë˜\[™
+ˆ‹HÜÝ]\×ÚXÛÛŸHÚ][VÉÚ][I×_HŠBˆÝ]]Û[™\Ë˜\[™
+ˆŠBˆˆÝ]]Ý^H	×‰Ëš›Ú[ŠÝ]]Û[™\ÊBˆˆ[ÙNˆÈ^›Ü›X]ˆÝ]]Û[™\ÈHÂˆˆ”™[X\ÙH™XY[™\ÜÈ™\Ü‹ˆˆOOOOOOOOOOOOOOOOOOOOOOOH‹ˆˆ”™[X\ÙNˆÜ[›™\‹œ™[X\ÙWÛ˜[Y_HžÜ[›™\‹™\œÚ[ÛŸH‹ˆˆ”Ý]\ÎˆØ\ÜÙ\ÜÛY[ÉÛÝ™\˜[ÜÝ]\É×K\\Š
+_H‹ˆˆ”™XY[™\ÜÈØÛÜ™NˆØ\ÜÙ\ÜÛY[ÉÜ™XY[™\Ü×ÜØÛÜ™I×N‹ŒYŸIH‹ˆˆ‚ˆBˆˆYˆ\ÜÙ\ÜÛY[ÉØ›ØÚÚ[™×Ú\ÜÝY\É×N‚ˆÝ]]Û[™\Ë™^[™
+È“ÐÒÒS‘ÈTÔÕQTÎˆ‹ˆ—JBˆ›Üˆ\ÜÝYH[ˆ\ÜÙ\ÜÛY[ÉØ›ØÚÚ[™×Ú\ÜÝY\É×N‚ˆÝ]]Û[™\Ë˜\[™
+ˆˆ8§cÚ\ÜÝY_HŠBˆÝ]]Û[™\Ë˜\[™
+ˆŠBˆˆYˆ\ÜÙ\ÜÛY[ÉÝØ\›š[™ÜÉ×N‚ˆÝ]]Û[™\Ë™^[™
+È•ÐT“’S‘ÔÎˆ‹ˆ—JBˆ›ÜˆØ\›š[™È[ˆ\ÜÙ\ÜÛY[ÉÝØ\›š[™ÜÉ×N‚ˆÝ]]Û[™\Ë˜\[™
+ˆˆ8¦¨;î#ÈÝØ\›š[™ßHŠBˆÝ]]Û[™\Ë˜\[™
+ˆŠBˆˆYˆ\ÜÙ\ÜÛY[ÉÜ™XÛÛ[Y[™][ÛœÉ×N‚ˆÝ]]Û[™\Ë™^[™
+È”‘PÓÓSQS‘USÓ”Îˆ‹ˆ—JBˆ›Üˆ™XÈ[ˆ\ÜÙ\ÜÛY[ÉÜ™XÛÛ[Y[™][ÛœÉ×N‚ˆÝ]]Û[™\Ë˜\[™
+ˆˆ<'ä¨HÜ™XßHŠBˆÝ]]Û[™\Ë˜\[™
+ˆŠBˆˆÈÝ[[X\žHÝ]ÂˆœÈH\ÜÙ\ÜÛY[ÉÙ™X]\™WÜÝ[[X\žI×BˆÜÈH\ÜÙ\ÜÛY[ÉÜ]X[]WÙØ]WÜÝ[[X\žI×BˆˆÝ]]Û[™\Ë™^[™
+Âˆˆ‘‘PUT‘HÕSSPT–Nˆ‹ˆˆˆÝ[ˆÙœÖÉÝÝ[	×_H™XYNˆÙœÖÉÜ™XYI×_H›ØÚÙYˆÙœÖÉØ›ØÚÙY	×_H‹ˆˆˆœ™XZÚ[™ÈÚ[™Ù\ÎˆÙœÖÉØœ™XZÚ[™×ØÚ[™Ù\É×_HZ\ÜÚ[™È\›Ý˜[ÎˆÙœÖÉÛZ\ÜÚ[™×Ø\›Ý˜[É×_H‹ˆˆ‹ˆˆ”UPSUHÐUTÎˆ‹ˆˆˆÝ[ˆÙÜÖÉÝÝ[	×_H\ÜÙYˆÙÜÖÉÜ\ÜÙY	×_H˜Z[YˆÙÜÖÉÙ˜Z[Y	×_H‹ˆˆ‚ˆJBˆˆÝ]]Ý^H	×‰Ëš›Ú[ŠÝ]]Û[™\ÊBˆˆÈÜš]HÝ]]ˆYˆ\™ÜË›Ý]]‚ˆÚ]Ü[Š\™ÜË›Ý]]	ÝÉË[˜ÛÙ[™ÏIÝ]‹N	ÊH\ÈŽ‚ˆ‹Üš]JÝ]]Ý^
+Bˆ[ÙN‚ˆš[
+Ý]]Ý^
+B‚‚šYˆ×Û˜[YW×ÈOH	××ÛXZ[—×ÉÎ‚ˆXZ[Š
+B
