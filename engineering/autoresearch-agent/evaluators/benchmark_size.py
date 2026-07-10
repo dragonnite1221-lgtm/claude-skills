@@ -3,6 +3,7 @@
 DO NOT MODIFY after experiment starts — this is the fixed evaluator."""
 
 import os
+import shlex
 import subprocess
 import sys
 
@@ -28,7 +29,7 @@ target_dir = globals().get("TARGET_DIR")
 
 # Build if needed
 if build_cmd:
-    result = subprocess.run(build_cmd, shell=True, capture_output=True)
+    result = subprocess.run(shlex.split(build_cmd), capture_output=True)
     if result.returncode != 0:
         print(f"Build failed: {result.stderr.decode()[:200]}", file=sys.stderr)
         sys.exit(1)
@@ -36,10 +37,10 @@ if build_cmd:
 # Measure
 if docker_image:
     if docker_build_cmd:
-        subprocess.run(docker_build_cmd, shell=True, capture_output=True)
+        subprocess.run(shlex.split(docker_build_cmd), capture_output=True)
     result = subprocess.run(
-        f"docker image inspect {docker_image} --format '{{{{.Size}}}}'",
-        shell=True, capture_output=True, text=True
+        ["docker", "image", "inspect", docker_image, "--format", "{{.Size}}"],
+        capture_output=True, text=True
     )
     try:
         size_bytes = int(result.stdout.strip())

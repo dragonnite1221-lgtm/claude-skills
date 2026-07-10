@@ -20,7 +20,6 @@ from typing import Dict, List, Optional, Any, Union
 from dataclasses import dataclass, asdict
 from enum import Enum
 
-
 class RiskLevel(Enum):
     """Risk levels for release components."""
     LOW = "low"

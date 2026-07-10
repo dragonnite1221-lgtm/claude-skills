@@ -3,6 +3,7 @@
 DO NOT MODIFY after experiment starts — this is the fixed evaluator."""
 
 import statistics
+import shlex
 import subprocess
 import sys
 import time
@@ -17,12 +18,12 @@ times = []
 
 # Warmup
 for _ in range(WARMUP):
-    subprocess.run(COMMAND, shell=True, capture_output=True, timeout=120)
+    subprocess.run(shlex.split(COMMAND), capture_output=True, timeout=120)
 
 # Benchmark
 for i in range(RUNS):
     t0 = time.perf_counter()
-    result = subprocess.run(COMMAND, shell=True, capture_output=True, timeout=120)
+    result = subprocess.run(shlex.split(COMMAND), capture_output=True, timeout=120)
     elapsed = (time.perf_counter() - t0) * 1000  # ms
 
     if result.returncode != 0:

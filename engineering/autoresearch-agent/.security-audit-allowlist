@@ -2,13 +2,6 @@
 # detection is unchanged for every other skill. Pinned to exact file:line so any
 # NEW command-execution pattern added to these templates still surfaces.
 #
-# Fixed benchmark evaluator templates ("DO NOT MODIFY after experiment starts").
-# COMMAND/BUILD_CMD/DOCKER_BUILD_CMD/CLEAN_CMD are user-configured constants for
-# benchmarking the user's OWN project locally — not untrusted input. shell=True
-# is intentional so a benchmark command may use shell pipelines.
-CMD-INJECT  evaluators/build_speed.py:20
-CMD-INJECT  evaluators/build_speed.py:23
-CMD-INJECT  evaluators/benchmark_size.py:26
-CMD-INJECT  evaluators/benchmark_size.py:34
-CMD-INJECT  evaluators/benchmark_speed.py:20
-CMD-INJECT  evaluators/benchmark_speed.py:25
+# No active suppressions. Benchmark commands are parsed with shlex and executed
+# without a shell, so configured pipelines and metacharacters are never treated
+# as executable shell syntax.
