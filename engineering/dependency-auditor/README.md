@@ -398,7 +398,10 @@ fi
 The `assets/` directory contains sample dependency files for testing:
 
 - `sample_package.json`: Node.js project with various dependencies
-- `sample_requirements.txt`: Python project dependencies
+- `vulnerable_python.fixture`: intentionally vulnerable Python dependencies;
+  copy it to `requirements.txt` in a temporary directory before scanning
+- `vulnerable_npm_manifest.fixture.json`: intentionally vulnerable npm
+  dependencies; copy it to `package.json` in a temporary directory before scanning
 - `sample_go.mod`: Go module dependencies
 
 The `expected_outputs/` directory contains example reports showing the expected format and content.
