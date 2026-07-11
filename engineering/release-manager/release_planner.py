@@ -13,12 +13,12 @@ Output: release readiness report + checklist + rollback runbook + announcement d
 
 import argparse
 import json
+import re
 import sys
 from datetime import datetime, timedelta
 from typing import Dict, List, Optional, Any, Union
 from dataclasses import dataclass, asdict
 from enum import Enum
-
 
 class RiskLevel(Enum):
     """Risk levels for release components."""

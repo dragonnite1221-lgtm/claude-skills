@@ -63,7 +63,10 @@ and security priority, and produces a migration checklist within `--timeline` da
 `dep_scanner.py --format json` produces the inventory consumed by the other tools:
 `{ timestamp, project_path, dependencies: [{ name, version, ecosystem, direct,
 license, vulnerabilities: [...] }] }`. Sample manifests live in `assets/`
-(`sample_package.json`, `sample_requirements.txt`, `sample_go.mod`); reference
+(`sample_package.json`, `vulnerable_python.fixture`, `sample_go.mod`); the
+intentionally vulnerable Python fixture must be copied to `requirements.txt`
+inside a temporary project before scanning so repository dependency tooling
+does not mistake test data for a deployable manifest. Reference
 outputs are in `expected_outputs/`.
 
 ## References

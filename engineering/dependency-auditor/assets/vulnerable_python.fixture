@@ -1,4 +1,4 @@
-# Core web framework
+# Intentionally vulnerable Python fixture. Copy to requirements.txt before scanning.
 Django==4.1.7
 djangorestframework==3.14.0
 django-cors-headers==3.14.0

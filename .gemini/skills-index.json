@@ -481,7 +481,7 @@
     {
       "name": "autoresearch-agent",
       "category": "engineering-advanced",
-      "description": "Autonomous experiment loop that optimizes any file by a measurable metric. Inspired by Karpathy's autoresearch. The agent edits a target file, runs a fixed evaluation, keeps improvements (git commit), discards failures (git reset), and loops indefinitely. Use when: user wants to optimize code speed, reduce bundle/image size, improve test pass rate, optimize prompts, improve content quality (headlines, copy, CTR), or run any measurable improvement loop. Requires: a target file, an evaluation command that outputs a metric, and a git repo."
+      "description": "Autonomous experiment loop that optimizes any file by a measurable metric. Inspired by Karpathy's autoresearch. The agent edits a target file, runs a fixed evaluation, keeps improvements (git commit), discards failures (history-preserving git revert), and loops indefinitely. Use when: user wants to optimize code speed, reduce bundle/image size, improve test pass rate, optimize prompts, improve content quality (headlines, copy, CTR), or run any measurable improvement loop. Requires: a target file, an evaluation command that outputs a metric, and a git repo."
     },
     {
       "name": "autoresearch-agent-skills-status",
@@ -656,7 +656,7 @@
     {
       "name": "release-manager",
       "category": "engineering-advanced",
-      "description": "Use when the user asks to plan releases, manage changelogs, coordinate deployments, create release branches, or automate versioning."
+      "description": "Manages software release workflows and produces CHANGELOG.md entries, semantic-version recommendations, release-readiness plans, deployment checklists, and rollback/hotfix procedures. Use when planning a release, analyzing conventional commits, coordinating a release branch or git tag, or preparing deployment and recovery artifacts."
     },
     {
       "name": "resume",

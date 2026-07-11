@@ -2,6 +2,7 @@
 """Measure build/compile time.
 DO NOT MODIFY after experiment starts — this is the fixed evaluator."""
 
+import shlex
 import subprocess
 import sys
 import time
@@ -17,10 +18,10 @@ times = []
 for i in range(RUNS):
     # Clean if configured
     if CLEAN_CMD:
-        subprocess.run(CLEAN_CMD, shell=True, capture_output=True, timeout=60)
+        subprocess.run(shlex.split(CLEAN_CMD), capture_output=True, timeout=60)
 
     t0 = time.perf_counter()
-    result = subprocess.run(BUILD_CMD, shell=True, capture_output=True, timeout=600)
+    result = subprocess.run(shlex.split(BUILD_CMD), capture_output=True, timeout=600)
     elapsed = time.perf_counter() - t0
 
     if result.returncode != 0:
