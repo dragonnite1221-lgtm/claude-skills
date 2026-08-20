@@ -67,7 +67,7 @@ jobs:
       - name: Install tooling
         run: |
           python -m pip install --upgrade pip
-          pip install yamllint==1.35.1 check-jsonschema==0.28.4 safety==3.2.4
+          pip install yamllint==1.35.1 check-jsonschema==0.28.4 pip-audit==2.10.1
           pip install -r requirements-dev.txt
 
       - name: Set up Node.js
@@ -88,7 +88,7 @@ jobs:
           find .github/workflows -name "*.yml" \
             ! -name "pr-issue-auto-close.yml" \
             ! -name "smart-sync.yml" \
-            -exec check-jsonschema --builtin-schema github-workflows {} + || true
+            -exec check-jsonschema --builtin-schema github-workflows {} +
 
       # Blocking quality gates run through scripts/check.sh so that a local
       # `bash scripts/check.sh` exercises exactly what CI does
@@ -98,7 +98,7 @@ jobs:
       - name: Quality gates (syntax, frontmatter, mirror, inventory, tests)
         run: bash scripts/check.sh
 
-      - name: Safety dependency audit (requirements*.txt)
+      - name: Dependency vulnerability audit (requirements*.txt)
         run: |
           set -e
           files=$(find . -name "requirements*.txt" 2>/dev/null || true)
@@ -108,7 +108,7 @@ jobs:
           fi
           for f in $files; do
             echo "Auditing $f"
-            safety check --full-report --file "$f" || true
+            pip-audit --requirement "$f"
           done
 
       - name: Markdown link spot-check
