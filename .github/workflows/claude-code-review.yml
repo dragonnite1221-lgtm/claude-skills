@@ -12,53 +12,59 @@ concurrency:
 
 jobs:
   claude-review:
+    if: >-
+      contains(
+        fromJSON('["OWNER", "MEMBER", "COLLABORATOR"]'),
+        github.event.pull_request.author_association
+      )
     # Auto-review ALL pull requests with Claude
-    # BYPASS: Add [EMERGENCY], [SKIP REVIEW], or [HOTFIX] to PR title
-    # BYPASS: Or add 'emergency' or 'skip-review' label to PR
+    # BYPASS: A maintainer may add an emergency, skip-review, or hotfix label.
     runs-on: ubuntu-latest
     permissions:
       contents: read
-      pull-requests: read
-      issues: read
+      pull-requests: write
+      issues: write
       id-token: write  # Required by Claude Code action for OIDC authentication
 
     steps:
+      - name: Checkout repository
+        uses: actions/checkout@v7
+        with:
+          fetch-depth: 1
+
       - name: Check Workflow Kill Switch
+        id: kill-switch
         run: |
+          echo "disabled=false" >> "$GITHUB_OUTPUT"
           if [ -f ".github/WORKFLOW_KILLSWITCH" ]; then
             STATUS=$(grep "STATUS:" .github/WORKFLOW_KILLSWITCH | awk '{print $2}')
             if [ "$STATUS" = "DISABLED" ]; then
+              echo "disabled=true" >> "$GITHUB_OUTPUT"
               echo "🛑 Workflows disabled by kill switch"
-              exit 0
             fi
           fi
+
+      - name: Report disabled workflow
+        if: steps.kill-switch.outputs.disabled == 'true'
+        run: echo "## 🛑 Automated review disabled by repository kill switch" >> "$GITHUB_STEP_SUMMARY"
       - name: Check for Review Bypass
+        if: steps.kill-switch.outputs.disabled != 'true'
         id: bypass
+        env:
+          PR_LABELS: ${{ toJSON(github.event.pull_request.labels.*.name) }}
         run: |
-          PR_TITLE="${{ github.event.pull_request.title }}"
-          PR_LABELS="${{ toJSON(github.event.pull_request.labels.*.name) }}"
-
-          # Check for bypass markers in PR title
-          if echo "$PR_TITLE" | grep -qE '\[EMERGENCY\]|\[SKIP REVIEW\]|\[HOTFIX\]'; then
-            echo "bypass=true" >> $GITHUB_OUTPUT
-            echo "reason=PR title contains bypass marker" >> $GITHUB_OUTPUT
-            echo "⏭️ BYPASS: PR title contains bypass marker"
-            exit 0
-          fi
-
-          # Check for bypass labels
-          if echo "$PR_LABELS" | grep -qE 'emergency|skip-review|hotfix'; then
-            echo "bypass=true" >> $GITHUB_OUTPUT
-            echo "reason=PR has bypass label" >> $GITHUB_OUTPUT
+          if echo "$PR_LABELS" | grep -qE '"(emergency|skip-review|hotfix)"'; then
+            echo "bypass=true" >> "$GITHUB_OUTPUT"
+            echo "reason=PR has a maintainer-controlled bypass label" >> "$GITHUB_OUTPUT"
             echo "⏭️ BYPASS: PR has bypass label"
             exit 0
           fi
 
-          echo "bypass=false" >> $GITHUB_OUTPUT
+          echo "bypass=false" >> "$GITHUB_OUTPUT"
           echo "✅ No bypass detected - review will proceed"
 
       - name: Post Bypass Notice
-        if: steps.bypass.outputs.bypass == 'true'
+        if: steps.kill-switch.outputs.disabled != 'true' && steps.bypass.outputs.bypass == 'true'
         uses: actions/github-script@v9
         with:
           script: |
@@ -76,14 +82,8 @@ jobs:
               *Bypass triggered by emergency procedures protocol*`
             })
 
-      - name: Checkout repository
-        if: steps.bypass.outputs.bypass != 'true'
-        uses: actions/checkout@v7
-        with:
-          fetch-depth: 1
-
       - name: Run Claude Code Review
-        if: steps.bypass.outputs.bypass != 'true'
+        if: steps.kill-switch.outputs.disabled != 'true' && steps.bypass.outputs.bypass != 'true'
         id: claude-review
         uses: anthropics/claude-code-action@v1
         continue-on-error: true
@@ -113,8 +113,7 @@ jobs:
             Bash(gh pr comment:*),Bash(gh pr diff:*),Bash(gh pr view:*),Bash(gh pr list:*)"
 
       - name: Post fallback review note (quota/timeout)
-        if: steps.claude-review.outcome != 'success'
-        continue-on-error: true  # Fork PRs have read-only GITHUB_TOKEN
+        if: steps.kill-switch.outputs.disabled != 'true' && steps.bypass.outputs.bypass != 'true' && steps.claude-review.outcome != 'success'
         uses: actions/github-script@v9
         with:
           script: |
@@ -132,7 +131,7 @@ jobs:
             })
 
       - name: Write review status to job summary
-        if: steps.claude-review.outcome != 'success'
+        if: steps.kill-switch.outputs.disabled != 'true' && steps.bypass.outputs.bypass != 'true' && steps.claude-review.outcome != 'success'
         run: |
           echo "## ⚠️ Automated Review Skipped" >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
@@ -140,3 +139,9 @@ jobs:
           echo "For fork PRs this is expected — OIDC tokens are unavailable." >> "$GITHUB_STEP_SUMMARY"
           echo "" >> "$GITHUB_STEP_SUMMARY"
           echo "- Retry from the Actions tab, or proceed with manual review." >> "$GITHUB_STEP_SUMMARY"
+
+      - name: Fail when automated review did not complete
+        if: steps.kill-switch.outputs.disabled != 'true' && steps.bypass.outputs.bypass != 'true' && steps.claude-review.outcome != 'success'
+        run: |
+          echo "Automated review is an enforced gate and did not complete." >&2
+          exit 1
