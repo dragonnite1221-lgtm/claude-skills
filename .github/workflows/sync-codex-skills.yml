@@ -25,13 +25,14 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
+          persist-credentials: false
           fetch-depth: 0
-          token: ${{ secrets.PROJECTS_TOKEN }}
+          token: ${{ github.token }}
 
       - name: Set up Python
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
         with:
           python-version: '3.11'
 
@@ -56,13 +57,13 @@ jobs:
 
       - name: Commit changes (dev only)
         if: steps.check_changes.outputs.has_changes == 'true' && github.event.inputs.dry_run != 'true' && github.ref != 'refs/heads/main'
-        uses: stefanzweifel/git-auto-commit-action@v5
+        uses: stefanzweifel/git-auto-commit-action@b863ae1933cb653a53c021fe36dbb774e1fb9403
         with:
           commit_message: "chore: sync codex skills symlinks [automated]"
           file_pattern: ".codex/*"
           commit_user_name: "github-actions[bot]"
           commit_user_email: "github-actions[bot]@users.noreply.github.com"
-          token: ${{ secrets.PROJECTS_TOKEN }}
+          token: ${{ github.token }}
 
       - name: Warn if main has drift
         if: steps.check_changes.outputs.has_changes == 'true' && github.ref == 'refs/heads/main'

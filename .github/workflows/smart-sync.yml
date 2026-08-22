@@ -12,6 +12,7 @@ concurrency:
 
 jobs:
   determine-direction:
+    if: vars.PROJECT_SYNC_ENABLED == 'true'
     runs-on: ubuntu-latest
     timeout-minutes: 3
     permissions:
@@ -26,7 +27,9 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
 
       - name: Check Workflow Kill Switch
         run: |
@@ -132,8 +135,9 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
+          persist-credentials: false
           fetch-depth: 1
 
       - name: Sync Issue to Project Board
@@ -274,8 +278,9 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
+          persist-credentials: false
           fetch-depth: 1
 
       - name: Sync Project Board to Issue
