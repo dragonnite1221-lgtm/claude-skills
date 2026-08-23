@@ -20,7 +20,7 @@ This repository includes AI-powered GitHub automation with:
 
 ## Quick Start (15 minutes)
 
-### 1. Create Required Secrets
+### 1. Create Required Secrets and Variables
 
 You need **2 secrets** for full automation:
 
@@ -49,6 +49,18 @@ This secret is already set up for Claude Code reviews.
 3. **Name**: `PROJECTS_TOKEN`
 4. **Value**: [Paste your token]
 5. Click "Add secret"
+
+#### ⚠️ PROJECT_SYNC_ENABLED (Required for Project Board Sync)
+
+Smart Sync is disabled by default so forks cannot write to the upstream project
+board accidentally. Enable it only after `PROJECTS_TOKEN` has access to project
+9 owned by `alirezarezvani`.
+
+1. Go to: https://github.com/alirezarezvani/claude-skills/settings/variables/actions
+2. Click "New repository variable"
+3. **Name**: `PROJECT_SYNC_ENABLED`
+4. **Value**: `true`
+5. Click "Add variable"
 
 ---
 
@@ -156,7 +168,7 @@ gh pr create \
 |----------|---------|--------|
 | **claude-code-review.yml** | PR opened/updated | ✅ Active |
 | **pr-issue-auto-close.yml** | PR merged | ✅ Active |
-| **smart-sync.yml** | Issue/board changes | ⚠️ Requires PROJECTS_TOKEN |
+| **smart-sync.yml** | Issue/board changes | ⚠️ Requires PROJECTS_TOKEN and PROJECT_SYNC_ENABLED=true |
 | **ci-quality-gate.yml** | PR opened/updated | ✅ Active |
 
 ---
@@ -228,9 +240,12 @@ Drag issue to "In Review" column on project board
 **Check:**
 ```bash
 gh secret list --repo alirezarezvani/claude-skills | grep PROJECTS_TOKEN
+gh variable get PROJECT_SYNC_ENABLED --repo alirezarezvani/claude-skills
 ```
 
-**Solution**: If missing, add PROJECTS_TOKEN (see Step 1 above)
+**Solution**: Add `PROJECTS_TOKEN` and set `PROJECT_SYNC_ENABLED=true` (see
+Step 1 above). Leave the variable unset if this repository must not write to
+the upstream project board.
 
 ### Claude Review Not Running
 
@@ -299,11 +314,12 @@ gh secret list --repo alirezarezvani/claude-skills
 ## Next Steps
 
 1. ✅ Create PROJECTS_TOKEN secret
-2. ✅ Create all required labels
-3. ✅ Verify project board columns
-4. ✅ Test with sample issue and PR
-5. ✅ Monitor first few workflow runs
-6. ✅ Document any project-specific customizations
+2. ✅ Set PROJECT_SYNC_ENABLED=true after verifying project access
+3. ✅ Create all required labels
+4. ✅ Verify project board columns
+5. ✅ Test with sample issue and PR
+6. ✅ Monitor first few workflow runs
+7. ✅ Document any project-specific customizations
 
 ---
 

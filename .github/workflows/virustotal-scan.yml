@@ -39,8 +39,7 @@ jobs:
           # Only scan executable/binary-capable files — skip text-only formats
           # (.md, .py, .json, .yml are plain text; VT adds no value scanning them)
           CHANGED=$(git diff --name-only \
-            "$BASE_SHA" \
-            "$HEAD_SHA" \
+            "$BASE_SHA...$HEAD_SHA" \
             | grep -E '\.(js|ts|sh|mjs|cjs|exe|dll|so|bin|wasm)$' || true)
 
           if [ -z "$CHANGED" ]; then
