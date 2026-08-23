@@ -23,8 +23,9 @@ jobs:
       has_skills: ${{ steps.find.outputs.has_skills }}
     steps:
       - name: Checkout
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
+          persist-credentials: false
           fetch-depth: 0
 
       - name: Find changed skill directories
@@ -80,10 +81,12 @@ jobs:
       pull-requests: write
     steps:
       - name: Checkout
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+        with:
+          persist-credentials: false
 
       - name: Set up Python
-        uses: actions/setup-python@v6
+        uses: actions/setup-python@ece7cb06caefa5fff74198d8649806c4678c61a1
         with:
           python-version: '3.11'
 
@@ -112,7 +115,7 @@ jobs:
           fi
 
       - name: Set up Tessl CLI
-        uses: tesslio/setup-tessl@v2
+        uses: tesslio/setup-tessl@25ec223fc0da33b41b8044ff5ab2b85235f4f91e
         with:
           token: ${{ secrets.TESSL_TOKEN }}
 
@@ -273,7 +276,7 @@ jobs:
 
       - name: Post review as PR comment
         if: always()
-        uses: actions/github-script@v9
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3
         with:
           script: |
             const fs = require('fs');

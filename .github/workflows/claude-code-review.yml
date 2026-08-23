@@ -28,8 +28,9 @@ jobs:
 
     steps:
       - name: Checkout repository
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
+          persist-credentials: false
           fetch-depth: 1
 
       - name: Check Workflow Kill Switch
@@ -65,7 +66,7 @@ jobs:
 
       - name: Post Bypass Notice
         if: steps.kill-switch.outputs.disabled != 'true' && steps.bypass.outputs.bypass == 'true'
-        uses: actions/github-script@v9
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3
         with:
           script: |
             github.rest.issues.createComment({
@@ -85,7 +86,7 @@ jobs:
       - name: Run Claude Code Review
         if: steps.kill-switch.outputs.disabled != 'true' && steps.bypass.outputs.bypass != 'true'
         id: claude-review
-        uses: anthropics/claude-code-action@v1
+        uses: anthropics/claude-code-action@4a3947e8ca609a286ab07d4d048d9ec4016798c1
         continue-on-error: true
         with:
           claude_code_oauth_token: ${{ secrets.CLAUDE_CODE_OAUTH_TOKEN }}
@@ -114,7 +115,7 @@ jobs:
 
       - name: Post fallback review note (quota/timeout)
         if: steps.kill-switch.outputs.disabled != 'true' && steps.bypass.outputs.bypass != 'true' && steps.claude-review.outcome != 'success'
-        uses: actions/github-script@v9
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3
         with:
           script: |
             github.rest.issues.createComment({

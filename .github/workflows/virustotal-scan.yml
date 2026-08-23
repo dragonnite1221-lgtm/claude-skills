@@ -20,20 +20,26 @@ jobs:
       pull-requests: write
     steps:
       - name: Checkout
-        uses: actions/checkout@v7
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
+          persist-credentials: false
           fetch-depth: 0
+          # Scan the submitted PR head rather than GitHub's synthetic merge commit.
+          # On releases this falls back to the release ref.
+          ref: ${{ github.event.pull_request.head.sha || github.ref }}
 
       - name: Package changed skills (PR)
         if: github.event_name == 'pull_request'
+        env:
+          BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          HEAD_SHA: ${{ github.event.pull_request.head.sha }}
         run: |
           mkdir -p /tmp/vt-scan
 
           # Only scan executable/binary-capable files — skip text-only formats
           # (.md, .py, .json, .yml are plain text; VT adds no value scanning them)
           CHANGED=$(git diff --name-only \
-            ${{ github.event.pull_request.base.sha }} \
-            ${{ github.sha }} \
+            "$BASE_SHA...$HEAD_SHA" \
             | grep -E '\.(js|ts|sh|mjs|cjs|exe|dll|so|bin|wasm)$' || true)
 
           if [ -z "$CHANGED" ]; then
@@ -92,7 +98,7 @@ jobs:
 
       - name: VirusTotal Scan
         if: env.SKIP_SCAN != 'true'
-        uses: crazy-max/ghaction-virustotal@v5
+        uses: crazy-max/ghaction-virustotal@936d8c5c00afe97d3d9a1af26d017cfdf26800a2
         id: vt-scan
         with:
           vt_api_key: ${{ secrets.VT_API_KEY }}
@@ -132,7 +138,7 @@ jobs:
 
       - name: Comment on PR
         if: github.event_name == 'pull_request' && env.SKIP_SCAN != 'true'
-        uses: actions/github-script@v9
+        uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3
         with:
           script: |
             const analysis = '${{ steps.vt-scan.outputs.analysis }}';
