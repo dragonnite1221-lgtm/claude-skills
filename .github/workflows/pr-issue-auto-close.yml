@@ -23,17 +23,21 @@ jobs:
           persist-credentials: false
 
       - name: Check Workflow Kill Switch
+        id: kill-switch
         run: |
           if [ -f ".github/WORKFLOW_KILLSWITCH" ]; then
             STATUS=$(grep "STATUS:" .github/WORKFLOW_KILLSWITCH | awk '{print $2}')
             if [ "$STATUS" = "DISABLED" ]; then
               echo "🛑 Workflows disabled by kill switch"
+              echo "disabled=true" >> "$GITHUB_OUTPUT"
               exit 0
             fi
           fi
+          echo "disabled=false" >> "$GITHUB_OUTPUT"
 
       - name: Extract linked issues from PR body
         id: extract_issues
+        if: steps.kill-switch.outputs.disabled != 'true'
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
@@ -90,12 +94,17 @@ jobs:
             return issues;
 
       - name: Close linked issues
-        if: steps.extract_issues.outputs.result != '[]'
+        if: steps.kill-switch.outputs.disabled != 'true' && steps.extract_issues.outputs.result != '[]'
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3
+        env:
+          ISSUE_NUMBERS_JSON: ${{ steps.extract_issues.outputs.result }}
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const issueNumbers = ${{ steps.extract_issues.outputs.result }};
+            const issueNumbers = JSON.parse(process.env.ISSUE_NUMBERS_JSON || '[]');
+            if (!Array.isArray(issueNumbers) || !issueNumbers.every(number => /^\d+$/.test(String(number)))) {
+              throw new Error('Invalid linked-issue output');
+            }
             const prNumber = context.payload.pull_request.number;
             const prTitle = context.payload.pull_request.title;
             const prUrl = context.payload.pull_request.html_url;
@@ -143,12 +152,17 @@ jobs:
             }
 
       - name: Update project board status
-        if: steps.extract_issues.outputs.result != '[]'
+        if: steps.kill-switch.outputs.disabled != 'true' && steps.extract_issues.outputs.result != '[]'
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3
+        env:
+          ISSUE_NUMBERS_JSON: ${{ steps.extract_issues.outputs.result }}
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const issueNumbers = ${{ steps.extract_issues.outputs.result }};
+            const issueNumbers = JSON.parse(process.env.ISSUE_NUMBERS_JSON || '[]');
+            if (!Array.isArray(issueNumbers) || !issueNumbers.every(number => /^\d+$/.test(String(number)))) {
+              throw new Error('Invalid linked-issue output');
+            }
 
             for (const issueNumber of issueNumbers) {
               try {
@@ -183,12 +197,17 @@ jobs:
             }
 
       - name: Summary
-        if: steps.extract_issues.outputs.result != '[]'
+        if: steps.kill-switch.outputs.disabled != 'true' && steps.extract_issues.outputs.result != '[]'
         uses: actions/github-script@3a2844b7e9c422d3c10d287c895573f7108da1b3
+        env:
+          ISSUE_NUMBERS_JSON: ${{ steps.extract_issues.outputs.result }}
         with:
           github-token: ${{ secrets.GITHUB_TOKEN }}
           script: |
-            const issueNumbers = ${{ steps.extract_issues.outputs.result }};
+            const issueNumbers = JSON.parse(process.env.ISSUE_NUMBERS_JSON || '[]');
+            if (!Array.isArray(issueNumbers) || !issueNumbers.every(number => /^\d+$/.test(String(number)))) {
+              throw new Error('Invalid linked-issue output');
+            }
             const prNumber = context.payload.pull_request.number;
 
             console.log(`

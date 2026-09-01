@@ -50,20 +50,35 @@ jobs:
         id: check_changes
         run: |
           if git diff --quiet .codex/; then
-            echo "has_changes=false" >> $GITHUB_OUTPUT
+            echo "has_changes=false" >> "$GITHUB_OUTPUT"
           else
-            echo "has_changes=true" >> $GITHUB_OUTPUT
+            echo "has_changes=true" >> "$GITHUB_OUTPUT"
           fi
+
+      - name: Configure authenticated push (dev only)
+        if: steps.check_changes.outputs.has_changes == 'true' && github.event.inputs.dry_run != 'true' && github.ref != 'refs/heads/main'
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          # Keep checkout credentials disabled. Supply the short-lived job token
+          # only when git asks for credentials during the automated push.
+          git config --local credential.helper \
+            "!f() { test \"\$1\" = get || exit 0; echo username=x-access-token; echo \"password=\$GH_TOKEN\"; }; f"
 
       - name: Commit changes (dev only)
         if: steps.check_changes.outputs.has_changes == 'true' && github.event.inputs.dry_run != 'true' && github.ref != 'refs/heads/main'
         uses: stefanzweifel/git-auto-commit-action@b863ae1933cb653a53c021fe36dbb774e1fb9403
+        env:
+          GH_TOKEN: ${{ github.token }}
         with:
           commit_message: "chore: sync codex skills symlinks [automated]"
           file_pattern: ".codex/*"
           commit_user_name: "github-actions[bot]"
           commit_user_email: "github-actions[bot]@users.noreply.github.com"
-          token: ${{ github.token }}
+
+      - name: Clear push authentication helper
+        if: always()
+        run: git config --local --unset-all credential.helper || true
 
       - name: Warn if main has drift
         if: steps.check_changes.outputs.has_changes == 'true' && github.ref == 'refs/heads/main'
@@ -72,19 +87,21 @@ jobs:
 
       - name: Summary
         run: |
-          echo "## Codex Skills Sync Summary" >> $GITHUB_STEP_SUMMARY
-          echo "" >> $GITHUB_STEP_SUMMARY
-          if [ -f ".codex/skills-index.json" ]; then
-            TOTAL=$(python3 -c "import json; print(json.load(open('.codex/skills-index.json'))['total_skills'])")
-            echo "**Total Skills:** $TOTAL" >> $GITHUB_STEP_SUMMARY
-            echo "" >> $GITHUB_STEP_SUMMARY
-            echo "### Categories" >> $GITHUB_STEP_SUMMARY
-            python3 -c "
+          {
+            echo "## Codex Skills Sync Summary"
+            echo ""
+            if [ -f ".codex/skills-index.json" ]; then
+              TOTAL=$(python3 -c "import json; print(json.load(open('.codex/skills-index.json'))['total_skills'])")
+              echo "**Total Skills:** $TOTAL"
+              echo ""
+              echo "### Categories"
+              python3 -c "
           import json
           data = json.load(open('.codex/skills-index.json'))
           for cat, info in data['categories'].items():
               print(f'- **{cat}**: {info[\"count\"]} skills')
-          " >> $GITHUB_STEP_SUMMARY
-          else
-            echo "No skills index found." >> $GITHUB_STEP_SUMMARY
-          fi
+          "
+            else
+              echo "No skills index found."
+            fi
+          } >> "$GITHUB_STEP_SUMMARY"
