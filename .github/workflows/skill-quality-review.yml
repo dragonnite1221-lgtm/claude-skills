@@ -31,39 +31,72 @@ jobs:
       - name: Find changed skill directories
         id: find
         run: |
-          CHANGED=$(git diff --name-only origin/${{ github.base_ref }}...HEAD 2>/dev/null || echo "")
-          if [ -z "$CHANGED" ]; then
+          # -z gives NUL-delimited, raw (never C-quoted) paths so directory
+          # names containing quotes, backslashes, tabs, or newlines aren't
+          # silently mangled and skipped by the checks below.
+          mapfile -d '' -t CHANGED_FILES < <(git diff --name-only -z origin/${{ github.base_ref }}...HEAD 2>/dev/null || true)
+          if [ ${#CHANGED_FILES[@]} -eq 0 ]; then
             echo "skills=[]" >> "$GITHUB_OUTPUT"
             echo "has_skills=false" >> "$GITHUB_OUTPUT"
             exit 0
           fi
 
           SKILLS=()
-          SEEN=()
-          while IFS= read -r file; do
-            dir=$(echo "$file" | cut -d'/' -f1-2)
+          declare -A SEEN=()
+          for file in "${CHANGED_FILES[@]}"; do
+            # Get the top-level directory (first two "/"-delimited
+            # components). Done with pure bash substring expansion, never a
+            # line-oriented tool like `cut`, because a path can legally
+            # contain an embedded newline byte — a line-oriented tool would
+            # split such a path across two "lines" and silently miscompute
+            # `dir`, letting a malicious/malformed skill escape the review.
+            first="${file%%/*}"
+            if [ "$first" = "$file" ]; then
+              dir="$file"
+            else
+              rest="${file#*/}"
+              dir="$first/${rest%%/*}"
+            fi
             case "$dir" in
               .github/*|.claude/*|.codex/*|.gemini/*|docs/*|scripts/*|commands/*|standards/*|eval-workspace/*|medium/*) continue ;;
             esac
             for candidate in "$dir"; do
-              if [ -f "$candidate/SKILL.md" ] && [[ ! " ${SEEN[*]} " =~ " $candidate " ]]; then
-                SKILLS+=("$candidate")
-                SEEN+=("$candidate")
-                break
+              if [ -f "$candidate/SKILL.md" ]; then
+                # Reject anything outside a safe, portable charset instead
+                # of trying to thread arbitrary bytes (newlines, control
+                # characters, quotes, spaces) through every downstream
+                # shell/JSON/Markdown/log-annotation consumer. Fail the
+                # job loudly so a human looks at it, rather than silently
+                # skipping it (which would let that directory's contents
+                # dodge the review entirely) or passing the raw bytes
+                # through (which reopens the exact class of injection this
+                # workflow exists to close, e.g. GitHub Actions workflow
+                # commands via an embedded newline).
+                if ! [[ "$candidate" =~ ^[A-Za-z0-9._-]+/[A-Za-z0-9._-]+$ ]]; then
+                  echo "::error::Skill directory name uses unsupported characters, refusing to review: $(printf '%q' "$candidate")" >&2
+                  exit 1
+                fi
+                # Exact-key associative-array lookup, not a joined-string
+                # regex match: `${SEEN[*]}` substring matching would let a
+                # crafted directory name falsely collide with an unrelated
+                # candidate and skip it from the review.
+                if [ -z "${SEEN[$candidate]+x}" ]; then
+                  SKILLS+=("$candidate")
+                  SEEN[$candidate]=1
+                  break
+                fi
               fi
             done
-          done <<< "$CHANGED"
+          done
 
           if [ ${#SKILLS[@]} -eq 0 ]; then
             echo "skills=[]" >> "$GITHUB_OUTPUT"
             echo "has_skills=false" >> "$GITHUB_OUTPUT"
           else
-            JSON="["
-            for i in "${!SKILLS[@]}"; do
-              [ $i -gt 0 ] && JSON+=","
-              JSON+="\"${SKILLS[$i]}\""
-            done
-            JSON+="]"
+            # Build JSON array with a real serializer so directory names
+            # containing quotes, backslashes, or shell metacharacters can
+            # never break out of the JSON string.
+            JSON=$(python3 -c 'import json,sys; print(json.dumps(sys.argv[1:]))' "${SKILLS[@]}")
             echo "skills=$JSON" >> "$GITHUB_OUTPUT"
             echo "has_skills=true" >> "$GITHUB_OUTPUT"
             echo "Changed skills: $JSON"
@@ -121,8 +154,12 @@ jobs:
 
       - name: Review changed skills
         id: review
+        env:
+          # Passed as an env var (never interpolated into the run: script
+          # body) so a malicious skill directory name cannot inject shell
+          # commands via GitHub Actions expression substitution.
+          SKILLS_JSON: ${{ needs.detect-skills.outputs.skills }}
         run: |
-          SKILLS='${{ needs.detect-skills.outputs.skills }}'
           REPORT_FILE=$(mktemp)
           OVERALL_EXIT=0
           THRESHOLD=70
@@ -134,7 +171,11 @@ jobs:
 
           DETAILS_FILE=$(mktemp)
 
-          for skill_dir in $(echo "$SKILLS" | python3 -c "import sys,json; [print(s) for s in json.load(sys.stdin)]"); do
+          # Read NUL-delimited (no word splitting, glob expansion, *or*
+          # line splitting) so paths with spaces, or even an embedded
+          # newline byte, are never mangled or split into extra, incorrect
+          # entries.
+          while IFS= read -r -d '' skill_dir; do
             echo "::group::Reviewing $skill_dir"
 
             JSON_OUT=$(tessl skill review "$skill_dir" --json 2>&1) && EXIT_CODE=$? || EXIT_CODE=$?
@@ -196,7 +237,7 @@ jobs:
             fi
 
             echo "::endgroup::"
-          done
+          done < <(printf '%s' "$SKILLS_JSON" | python3 -c "import sys,json; [sys.stdout.write(s + chr(0)) for s in json.load(sys.stdin)]")
 
           # Add details section
           DETAILS_CONTENT=$(cat "$DETAILS_FILE")
@@ -217,8 +258,12 @@ jobs:
 
       - name: Run internal validators
         id: internal
+        env:
+          # Passed as an env var (never interpolated into the run: script
+          # body) so a malicious skill directory name cannot inject shell
+          # commands via GitHub Actions expression substitution.
+          SKILLS_JSON: ${{ needs.detect-skills.outputs.skills }}
         run: |
-          SKILLS='${{ needs.detect-skills.outputs.skills }}'
           INTERNAL_REPORT=$(mktemp)
           INTERNAL_EXIT=0
 
@@ -226,7 +271,11 @@ jobs:
           echo "## 🔧 Internal Validation" >> "$INTERNAL_REPORT"
           echo "" >> "$INTERNAL_REPORT"
 
-          for skill_dir in $(echo "$SKILLS" | python3 -c "import sys,json; [print(s) for s in json.load(sys.stdin)]"); do
+          # Read NUL-delimited (no word splitting, glob expansion, *or*
+          # line splitting) so paths with spaces, or even an embedded
+          # newline byte, are never mangled or split into extra, incorrect
+          # entries.
+          while IFS= read -r -d '' skill_dir; do
             # Structure validation
             STRUCT=$(python3 engineering/skill-tester/scripts/skill_validator.py "$skill_dir" --json 2>&1 | python3 -c "
           import sys, json
@@ -269,7 +318,7 @@ jobs:
             fi
 
             echo "- \`$skill_dir\`: structure ${SSCORE}/100 (${SLEVEL}), scripts ${SCRIPT_STATUS}, security ${SEC}" >> "$INTERNAL_REPORT"
-          done
+          done < <(printf '%s' "$SKILLS_JSON" | python3 -c "import sys,json; [sys.stdout.write(s + chr(0)) for s in json.load(sys.stdin)]")
 
           echo "internal_report=$INTERNAL_REPORT" >> "$GITHUB_OUTPUT"
           echo "internal_exit=$INTERNAL_EXIT" >> "$GITHUB_OUTPUT"
