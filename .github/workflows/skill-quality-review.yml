@@ -313,9 +313,17 @@ jobs:
               print('ERROR')
           " 2>/dev/null || echo "ERROR")
 
-            if [ "$SEC" = "FAIL" ]; then
-              INTERNAL_EXIT=1
-            fi
+            # Fail closed: only a confirmed PASS or WARN verdict is safe to
+            # let through. Previously this only checked for the literal
+            # "FAIL" verdict, so if the auditor itself errored out (crash,
+            # timeout, malformed/non-JSON output -- anything the inner
+            # `except: print('ERROR')` above catches) SEC became "ERROR"
+            # and silently passed this gate: the security audit couldn't
+            # even run, but the quality-review job still reported success.
+            case "$SEC" in
+              PASS|WARN) ;;
+              *) INTERNAL_EXIT=1 ;;
+            esac
 
             echo "- \`$skill_dir\`: structure ${SSCORE}/100 (${SLEVEL}), scripts ${SCRIPT_STATUS}, security ${SEC}" >> "$INTERNAL_REPORT"
           done < <(printf '%s' "$SKILLS_JSON" | python3 -c "import sys,json; [sys.stdout.write(s + chr(0)) for s in json.load(sys.stdin)]")
@@ -367,7 +375,10 @@ jobs:
         if: steps.review.outputs.exit_code == '1' || steps.internal.outputs.internal_exit == '1'
         run: |
           if [ "${{ steps.internal.outputs.internal_exit }}" = "1" ]; then
-            echo "::error::Security audit found CRITICAL/HIGH findings. Merge blocked."
+            echo "::error::Internal security audit did not return a clean PASS/WARN verdict" \
+              "for one or more changed skills (either it found CRITICAL/HIGH findings, or it" \
+              "could not run to completion). See the internal validation report above." \
+              "Merge blocked."
           fi
           if [ "${{ steps.review.outputs.exit_code }}" = "1" ]; then
             echo "::error::Tessl quality review below threshold (70/100). Improve skill before merge."
