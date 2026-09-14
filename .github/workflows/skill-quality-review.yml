@@ -326,7 +326,10 @@ jobs:
         if: steps.review.outputs.exit_code == '1' || steps.internal.outputs.internal_exit == '1'
         run: |
           if [ "${{ steps.internal.outputs.internal_exit }}" = "1" ]; then
-            echo "::error::Internal security audit did not return a clean PASS/WARN verdict for one or more changed skills (either it found CRITICAL/HIGH findings, or it could not run to completion). See the internal validation report above. Merge blocked."
+            echo "::error::Internal security audit did not return a clean PASS/WARN verdict" \
+              "for one or more changed skills (either it found CRITICAL/HIGH findings, or it" \
+              "could not run to completion). See the internal validation report above." \
+              "Merge blocked."
           fi
           if [ "${{ steps.review.outputs.exit_code }}" = "1" ]; then
             echo "::error::Tessl quality review below threshold (70/100). Improve skill before merge."
