@@ -118,18 +118,8 @@ class TestSuite:
             "no_tests": statuses.count("NO_TESTS")
         }
         
-        # Determine overall status. A batch counts as PASS only when every
-        # script fully passed -- if any script came back PARTIAL (some of
-        # its own tests failed) the batch must not be reported as PASS,
-        # even when no script outright FAILed or had NO_TESTS, otherwise a
-        # suite made up entirely of PARTIAL scripts is misreported as a
-        # clean PASS and callers relying on this field (and the CLI's exit
-        # code, which is derived from it) never see the degradation.
-        if (
-            self.summary["failed"] == 0
-            and self.summary["no_tests"] == 0
-            and self.summary["partial"] == 0
-        ):
+        # PASS requires zero failed/no_tests/partial (else all-PARTIAL shows as PASS)
+        if self.summary["failed"] == self.summary["no_tests"] == self.summary["partial"] == 0:
             self.summary["overall_status"] = "PASS"
         elif self.summary["passed"] > 0 or self.summary["partial"] > 0:
             self.summary["overall_status"] = "PARTIAL"
@@ -716,18 +706,13 @@ Test Categories:
         else:
             print(TestReportFormatter.format_human_readable(test_suite))
             
-        # Exit with appropriate code, matching the repo-wide convention in
-        # CONVENTIONS.md ("Exit codes: 0 = success, 1 = warnings, 2 =
-        # critical errors"). PARTIAL is a warning-level outcome (some tests
-        # failed but nothing is entirely broken); FAIL and global errors
-        # (skill path missing, no scripts found, etc.) are critical -- the
-        # suite could not be meaningfully exercised at all.
+        # Exit codes per CONVENTIONS.md: 0=success, 1=warnings, 2=critical.
         if test_suite.global_errors:
             sys.exit(2)
         elif test_suite.summary.get("overall_status") == "FAIL":
             sys.exit(2)
         elif test_suite.summary.get("overall_status") == "PARTIAL":
-            sys.exit(1)  # Partial success (warning-level)
+            sys.exit(1)  # warning-level
         else:
             sys.exit(0)  # Success
             
