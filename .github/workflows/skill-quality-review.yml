@@ -42,16 +42,33 @@ jobs:
           fi
 
           SKILLS=()
-          SEEN=()
+          declare -A SEEN=()
           for file in "${CHANGED_FILES[@]}"; do
-            dir=$(printf '%s' "$file" | cut -d'/' -f1-2)
+            # Get the top-level directory (first two "/"-delimited
+            # components). Done with pure bash substring expansion, never a
+            # line-oriented tool like `cut`, because a path can legally
+            # contain an embedded newline byte — a line-oriented tool would
+            # split such a path across two "lines" and silently miscompute
+            # `dir`, letting a malicious/malformed skill escape the review.
+            first="${file%%/*}"
+            if [ "$first" = "$file" ]; then
+              dir="$file"
+            else
+              rest="${file#*/}"
+              dir="$first/${rest%%/*}"
+            fi
             case "$dir" in
               .github/*|.claude/*|.codex/*|.gemini/*|docs/*|scripts/*|commands/*|standards/*|eval-workspace/*|medium/*) continue ;;
             esac
             for candidate in "$dir"; do
-              if [ -f "$candidate/SKILL.md" ] && [[ ! " ${SEEN[*]} " =~ " $candidate " ]]; then
+              # Exact-key associative-array lookup, not a joined-string
+              # regex match: `${SEEN[*]}` substring matching would let a
+              # crafted directory name (e.g. one containing a literal
+              # space) falsely collide with an unrelated candidate and
+              # skip it from the review.
+              if [ -f "$candidate/SKILL.md" ] && [ -z "${SEEN[$candidate]+x}" ]; then
                 SKILLS+=("$candidate")
-                SEEN+=("$candidate")
+                SEEN[$candidate]=1
                 break
               fi
             done
