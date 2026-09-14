@@ -32,16 +32,24 @@ jobs:
           persist-credentials: false
 
       - name: Check Workflow Kill Switch
+        id: kill-switch
         run: |
+            echo "disabled=false" >> "$GITHUB_OUTPUT"
             if [ -f ".github/WORKFLOW_KILLSWITCH" ]; then
               STATUS=$(grep "STATUS:" .github/WORKFLOW_KILLSWITCH | awk '{print $2}')
               if [ "$STATUS" = "DISABLED" ]; then
+                echo "disabled=true" >> "$GITHUB_OUTPUT"
                 echo "🛑 Workflows disabled by kill switch"
-                exit 0
               fi
             fi
+
+      # `exit 0` inside the check above only ends *that* step successfully --
+      # it does not skip any later step in the job, so the sync used to run
+      # unconditionally even while the repository was marked DISABLED. Gate
+      # every step that can perform a sync action on this output instead.
       - name: Determine Sync Direction
         id: check
+        if: steps.kill-switch.outputs.disabled != 'true'
         run: |
           # Check which event triggered this workflow
           if [ "${{ github.event_name }}" = "issues" ]; then
