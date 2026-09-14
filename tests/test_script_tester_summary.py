@@ -57,11 +57,22 @@ def test_all_failed_batch_is_reported_as_fail():
         raise AssertionError(f"expected FAIL, got {got}: {suite.summary}")
 
 
-def test_failed_and_partial_mix_is_reported_as_partial():
+def test_failed_and_partial_mix_is_reported_as_fail():
+    # commands/plugin-audit.md's documented gate rule: "Any FAIL is a
+    # blocker" -- it must outrank a PARTIAL elsewhere in the same batch.
     suite = _suite_with_statuses("FAIL", "PARTIAL")
     got = suite.summary["overall_status"]
-    if got != "PARTIAL":
-        raise AssertionError(f"expected PARTIAL, got {got}: {suite.summary}")
+    if got != "FAIL":
+        raise AssertionError(f"expected FAIL, got {got}: {suite.summary}")
+
+
+def test_failed_and_passed_mix_is_reported_as_fail():
+    # Same blocker rule: even a batch that's mostly PASS must not outrank
+    # a single FAIL.
+    suite = _suite_with_statuses("FAIL", "PASS")
+    got = suite.summary["overall_status"]
+    if got != "FAIL":
+        raise AssertionError(f"expected FAIL, got {got}: {suite.summary}")
 
 
 # --- CLI exit-code contract (CONVENTIONS.md: 0=success, 1=warnings,
