@@ -31,8 +31,11 @@ jobs:
       - name: Find changed skill directories
         id: find
         run: |
-          CHANGED=$(git diff --name-only origin/${{ github.base_ref }}...HEAD 2>/dev/null || echo "")
-          if [ -z "$CHANGED" ]; then
+          # -z gives NUL-delimited, raw (never C-quoted) paths so directory
+          # names containing quotes, backslashes, tabs, or newlines aren't
+          # silently mangled and skipped by the checks below.
+          mapfile -d '' -t CHANGED_FILES < <(git diff --name-only -z origin/${{ github.base_ref }}...HEAD 2>/dev/null || true)
+          if [ ${#CHANGED_FILES[@]} -eq 0 ]; then
             echo "skills=[]" >> "$GITHUB_OUTPUT"
             echo "has_skills=false" >> "$GITHUB_OUTPUT"
             exit 0
@@ -40,8 +43,8 @@ jobs:
 
           SKILLS=()
           SEEN=()
-          while IFS= read -r file; do
-            dir=$(echo "$file" | cut -d'/' -f1-2)
+          for file in "${CHANGED_FILES[@]}"; do
+            dir=$(printf '%s' "$file" | cut -d'/' -f1-2)
             case "$dir" in
               .github/*|.claude/*|.codex/*|.gemini/*|docs/*|scripts/*|commands/*|standards/*|eval-workspace/*|medium/*) continue ;;
             esac
@@ -52,7 +55,7 @@ jobs:
                 break
               fi
             done
-          done <<< "$CHANGED"
+          done
 
           if [ ${#SKILLS[@]} -eq 0 ]; then
             echo "skills=[]" >> "$GITHUB_OUTPUT"

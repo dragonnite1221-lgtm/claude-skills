@@ -41,10 +41,14 @@ jobs:
       - name: Find changed skill directories
         id: find
         run: |
-          # Get list of changed files in PR
-          CHANGED=$(git diff --name-only origin/${{ github.base_ref }}...HEAD 2>/dev/null || echo "")
+          # Get list of changed files in PR. -z gives NUL-delimited, raw
+          # (never C-quoted) paths so directory names containing quotes,
+          # backslashes, tabs, or newlines aren't silently mangled — a
+          # mangled name would fail the SKILL.md existence check below and
+          # let that skill escape the audit entirely.
+          mapfile -d '' -t CHANGED_FILES < <(git diff --name-only -z origin/${{ github.base_ref }}...HEAD 2>/dev/null || true)
 
-          if [ -z "$CHANGED" ]; then
+          if [ ${#CHANGED_FILES[@]} -eq 0 ]; then
             echo "skills=[]" >> "$GITHUB_OUTPUT"
             echo "has_skills=false" >> "$GITHUB_OUTPUT"
             exit 0
@@ -53,9 +57,9 @@ jobs:
           # Extract unique skill root directories (top-level dirs containing SKILL.md)
           SKILLS=()
           SEEN=()
-          while IFS= read -r file; do
+          for file in "${CHANGED_FILES[@]}"; do
             # Get the top-level directory
-            dir=$(echo "$file" | cut -d'/' -f1-2)
+            dir=$(printf '%s' "$file" | cut -d'/' -f1-2)
             # Skip non-skill paths
             case "$dir" in
               .github/*|.claude/*|.codex/*|.gemini/*|docs/*|scripts/*|commands/*|standards/*|eval-workspace/*) continue ;;
@@ -71,7 +75,7 @@ jobs:
                 break
               fi
             done
-          done <<< "$CHANGED"
+          done
 
           if [ ${#SKILLS[@]} -eq 0 ]; then
             echo "skills=[]" >> "$GITHUB_OUTPUT"
