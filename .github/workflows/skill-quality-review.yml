@@ -61,15 +61,30 @@ jobs:
               .github/*|.claude/*|.codex/*|.gemini/*|docs/*|scripts/*|commands/*|standards/*|eval-workspace/*|medium/*) continue ;;
             esac
             for candidate in "$dir"; do
-              # Exact-key associative-array lookup, not a joined-string
-              # regex match: `${SEEN[*]}` substring matching would let a
-              # crafted directory name (e.g. one containing a literal
-              # space) falsely collide with an unrelated candidate and
-              # skip it from the review.
-              if [ -f "$candidate/SKILL.md" ] && [ -z "${SEEN[$candidate]+x}" ]; then
-                SKILLS+=("$candidate")
-                SEEN[$candidate]=1
-                break
+              if [ -f "$candidate/SKILL.md" ]; then
+                # Reject anything outside a safe, portable charset instead
+                # of trying to thread arbitrary bytes (newlines, control
+                # characters, quotes, spaces) through every downstream
+                # shell/JSON/Markdown/log-annotation consumer. Fail the
+                # job loudly so a human looks at it, rather than silently
+                # skipping it (which would let that directory's contents
+                # dodge the review entirely) or passing the raw bytes
+                # through (which reopens the exact class of injection this
+                # workflow exists to close, e.g. GitHub Actions workflow
+                # commands via an embedded newline).
+                if ! [[ "$candidate" =~ ^[A-Za-z0-9._-]+/[A-Za-z0-9._-]+$ ]]; then
+                  echo "::error::Skill directory name uses unsupported characters, refusing to review: $(printf '%q' "$candidate")" >&2
+                  exit 1
+                fi
+                # Exact-key associative-array lookup, not a joined-string
+                # regex match: `${SEEN[*]}` substring matching would let a
+                # crafted directory name falsely collide with an unrelated
+                # candidate and skip it from the review.
+                if [ -z "${SEEN[$candidate]+x}" ]; then
+                  SKILLS+=("$candidate")
+                  SEEN[$candidate]=1
+                  break
+                fi
               fi
             done
           done
