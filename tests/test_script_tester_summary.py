@@ -62,3 +62,51 @@ def test_failed_and_partial_mix_is_reported_as_partial():
     got = suite.summary["overall_status"]
     if got != "PARTIAL":
         raise AssertionError(f"expected PARTIAL, got {got}: {suite.summary}")
+
+
+# --- CLI exit-code contract (CONVENTIONS.md: 0=success, 1=warnings,
+# 2=critical errors) -------------------------------------------------------
+
+
+def _run_main_with_status(monkeypatch, capsys, overall_status, global_error=None):
+    """Run script_tester.main() against a canned TestSuite result, without
+    needing real script fixtures on disk, and return the SystemExit code."""
+    suite = script_tester.TestSuite("dummy-skill")
+    if global_error:
+        suite.add_global_error(global_error)
+    else:
+        suite.add_script_result(_suite_with_statuses(overall_status).script_results["script_0.py"])
+        suite.calculate_summary()
+
+    def fake_test_all_scripts(self):
+        return suite
+
+    monkeypatch.setattr(script_tester.ScriptTester, "test_all_scripts", fake_test_all_scripts)
+    monkeypatch.setattr(sys, "argv", ["script_tester.py", "dummy-skill", "--json"])
+
+    try:
+        script_tester.main()
+    except SystemExit as exc:
+        capsys.readouterr()
+        return exc.code
+    raise AssertionError("main() did not call sys.exit()")
+
+
+def test_cli_exits_0_on_pass(monkeypatch, capsys):
+    code = _run_main_with_status(monkeypatch, capsys, "PASS")
+    assert code == 0, f"expected exit 0 (success) for PASS, got {code}"
+
+
+def test_cli_exits_1_on_partial(monkeypatch, capsys):
+    code = _run_main_with_status(monkeypatch, capsys, "PARTIAL")
+    assert code == 1, f"expected exit 1 (warning) for PARTIAL, got {code}"
+
+
+def test_cli_exits_2_on_fail(monkeypatch, capsys):
+    code = _run_main_with_status(monkeypatch, capsys, "FAIL")
+    assert code == 2, f"expected exit 2 (critical) for FAIL, got {code}"
+
+
+def test_cli_exits_2_on_global_error(monkeypatch, capsys):
+    code = _run_main_with_status(monkeypatch, capsys, None, global_error="No scripts directory found")
+    assert code == 2, f"expected exit 2 (critical) for a global error, got {code}"

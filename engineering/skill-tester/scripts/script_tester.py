@@ -716,13 +716,18 @@ Test Categories:
         else:
             print(TestReportFormatter.format_human_readable(test_suite))
             
-        # Exit with appropriate code
+        # Exit with appropriate code, matching the repo-wide convention in
+        # CONVENTIONS.md ("Exit codes: 0 = success, 1 = warnings, 2 =
+        # critical errors"). PARTIAL is a warning-level outcome (some tests
+        # failed but nothing is entirely broken); FAIL and global errors
+        # (skill path missing, no scripts found, etc.) are critical -- the
+        # suite could not be meaningfully exercised at all.
         if test_suite.global_errors:
-            sys.exit(1)
+            sys.exit(2)
         elif test_suite.summary.get("overall_status") == "FAIL":
-            sys.exit(1)
+            sys.exit(2)
         elif test_suite.summary.get("overall_status") == "PARTIAL":
-            sys.exit(2)  # Partial success
+            sys.exit(1)  # Partial success (warning-level)
         else:
             sys.exit(0)  # Success
             
