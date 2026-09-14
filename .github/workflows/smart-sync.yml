@@ -43,13 +43,35 @@ jobs:
               fi
             fi
 
-      # `exit 0` inside the check above only ends *that* step successfully --
-      # it does not skip any later step in the job, so the sync used to run
-      # unconditionally even while the repository was marked DISABLED. Gate
-      # every step that can perform a sync action on this output instead.
+      # This workflow's sync targets are hardcoded to a single project
+      # board owned by alirezarezvani (project #9; see the `owner:
+      # "alirezarezvani"` / `user(login: "alirezarezvani")` GraphQL calls
+      # in sync-issue-to-project below). A fork inherits this file
+      # verbatim, so without this guard *the fork's own* issue events
+      # would try to add/move items on a project board that belongs to a
+      # different repository entirely -- a cross-repository mutation that
+      # has nothing to do with the repo that actually triggered the run.
+      - name: Verify canonical repository ownership
+        id: repo-check
+        run: |
+          echo "is_canonical=false" >> "$GITHUB_OUTPUT"
+          if [ "${{ github.repository }}" = "alirezarezvani/claude-skills" ]; then
+            echo "is_canonical=true" >> "$GITHUB_OUTPUT"
+          else
+            echo "⏭️ This workflow syncs issues to a project board owned by" \
+              "alirezarezvani (project #9) and must never run that sync" \
+              "against a different repository's issues. Skipping in" \
+              "${{ github.repository }}."
+          fi
+
+      # `exit 0` inside the kill-switch check above only ends *that* step
+      # successfully -- it does not skip any later step in the job, so the
+      # sync used to run unconditionally even while the repository was
+      # marked DISABLED. Gate every step that can perform a sync action on
+      # these outputs instead.
       - name: Determine Sync Direction
         id: check
-        if: steps.kill-switch.outputs.disabled != 'true'
+        if: steps.kill-switch.outputs.disabled != 'true' && steps.repo-check.outputs.is_canonical == 'true'
         run: |
           # Check which event triggered this workflow
           if [ "${{ github.event_name }}" = "issues" ]; then
@@ -131,9 +153,13 @@ jobs:
 
   sync-issue-to-project:
     needs: [determine-direction, rate-limit-check, debounce]
+    # Defense in depth: this job hardcodes writes to a project board owned
+    # by alirezarezvani, so it must never run outside that exact repo, even
+    # if a future edit to determine-direction's gating regresses.
     if: |
       needs.determine-direction.outputs.direction == 'issue-to-project' &&
-      needs.rate-limit-check.outputs.can_proceed == 'true'
+      needs.rate-limit-check.outputs.can_proceed == 'true' &&
+      github.repository == 'alirezarezvani/claude-skills'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:
@@ -274,9 +300,11 @@ jobs:
 
   sync-project-to-issue:
     needs: [determine-direction, rate-limit-check, debounce]
+    # Defense in depth: see the matching comment on sync-issue-to-project.
     if: |
       needs.determine-direction.outputs.direction == 'project-to-issue' &&
-      needs.rate-limit-check.outputs.can_proceed == 'true'
+      needs.rate-limit-check.outputs.can_proceed == 'true' &&
+      github.repository == 'alirezarezvani/claude-skills'
     runs-on: ubuntu-latest
     timeout-minutes: 5
     permissions:
