@@ -77,13 +77,10 @@ jobs:
             echo "skills=[]" >> "$GITHUB_OUTPUT"
             echo "has_skills=false" >> "$GITHUB_OUTPUT"
           else
-            # Build JSON array
-            JSON="["
-            for i in "${!SKILLS[@]}"; do
-              [ $i -gt 0 ] && JSON+=","
-              JSON+="\"${SKILLS[$i]}\""
-            done
-            JSON+="]"
+            # Build JSON array with a real serializer so directory names
+            # containing quotes, backslashes, or shell metacharacters can
+            # never break out of the JSON string.
+            JSON=$(python3 -c 'import json,sys; print(json.dumps(sys.argv[1:]))' "${SKILLS[@]}")
             echo "skills=$JSON" >> "$GITHUB_OUTPUT"
             echo "has_skills=true" >> "$GITHUB_OUTPUT"
             echo "Changed skills: $JSON"
@@ -110,17 +107,22 @@ jobs:
 
       - name: Run security auditor on changed skills
         id: audit
+        env:
+          # Passed as an env var (never interpolated into the run: script
+          # body) so a malicious skill directory name cannot inject shell
+          # commands via GitHub Actions expression substitution.
+          SKILLS_JSON: ${{ needs.detect-changes.outputs.skills }}
         run: |
           AUDITOR="engineering/skill-security-auditor/scripts/skill_security_auditor.py"
-          SKILLS='${{ needs.detect-changes.outputs.skills }}'
           REPORT_FILE=$(mktemp)
           OVERALL_EXIT=0
 
           echo "## 🔒 Skill Security Audit Results" > "$REPORT_FILE"
           echo "" >> "$REPORT_FILE"
 
-          # Parse JSON array of skill dirs
-          for skill_dir in $(echo "$SKILLS" | python3 -c "import sys,json; [print(s) for s in json.load(sys.stdin)]"); do
+          # Parse JSON array of skill dirs. Read line-by-line (no word
+          # splitting or glob expansion) so paths with spaces are safe too.
+          while IFS= read -r skill_dir; do
             echo "::group::Auditing $skill_dir"
             echo "Scanning: $skill_dir"
 
@@ -189,7 +191,7 @@ jobs:
             fi
 
             echo "::endgroup::"
-          done
+          done < <(echo "$SKILLS_JSON" | python3 -c "import sys,json; [print(s) for s in json.load(sys.stdin)]")
 
           # Save report for comment step
           echo "report_file=$REPORT_FILE" >> "$GITHUB_OUTPUT"

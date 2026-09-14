@@ -58,12 +58,10 @@ jobs:
             echo "skills=[]" >> "$GITHUB_OUTPUT"
             echo "has_skills=false" >> "$GITHUB_OUTPUT"
           else
-            JSON="["
-            for i in "${!SKILLS[@]}"; do
-              [ $i -gt 0 ] && JSON+=","
-              JSON+="\"${SKILLS[$i]}\""
-            done
-            JSON+="]"
+            # Build JSON array with a real serializer so directory names
+            # containing quotes, backslashes, or shell metacharacters can
+            # never break out of the JSON string.
+            JSON=$(python3 -c 'import json,sys; print(json.dumps(sys.argv[1:]))' "${SKILLS[@]}")
             echo "skills=$JSON" >> "$GITHUB_OUTPUT"
             echo "has_skills=true" >> "$GITHUB_OUTPUT"
             echo "Changed skills: $JSON"
@@ -121,8 +119,12 @@ jobs:
 
       - name: Review changed skills
         id: review
+        env:
+          # Passed as an env var (never interpolated into the run: script
+          # body) so a malicious skill directory name cannot inject shell
+          # commands via GitHub Actions expression substitution.
+          SKILLS_JSON: ${{ needs.detect-skills.outputs.skills }}
         run: |
-          SKILLS='${{ needs.detect-skills.outputs.skills }}'
           REPORT_FILE=$(mktemp)
           OVERALL_EXIT=0
           THRESHOLD=70
@@ -134,7 +136,9 @@ jobs:
 
           DETAILS_FILE=$(mktemp)
 
-          for skill_dir in $(echo "$SKILLS" | python3 -c "import sys,json; [print(s) for s in json.load(sys.stdin)]"); do
+          # Read line-by-line (no word splitting or glob expansion) so
+          # paths with spaces are safe too.
+          while IFS= read -r skill_dir; do
             echo "::group::Reviewing $skill_dir"
 
             JSON_OUT=$(tessl skill review "$skill_dir" --json 2>&1) && EXIT_CODE=$? || EXIT_CODE=$?
@@ -196,7 +200,7 @@ jobs:
             fi
 
             echo "::endgroup::"
-          done
+          done < <(echo "$SKILLS_JSON" | python3 -c "import sys,json; [print(s) for s in json.load(sys.stdin)]")
 
           # Add details section
           DETAILS_CONTENT=$(cat "$DETAILS_FILE")
@@ -217,8 +221,12 @@ jobs:
 
       - name: Run internal validators
         id: internal
+        env:
+          # Passed as an env var (never interpolated into the run: script
+          # body) so a malicious skill directory name cannot inject shell
+          # commands via GitHub Actions expression substitution.
+          SKILLS_JSON: ${{ needs.detect-skills.outputs.skills }}
         run: |
-          SKILLS='${{ needs.detect-skills.outputs.skills }}'
           INTERNAL_REPORT=$(mktemp)
           INTERNAL_EXIT=0
 
@@ -226,7 +234,9 @@ jobs:
           echo "## 🔧 Internal Validation" >> "$INTERNAL_REPORT"
           echo "" >> "$INTERNAL_REPORT"
 
-          for skill_dir in $(echo "$SKILLS" | python3 -c "import sys,json; [print(s) for s in json.load(sys.stdin)]"); do
+          # Read line-by-line (no word splitting or glob expansion) so
+          # paths with spaces are safe too.
+          while IFS= read -r skill_dir; do
             # Structure validation
             STRUCT=$(python3 engineering/skill-tester/scripts/skill_validator.py "$skill_dir" --json 2>&1 | python3 -c "
           import sys, json
@@ -269,7 +279,7 @@ jobs:
             fi
 
             echo "- \`$skill_dir\`: structure ${SSCORE}/100 (${SLEVEL}), scripts ${SCRIPT_STATUS}, security ${SEC}" >> "$INTERNAL_REPORT"
-          done
+          done < <(echo "$SKILLS_JSON" | python3 -c "import sys,json; [print(s) for s in json.load(sys.stdin)]")
 
           echo "internal_report=$INTERNAL_REPORT" >> "$GITHUB_OUTPUT"
           echo "internal_exit=$INTERNAL_EXIT" >> "$GITHUB_OUTPUT"
