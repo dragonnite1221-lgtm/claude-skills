@@ -140,9 +140,11 @@ jobs:
           echo "## 🔒 Skill Security Audit Results" > "$REPORT_FILE"
           echo "" >> "$REPORT_FILE"
 
-          # Parse JSON array of skill dirs. Read line-by-line (no word
-          # splitting or glob expansion) so paths with spaces are safe too.
-          while IFS= read -r skill_dir; do
+          # Parse JSON array of skill dirs. Read NUL-delimited (no word
+          # splitting, glob expansion, *or* line splitting) so paths with
+          # spaces, or even an embedded newline byte, are never mangled or
+          # split into extra, incorrect entries.
+          while IFS= read -r -d '' skill_dir; do
             echo "::group::Auditing $skill_dir"
             echo "Scanning: $skill_dir"
 
@@ -211,7 +213,7 @@ jobs:
             fi
 
             echo "::endgroup::"
-          done < <(echo "$SKILLS_JSON" | python3 -c "import sys,json; [print(s) for s in json.load(sys.stdin)]")
+          done < <(printf '%s' "$SKILLS_JSON" | python3 -c "import sys,json; [sys.stdout.write(s + chr(0)) for s in json.load(sys.stdin)]")
 
           # Save report for comment step
           echo "report_file=$REPORT_FILE" >> "$GITHUB_OUTPUT"

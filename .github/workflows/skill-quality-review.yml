@@ -156,9 +156,11 @@ jobs:
 
           DETAILS_FILE=$(mktemp)
 
-          # Read line-by-line (no word splitting or glob expansion) so
-          # paths with spaces are safe too.
-          while IFS= read -r skill_dir; do
+          # Read NUL-delimited (no word splitting, glob expansion, *or*
+          # line splitting) so paths with spaces, or even an embedded
+          # newline byte, are never mangled or split into extra, incorrect
+          # entries.
+          while IFS= read -r -d '' skill_dir; do
             echo "::group::Reviewing $skill_dir"
 
             JSON_OUT=$(tessl skill review "$skill_dir" --json 2>&1) && EXIT_CODE=$? || EXIT_CODE=$?
@@ -220,7 +222,7 @@ jobs:
             fi
 
             echo "::endgroup::"
-          done < <(echo "$SKILLS_JSON" | python3 -c "import sys,json; [print(s) for s in json.load(sys.stdin)]")
+          done < <(printf '%s' "$SKILLS_JSON" | python3 -c "import sys,json; [sys.stdout.write(s + chr(0)) for s in json.load(sys.stdin)]")
 
           # Add details section
           DETAILS_CONTENT=$(cat "$DETAILS_FILE")
@@ -254,9 +256,11 @@ jobs:
           echo "## 🔧 Internal Validation" >> "$INTERNAL_REPORT"
           echo "" >> "$INTERNAL_REPORT"
 
-          # Read line-by-line (no word splitting or glob expansion) so
-          # paths with spaces are safe too.
-          while IFS= read -r skill_dir; do
+          # Read NUL-delimited (no word splitting, glob expansion, *or*
+          # line splitting) so paths with spaces, or even an embedded
+          # newline byte, are never mangled or split into extra, incorrect
+          # entries.
+          while IFS= read -r -d '' skill_dir; do
             # Structure validation
             STRUCT=$(python3 engineering/skill-tester/scripts/skill_validator.py "$skill_dir" --json 2>&1 | python3 -c "
           import sys, json
@@ -299,7 +303,7 @@ jobs:
             fi
 
             echo "- \`$skill_dir\`: structure ${SSCORE}/100 (${SLEVEL}), scripts ${SCRIPT_STATUS}, security ${SEC}" >> "$INTERNAL_REPORT"
-          done < <(echo "$SKILLS_JSON" | python3 -c "import sys,json; [print(s) for s in json.load(sys.stdin)]")
+          done < <(printf '%s' "$SKILLS_JSON" | python3 -c "import sys,json; [sys.stdout.write(s + chr(0)) for s in json.load(sys.stdin)]")
 
           echo "internal_report=$INTERNAL_REPORT" >> "$GITHUB_OUTPUT"
           echo "internal_exit=$INTERNAL_EXIT" >> "$GITHUB_OUTPUT"
