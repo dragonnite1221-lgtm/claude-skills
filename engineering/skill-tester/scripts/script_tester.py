@@ -118,10 +118,20 @@ class TestSuite:
             "no_tests": statuses.count("NO_TESTS")
         }
         
-        # Determine overall status
-        if self.summary["failed"] == 0 and self.summary["no_tests"] == 0:
+        # Determine overall status. A batch counts as PASS only when every
+        # script fully passed -- if any script came back PARTIAL (some of
+        # its own tests failed) the batch must not be reported as PASS,
+        # even when no script outright FAILed or had NO_TESTS, otherwise a
+        # suite made up entirely of PARTIAL scripts is misreported as a
+        # clean PASS and callers relying on this field (and the CLI's exit
+        # code, which is derived from it) never see the degradation.
+        if (
+            self.summary["failed"] == 0
+            and self.summary["no_tests"] == 0
+            and self.summary["partial"] == 0
+        ):
             self.summary["overall_status"] = "PASS"
-        elif self.summary["passed"] > 0:
+        elif self.summary["passed"] > 0 or self.summary["partial"] > 0:
             self.summary["overall_status"] = "PARTIAL"
         else:
             self.summary["overall_status"] = "FAIL"
