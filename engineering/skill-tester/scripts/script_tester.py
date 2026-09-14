@@ -118,10 +118,12 @@ class TestSuite:
             "no_tests": statuses.count("NO_TESTS")
         }
         
-        # Determine overall status
-        if self.summary["failed"] == 0 and self.summary["no_tests"] == 0:
+        # Any FAIL is a blocker (commands/plugin-audit.md), outranking PARTIAL/PASS.
+        if self.summary["failed"] > 0:
+            self.summary["overall_status"] = "FAIL"
+        elif self.summary["no_tests"] == 0 and self.summary["partial"] == 0:
             self.summary["overall_status"] = "PASS"
-        elif self.summary["passed"] > 0:
+        elif self.summary["passed"] > 0 or self.summary["partial"] > 0:
             self.summary["overall_status"] = "PARTIAL"
         else:
             self.summary["overall_status"] = "FAIL"
@@ -706,13 +708,11 @@ Test Categories:
         else:
             print(TestReportFormatter.format_human_readable(test_suite))
             
-        # Exit with appropriate code
-        if test_suite.global_errors:
-            sys.exit(1)
-        elif test_suite.summary.get("overall_status") == "FAIL":
-            sys.exit(1)
+        # Exit codes per CONVENTIONS.md: 0=success, 1=warnings, 2=critical.
+        if test_suite.global_errors or test_suite.summary.get("overall_status") == "FAIL":
+            sys.exit(2)
         elif test_suite.summary.get("overall_status") == "PARTIAL":
-            sys.exit(2)  # Partial success
+            sys.exit(1)  # warning-level
         else:
             sys.exit(0)  # Success
             
