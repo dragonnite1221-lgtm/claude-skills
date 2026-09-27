@@ -149,14 +149,37 @@ install_skill() {
     # Create destination directory
     mkdir -p "$CODEX_SKILLS_DIR"
 
-    # Remove existing installation
-    if [[ -e "$skill_dest" ]]; then
-        print_info "Updating existing skill: $skill_name"
-        rm -rf "$skill_dest"
+    # Prepare the complete replacement before moving the existing skill.
+    local stage_dir
+    stage_dir=$(mktemp -d "$CODEX_SKILLS_DIR/.codex-install.XXXXXX")
+    if ! cp -rL "$skill_src" "$stage_dir/skill"; then
+        rm -rf -- "$stage_dir"
+        print_error "Copy failed; existing skill retained: $skill_name"
+        return 1
     fi
 
-    # Copy skill (following symlinks with -L)
-    cp -rL "$skill_src" "$skill_dest"
+    if [[ -e "$skill_dest" || -L "$skill_dest" ]]; then
+        print_info "Updating existing skill: $skill_name"
+        if ! mv -- "$skill_dest" "$stage_dir/previous"; then
+            rm -rf -- "$stage_dir"
+            print_error "Could not move existing skill: $skill_name"
+            return 1
+        fi
+    fi
+
+    if ! mv -- "$stage_dir/skill" "$skill_dest"; then
+        if [[ -e "$stage_dir/previous" || -L "$stage_dir/previous" ]]; then
+            if ! mv -- "$stage_dir/previous" "$skill_dest"; then
+                print_error "Restore failed; previous skill retained at: $stage_dir/previous"
+                return 1
+            fi
+        fi
+        rm -rf -- "$stage_dir"
+        print_error "Could not activate staged skill: $skill_name"
+        return 1
+    fi
+
+    rm -rf -- "$stage_dir"
 
     print_success "Installed: $skill_name"
     return 0
