@@ -146,15 +146,21 @@ for /d %%i in ("%CODEX_SKILLS_SRC%\*") do (
 
         echo [INFO] Installing: %%~ni
 
-        if exist "!SKILL_DEST!" rmdir /s /q "!SKILL_DEST!"
-
-        xcopy /e /i /q "%%i" "!SKILL_DEST!" >nul
-
+        powershell -NoProfile -Command "$item=Get-Item -LiteralPath $env:SKILL_DEST -Force -ErrorAction SilentlyContinue; if ($item -and ($item.Attributes -band [IO.FileAttributes]::ReparsePoint)) { exit 1 }"
         if errorlevel 1 (
-            echo [ERROR] Failed to install: %%~ni
+            echo [ERROR] Refusing linked destination: !SKILL_DEST!
             set /a FAILED+=1
         ) else (
-            set /a INSTALLED+=1
+            if exist "!SKILL_DEST!" rmdir /s /q "!SKILL_DEST!"
+
+            xcopy /e /i /q "%%i" "!SKILL_DEST!" >nul
+
+            if errorlevel 1 (
+                echo [ERROR] Failed to install: %%~ni
+                set /a FAILED+=1
+            ) else (
+                set /a INSTALLED+=1
+            )
         )
     )
 )
