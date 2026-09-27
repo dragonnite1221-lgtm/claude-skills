@@ -82,12 +82,12 @@ list_skills() {
 
     if [[ -f "$CODEX_INDEX" ]] && command -v python3 &> /dev/null; then
         # Use Python to parse JSON and display nicely
-        python3 << 'EOF'
+        python3 - "$CODEX_INDEX" << 'EOF'
 import json
 import sys
 
 try:
-    with open('$CODEX_INDEX'.replace('$CODEX_INDEX', '''$CODEX_INDEX'''), 'r') as f:
+    with open(sys.argv[1], 'r') as f:
         index = json.load(f)
 
     print("Categories:")
@@ -126,8 +126,15 @@ EOF
 install_skill() {
     local skill_name="$1"
     local dry_run="$2"
+
+    if [[ ! "$skill_name" =~ ^[a-zA-Z0-9][a-zA-Z0-9_-]*$ ]]; then
+        print_error "Invalid skill name: $skill_name"
+        return 1
+    fi
+
     local skill_src="$CODEX_SKILLS_SRC/$skill_name"
     local skill_dest="$CODEX_SKILLS_DIR/$skill_name"
+    local resolved_src resolved_repo
 
     # Check if skill exists
     if [[ ! -e "$skill_src" ]]; then
@@ -138,6 +145,13 @@ install_skill() {
     # Check if it's a valid skill (has SKILL.md)
     if [[ ! -e "$skill_src/SKILL.md" ]]; then
         print_error "Invalid skill (no SKILL.md): $skill_name"
+        return 1
+    fi
+
+    resolved_src="$(realpath -e -- "$skill_src")" || return 1
+    resolved_repo="$(realpath -e -- "$REPO_ROOT")" || return 1
+    if [[ "$resolved_src" != "$resolved_repo/"* ]]; then
+        print_error "Skill source escapes repository: $skill_name"
         return 1
     fi
 
@@ -178,14 +192,16 @@ install_category() {
 
     # Get skills for this category from index
     local skills
-    skills=$(python3 -c "
+    skills=$(python3 - "$CODEX_INDEX" "$category" <<'PY'
 import json
-with open('$CODEX_INDEX', 'r') as f:
+import sys
+with open(sys.argv[1], 'r') as f:
     index = json.load(f)
 for skill in index.get('skills', []):
-    if skill['category'] == '$category':
+    if skill['category'] == sys.argv[2]:
         print(skill['name'])
-")
+PY
+)
 
     if [[ -z "$skills" ]]; then
         print_error "No skills found for category: $category"
@@ -194,14 +210,15 @@ for skill in index.get('skills', []):
 
     while IFS= read -r skill; do
         if install_skill "$skill" "$dry_run"; then
-            ((installed++))
+            installed=$((installed + 1))
         else
-            ((failed++))
+            failed=$((failed + 1))
         fi
     done <<< "$skills"
 
     echo ""
     print_info "Category '$category' complete: $installed installed, $failed failed"
+    ((failed == 0))
 }
 
 # Install all skills
@@ -219,9 +236,9 @@ install_all() {
             skill_name=$(basename "$skill")
 
             if install_skill "$skill_name" "$dry_run"; then
-                ((installed++))
+                installed=$((installed + 1))
             else
-                ((failed++))
+                failed=$((failed + 1))
             fi
         fi
     done
@@ -234,6 +251,7 @@ install_all() {
         print_success "Skills installed to: $CODEX_SKILLS_DIR"
         print_info "Verify with: ls $CODEX_SKILLS_DIR"
     fi
+    ((failed == 0))
 }
 
 # Main
