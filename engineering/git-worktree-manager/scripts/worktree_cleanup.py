@@ -131,8 +131,10 @@ def main() -> int:
     repo = Path(str(payload.get("repo", args.repo))).resolve()
     stale_days = int(payload.get("stale_days", args.stale_days))
     base_branch = str(payload.get("base_branch", args.base_branch))
-    remove_merged = bool(payload.get("remove_merged", args.remove_merged))
-    force = bool(payload.get("force", args.force))
+    remove_merged = payload.get("remove_merged", args.remove_merged)
+    force = payload.get("force", args.force)
+    if not isinstance(remove_merged, bool) or not isinstance(force, bool):
+        raise CLIError("remove_merged and force must be JSON booleans")
 
     try:
         run(["git", "rev-parse", "--is-inside-work-tree"], cwd=repo)
