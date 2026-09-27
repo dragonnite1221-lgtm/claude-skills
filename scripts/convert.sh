@@ -443,6 +443,29 @@ fi
 
 info "Found ${TOTAL_CANDIDATES} candidate skills"
 
+# Reject unsafe and colliding names before replacing any existing output.
+SEEN_NAMES="$(mktemp)"
+trap 'rm -f -- "$SKILLS_TMP" "$SEEN_NAMES"' EXIT
+while IFS= read -r rel_path; do
+  src="${REPO_ROOT}/${rel_path#./}"
+  meta="$(extract_frontmatter "$src")"
+  name="$(yaml_unquote "${meta%%$'\t'*}")"
+  description="$(yaml_unquote "${meta#*$'\t'}")"
+  if [[ -z "$name" || -z "$description" ]]; then
+    continue
+  fi
+  if [[ ! "$name" =~ ^[a-zA-Z0-9][a-zA-Z0-9._-]*$ || "$name" == *. ]]; then
+    err "Unsafe skill name in ${rel_path}: ${name}"
+    exit 1
+  fi
+  name_key="$(printf '%s' "$name" | tr '[:upper:]' '[:lower:]')"
+  if grep -Fxq -- "$name_key" "$SEEN_NAMES"; then
+    err "Duplicate skill name in ${rel_path}: ${name}"
+    exit 1
+  fi
+  printf '%s\n' "$name_key" >> "$SEEN_NAMES"
+done < "$SKILLS_TMP"
+
 for t in $TOOLS; do
   rm -rf "${OUT_BASE}/${t}"
   mkdir -p "${OUT_BASE}/${t}"
@@ -465,6 +488,14 @@ for t in $TOOLS; do
 done
 
 init_count_vars
+
+safe_output_target() {
+  local target="$1"
+  if [[ -L "$target" || -L "$(dirname "$target")" ]]; then
+    err "Refusing linked output destination: $target"
+    return 1
+  fi
+}
 
 while IFS= read -r rel_path; do
   src="${REPO_ROOT}/${rel_path#./}"
@@ -492,6 +523,7 @@ while IFS= read -r rel_path; do
     case "$t" in
       antigravity)
         out_dir="${OUT_BASE}/antigravity/${name}"
+        safe_output_target "$out_dir"
         mkdir -p "$out_dir"
         {
           echo "---"
@@ -507,6 +539,7 @@ while IFS= read -r rel_path; do
         ;;
       cursor)
         out_file="${OUT_BASE}/cursor/rules/${name}.mdc"
+        safe_output_target "$out_file"
         {
           echo "---"
           echo "description: $(yaml_quote "$description")"
@@ -521,6 +554,7 @@ while IFS= read -r rel_path; do
         ;;
       kilocode)
         out_file="${OUT_BASE}/kilocode/rules/${name}.md"
+        safe_output_target "$out_file"
         {
           echo "# ${name}"
           echo "> ${description}"
@@ -530,6 +564,7 @@ while IFS= read -r rel_path; do
         ;;
       windsurf)
         out_dir="${OUT_BASE}/windsurf/skills/${name}"
+        safe_output_target "$out_dir"
         mkdir -p "$out_dir"
         {
           echo "---"
@@ -542,6 +577,7 @@ while IFS= read -r rel_path; do
         ;;
       opencode)
         out_dir="${OUT_BASE}/opencode/skills/${name}"
+        safe_output_target "$out_dir"
         mkdir -p "$out_dir"
         {
           echo "---"
@@ -555,6 +591,7 @@ while IFS= read -r rel_path; do
         ;;
       augment)
         out_file="${OUT_BASE}/augment/rules/${name}.md"
+        safe_output_target "$out_file"
         {
           echo "---"
           echo "type: auto"
