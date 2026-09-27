@@ -31,6 +31,7 @@ from __future__ import annotations
 import argparse
 import datetime as dt
 import json
+import os
 import sys
 from pathlib import Path
 
@@ -50,8 +51,11 @@ def validate_vault(vault):
     """Return the log.md path or raise if vault is invalid."""
     if not vault.exists():
         raise FileNotFoundError(f"vault does not exist: {vault}")
-    log_path = vault / "wiki" / "log.md"
-    if not log_path.exists():
+    wiki = vault / "wiki"
+    log_path = wiki / "log.md"
+    if wiki.is_symlink() or not wiki.is_dir():
+        raise FileNotFoundError(f"unsafe wiki directory: {wiki}")
+    if log_path.is_symlink() or not log_path.is_file():
         raise FileNotFoundError(f"{log_path} does not exist — is this a vault?")
     return log_path
 
@@ -77,7 +81,8 @@ def append_log(vault, op, title, detail, as_json=False):
     today, header, entry_text = format_entry(op, title, detail)
 
     try:
-        with log_path.open("a", encoding="utf-8") as f:
+        flags = os.O_WRONLY | os.O_APPEND | getattr(os, "O_NOFOLLOW", 0)
+        with os.fdopen(os.open(log_path, flags), "a", encoding="utf-8") as f:
             f.write(entry_text)
     except OSError as e:
         _error(f"failed to write {log_path}: {e}", as_json)

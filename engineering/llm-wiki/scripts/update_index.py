@@ -1,31 +1,17 @@
 #!/usr/bin/env python3
-"""
-update_index.py — Regenerate wiki/index.md from the frontmatter of every wiki page.
+"""Regenerate wiki/index.md from wiki-page YAML frontmatter.
 
-The index is content-oriented: a catalog organized by category (entities, concepts,
-sources, comparisons, synthesis), with one-line summaries read from each page's
-YAML frontmatter.
-
-Frontmatter convention (per page):
-    ---
-    title: Monosemanticity
-    category: concept            # entity | concept | source | comparison | synthesis
-    summary: Single-feature interpretability hypothesis from Anthropic's sparse autoencoder work
-    tags: [interpretability, sparse-autoencoders]
-    sources: 2                   # optional — count of sources referencing this page
-    updated: 2026-04-10
-    ---
-
-Usage:
-    python update_index.py --vault ~/vaults/research
-    python update_index.py --vault . --dry-run
+Pages are grouped by category with titles, summaries, and source metadata.
+Use --dry-run to preview without writing.
 """
 from __future__ import annotations
 import argparse
 import datetime as dt
 import json
+import os
 import re
 import sys
+import tempfile
 from collections import defaultdict
 from pathlib import Path
 
@@ -61,8 +47,8 @@ def infer_title(path: Path, fm: dict[str, str]) -> str:
 
 def scan_wiki(vault: Path) -> dict[str, list[dict]]:
     wiki = vault / "wiki"
-    if not wiki.exists():
-        print(f"[error] {wiki} not found", file=sys.stderr)
+    if wiki.is_symlink() or not wiki.is_dir():
+        print(f"[error] unsafe wiki directory: {wiki}", file=sys.stderr)
         sys.exit(1)
 
     pages: dict[str, list[dict]] = defaultdict(list)
@@ -184,14 +170,26 @@ def main():
         return
 
     index_path = vault / "wiki" / "index.md"
+    staged = None
     try:
-        index_path.write_text(content, encoding="utf-8")
+        wiki = index_path.parent
+        if wiki.is_symlink() or not wiki.is_dir() or index_path.is_symlink():
+            raise OSError(f"unsafe wiki index destination: {index_path}")
+        fd, staged = tempfile.mkstemp(prefix=".index.", dir=wiki)
+        with os.fdopen(fd, "w", encoding="utf-8") as f:
+            f.write(content)
+        if index_path.is_symlink():
+            raise OSError(f"unsafe wiki index destination: {index_path}")
+        os.replace(staged, index_path)
     except OSError as e:
         if args.json:
             print(json.dumps({"status": "error", "message": f"failed to write {index_path}: {e}"}))
         else:
             print(f"[error] failed to write {index_path}: {e}", file=sys.stderr)
         sys.exit(1)
+    finally:
+        if staged is not None:
+            Path(staged).unlink(missing_ok=True)
 
     summary["index_path"] = str(index_path)
     if args.json:
