@@ -1,13 +1,5 @@
 #!/usr/bin/env python3
-"""Create and prepare git worktrees with deterministic port allocation.
-
-Supports:
-- JSON input from stdin or --input file
-- Worktree creation from existing/new branch
-- .env file sync from main repo
-- Optional dependency installation
-- JSON or text output
-"""
+"""Create and prepare git worktrees with deterministic port allocation."""
 
 import argparse
 import json
@@ -56,7 +48,6 @@ def load_json_input(input_file: Optional[str]) -> Dict[str, Any]:
             return json.loads(Path(input_file).read_text(encoding="utf-8"))
         except Exception as exc:
             raise CLIError(f"Failed reading --input file: {exc}") from exc
-
     if not sys.stdin.isatty():
         data = sys.stdin.read().strip()
         if data:
@@ -95,7 +86,6 @@ def find_next_ports(repo: Path, app_base: int, db_base: int, redis_base: int, st
                 used_ports.update(int(v) for v in payload.values() if isinstance(v, int))
             except Exception:
                 continue
-
     index = 0
     while True:
         ports = {
@@ -142,7 +132,6 @@ def install_dependencies_if_requested(worktree_path: Path, install: bool) -> str
                 return f"installed via {' '.join(command)}"
             except subprocess.CalledProcessError as exc:
                 raise CLIError(f"Dependency install failed: {' '.join(command)}\n{exc.stderr}") from exc
-
     return "no known lockfile found"
 
 
@@ -162,7 +151,6 @@ def ensure_worktree(repo: Path, branch: str, name: str, base_branch: str) -> Pat
             run(["git", "worktree", "add", "-b", branch, str(wt_path), base_branch], cwd=repo)
         except subprocess.CalledProcessError as exc:
             raise CLIError(f"Failed to create worktree: {exc.stderr}") from exc
-
     return wt_path
 
 
@@ -237,7 +225,6 @@ def main() -> int:
         copied_env_files=copied,
         dependency_install=install_status,
     )
-
     if args.format == "json":
         print(json.dumps(asdict(result), indent=2))
     else:
