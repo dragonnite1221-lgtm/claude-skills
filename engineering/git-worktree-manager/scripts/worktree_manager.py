@@ -15,6 +15,7 @@ import os
 import shutil
 import subprocess
 import sys
+import tempfile
 from dataclasses import dataclass, asdict
 from pathlib import Path
 from typing import Any, Dict, List, Optional
@@ -108,12 +109,24 @@ def find_next_ports(repo: Path, app_base: int, db_base: int, redis_base: int, st
 
 
 def sync_env_files(src_repo: Path, dest_repo: Path) -> List[str]:
+    if not dest_repo.is_dir() or dest_repo.resolve() != dest_repo.absolute():
+        raise CLIError(f"Unsafe worktree destination: {dest_repo}")
     copied = []
     for name in ENV_FILES:
         src = src_repo / name
         if src.exists() and src.is_file():
             dst = dest_repo / name
-            shutil.copy2(src, dst)
+            if dst.is_symlink():
+                raise CLIError(f"Refusing linked environment destination: {dst}")
+            fd, staged = tempfile.mkstemp(prefix=f".{name}.", dir=dest_repo)
+            os.close(fd)
+            try:
+                shutil.copy2(src, staged)
+                if dst.is_symlink():
+                    raise CLIError(f"Refusing linked environment destination: {dst}")
+                os.replace(staged, dst)
+            finally:
+                Path(staged).unlink(missing_ok=True)
             copied.append(name)
     return copied
 
@@ -198,7 +211,7 @@ def main() -> int:
     stride = int(payload.get("stride", args.stride))
     install_deps = bool(payload.get("install_deps", args.install_deps))
 
-    if not branch or not name:
+    if not branch or not isinstance(name, str) or not name or Path(name).name != name or name in (".", ".."):
         raise CLIError("Missing required values: --branch and --name (or provide via JSON input).")
 
     try:
