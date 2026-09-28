@@ -1,7 +1,7 @@
 ---
 name: Sync Codex Skills Symlinks
 
-on:
+"on":
   push:
     paths:
       - '**/SKILL.md'
