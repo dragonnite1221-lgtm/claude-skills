@@ -129,52 +129,19 @@ except:
     echo "  ⏭  Tessl:    not installed (npm install -g tessl)"
   fi
 
-  # 2. Structure validation
-  STRUCT_SCORE=$(python3 engineering/skill-tester/scripts/skill_validator.py "$skill_dir" --json 2>&1 | python3 -c "
-import sys, json
-try:
-    d = json.load(sys.stdin)
-    print(f'{d[\"overall_score\"]}/{d[\"compliance_level\"]}')
-except:
-    print('0/ERROR')
-" 2>/dev/null || echo "0/ERROR")
+  CHECKS=$(python3 scripts/required-skill-checks.py "$skill_dir" 2>/dev/null) || CHECKS="ERROR|ERROR|ERROR|FAIL"
+  IFS='|' read -r STRUCT_SCORE SCRIPT_RESULT SEC_RESULT CHECK_RESULT <<< "$CHECKS"
   echo "  📐 Structure: $STRUCT_SCORE"
-
-  # 3. Script testing
-  if [ -d "$skill_dir/scripts" ] && ls "$skill_dir/scripts/"*.py >/dev/null 2>&1; then
-    SCRIPT_RESULT=$(python3 engineering/skill-tester/scripts/script_tester.py "$skill_dir" --json 2>&1 | python3 -c "
-import sys, json
-text = sys.stdin.read()
-try:
-    start = text.index('{')
-    d = json.loads(text[start:])
-    print(f'{d[\"summary\"][\"passed\"]}/{d[\"summary\"][\"total_scripts\"]} PASS')
-except:
-    print('ERROR')
-" 2>/dev/null || echo "ERROR")
-    echo "  🧪 Scripts:  $SCRIPT_RESULT"
-  fi
-
-  # 4. Security audit
-  SEC_RESULT=$(python3 engineering/skill-security-auditor/scripts/skill_security_auditor.py "$skill_dir" --strict --json 2>&1 | python3 -c "
-import sys, json
-try:
-    d = json.load(sys.stdin)
-    c = d['summary']['critical']
-    h = d['summary']['high']
-    print(f'{d[\"verdict\"]} (critical:{c}, high:{h})')
-except:
-    print('ERROR')
-" 2>/dev/null || echo "ERROR")
+  echo "  🧪 Scripts:  $SCRIPT_RESULT"
   echo "  🔒 Security: $SEC_RESULT"
 
   # Verdict
-  if [ "$TESSL_SCORE" -ge "$THRESHOLD" ]; then
+  if [ "$TESSL_SCORE" -ge "$THRESHOLD" ] && [ "$CHECK_RESULT" = "PASS" ]; then
     PASS_COUNT=$((PASS_COUNT + 1))
     RESULTS+=("✅ $skill_dir: ${TESSL_SCORE}/100")
   else
     FAIL_COUNT=$((FAIL_COUNT + 1))
-    RESULTS+=("⚠️  $skill_dir: ${TESSL_SCORE}/100 — below ${THRESHOLD}")
+    RESULTS+=("⚠️  $skill_dir: ${TESSL_SCORE}/100 — score below ${THRESHOLD} or required check failed")
   fi
 
   echo ""
