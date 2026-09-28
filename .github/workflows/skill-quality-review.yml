@@ -304,7 +304,8 @@ jobs:
             fi
 
             # Security audit
-            SEC=$(python3 engineering/skill-security-auditor/scripts/skill_security_auditor.py "$skill_dir" --strict --json 2>&1 | python3 -c "
+            SEC_JSON=$(python3 engineering/skill-security-auditor/scripts/skill_security_auditor.py "$skill_dir" --strict --json 2>&1) && SEC_EXIT=$? || SEC_EXIT=$?
+            SEC=$(printf '%s' "$SEC_JSON" | python3 -c "
           import sys, json
           try:
               d = json.load(sys.stdin)
@@ -313,15 +314,10 @@ jobs:
               print('ERROR')
           " 2>/dev/null || echo "ERROR")
 
-            # Fail closed: only a confirmed PASS or WARN verdict is safe to
-            # let through. Previously this only checked for the literal
-            # "FAIL" verdict, so if the auditor itself errored out (crash,
-            # timeout, malformed/non-JSON output -- anything the inner
-            # `except: print('ERROR')` above catches) SEC became "ERROR"
-            # and silently passed this gate: the security audit couldn't
-            # even run, but the quality-review job still reported success.
+            # Strict audits pass only when both the structured verdict and
+            # process status agree. WARN, FAIL, and unparseable output block.
             case "$SEC" in
-              PASS|WARN) ;;
+              PASS) [ "$SEC_EXIT" -eq 0 ] || INTERNAL_EXIT=1 ;;
               *) INTERNAL_EXIT=1 ;;
             esac
 

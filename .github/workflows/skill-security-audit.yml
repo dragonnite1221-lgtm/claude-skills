@@ -185,8 +185,8 @@ jobs:
 
             # Map verdict to emoji
             case "$V" in
-              PASS) ICON="✅" ;;
-              WARN) ICON="⚠️" ;;
+              PASS) ICON="✅"; [ "$EXIT_CODE" -eq 0 ] && [ "$CRIT" -eq 0 ] && [ "$HIGH" -eq 0 ] || OVERALL_EXIT=1 ;;
+              WARN) ICON="⚠️"; OVERALL_EXIT=1 ;;
               FAIL) ICON="❌"; OVERALL_EXIT=1 ;;
               *)    ICON="❓"; OVERALL_EXIT=1 ;;
             esac

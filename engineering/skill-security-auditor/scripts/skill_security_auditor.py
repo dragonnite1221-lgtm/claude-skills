@@ -73,6 +73,7 @@ class AuditReport:
     files_scanned: int = 0
     scripts_scanned: int = 0
     md_files_scanned: int = 0
+    strict: bool = False
 
     @property
     def critical_count(self):
@@ -91,6 +92,8 @@ class AuditReport:
         if self.critical_count > 0:
             return "FAIL"
         if self.high_count > 0:
+            if self.strict:
+                return "FAIL"
             return "WARN"
         return "PASS"
 
@@ -1131,6 +1134,7 @@ def main():
 
     try:
         report = scan_skill(skill_path)
+        report.strict = args.strict
 
         if args.json_output:
             print(json.dumps(report.to_dict(), indent=2))
@@ -1138,9 +1142,7 @@ def main():
             print_report(report)
 
         # Exit code
-        if args.strict and report.verdict == "WARN":
-            sys.exit(1)
-        elif report.verdict == "FAIL":
+        if report.verdict == "FAIL":
             sys.exit(1)
         elif report.verdict == "WARN":
             sys.exit(2)
