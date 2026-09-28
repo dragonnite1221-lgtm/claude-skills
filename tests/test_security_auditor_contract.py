@@ -6,6 +6,8 @@ not flag those, while still catching real dangerous calls in normal skills.
 These tests pin that behavior so it cannot silently regress."""
 
 import importlib.util
+import json
+import subprocess
 import sys
 from pathlib import Path
 
@@ -58,3 +60,19 @@ def test_allowlist_suppresses_named_findings(tmp_path):
     (tmp_path / ".security-audit-allowlist").write_text("CMD-INJECT run.py  # intentional\n")
     report2 = auditor.scan_skill(tmp_path)
     assert "CMD-INJECT" not in _categories(report2)
+
+
+def test_strict_high_verdict_matches_exit_code(tmp_path):
+    _make_skill(tmp_path, {"run.py": "import importlib\nimportlib.import_module(user_input)\n"})
+    normal = subprocess.run(
+        [sys.executable, str(AUDITOR), str(tmp_path), "--json"],
+        capture_output=True, text=True, check=False,
+    )
+    strict = subprocess.run(
+        [sys.executable, str(AUDITOR), str(tmp_path), "--strict", "--json"],
+        capture_output=True, text=True, check=False,
+    )
+    assert normal.returncode == 2
+    assert json.loads(normal.stdout)["verdict"] == "WARN"
+    assert strict.returncode == 1
+    assert json.loads(strict.stdout)["verdict"] == "FAIL"
