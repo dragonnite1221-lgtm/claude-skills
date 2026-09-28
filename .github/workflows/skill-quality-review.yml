@@ -181,13 +181,19 @@ jobs:
             JSON_OUT=$(tessl skill review "$skill_dir" --json 2>&1) && EXIT_CODE=$? || EXIT_CODE=$?
 
             # Parse results
-            PARSED=$(echo "$JSON_OUT" | python3 -c "
+            if [ "$EXIT_CODE" -ne 0 ]; then
+              echo "::error::Tessl CLI failed for $skill_dir (exit $EXIT_CODE); quality score unavailable."
+              PARSED='unknown|N/A|N/A|N/A|ERROR|[]'
+            else
+              PARSED=$(echo "$JSON_OUT" | python3 -c "
           import sys, json
           try:
               # tessl prints a Terms banner before the JSON; parse from the first '{'
               text = sys.stdin.read()
               d = json.loads(text[text.index('{'):])
-              score = d.get('review', {}).get('reviewScore', 0)
+              score = d['review']['reviewScore']
+              if type(score) is not int or not 0 <= score <= 100:
+                  raise ValueError('invalid reviewScore')
               ds = round(d.get('descriptionJudge', {}).get('normalizedScore', 0) * 100)
               cs = round(d.get('contentJudge', {}).get('normalizedScore', 0) * 100)
               passed = d.get('validation', {}).get('overallPassed', False)
@@ -205,22 +211,33 @@ jobs:
 
               print(f'{name}|{score}|{ds}|{cs}|{\"PASS\" if passed else \"FAIL\"}|{json.dumps(suggestions)}')
           except Exception as e:
-              print(f'unknown|0|0|0|ERROR|[]')
-          " 2>/dev/null || echo "unknown|0|0|0|ERROR|[]")
+              print('unknown|N/A|N/A|N/A|ERROR|[]')
+          " 2>/dev/null || echo 'unknown|N/A|N/A|N/A|ERROR|[]')
+            fi
 
             IFS='|' read -r NAME SCORE DS CS VSTATUS SUGGESTIONS <<< "$PARSED"
 
             # Determine verdict
-            if [ "$SCORE" -ge "$THRESHOLD" ]; then
+            if [ "$VSTATUS" = "ERROR" ]; then
+              if [ "$EXIT_CODE" -eq 0 ]; then
+                echo "::error::Tessl response for $skill_dir could not be parsed; quality score unavailable."
+              fi
+              ICON="❌"
+              VERDICT="ERROR"
+              SCORE_LABEL="unavailable"
+              OVERALL_EXIT=1
+            elif [ "$SCORE" -ge "$THRESHOLD" ]; then
               ICON="✅"
               VERDICT="PASS"
+              SCORE_LABEL="${SCORE}/100"
             else
               ICON="⚠️"
               VERDICT="NEEDS WORK"
+              SCORE_LABEL="${SCORE}/100"
               OVERALL_EXIT=1
             fi
 
-            echo "| \`$skill_dir\` | **${SCORE}/100** ${ICON} | ${DS}% | ${CS}% | ${VERDICT} |" >> "$REPORT_FILE"
+            echo "| \`$skill_dir\` | **${SCORE_LABEL}** ${ICON} | ${DS}% | ${CS}% | ${VERDICT} |" >> "$REPORT_FILE"
 
             # Add suggestions as details
             SUGG_COUNT=$(echo "$SUGGESTIONS" | python3 -c "import sys,json; print(len(json.loads(sys.stdin.readline())))" 2>/dev/null || echo "0")
@@ -381,6 +398,6 @@ jobs:
               "Merge blocked."
           fi
           if [ "${{ steps.review.outputs.exit_code }}" = "1" ]; then
-            echo "::error::Tessl quality review below threshold (70/100). Improve skill before merge."
+            echo "::error::Tessl quality review failed or was unavailable. See the review report before merge."
           fi
           exit 1
