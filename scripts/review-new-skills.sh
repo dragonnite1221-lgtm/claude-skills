@@ -93,8 +93,19 @@ for skill_dir in "${SKILL_DIRS[@]}"; do
 
   # 1. Tessl review
   TESSL_SCORE=0
+  TESSL_EXIT=1
+  TESSL_VALIDATION=FAIL
   if command -v tessl &>/dev/null; then
-    TESSL_JSON=$(tessl skill review "$skill_dir" --json 2>/dev/null || echo '{}')
+    TESSL_EXIT=0
+    TESSL_JSON=$(tessl skill review "$skill_dir" --json 2>/dev/null) || TESSL_EXIT=$?
+    TESSL_VALIDATION=$(printf '%s' "$TESSL_JSON" | python3 -c "
+import sys, json
+try:
+    d = json.load(sys.stdin)
+    print('PASS' if d.get('validation', {}).get('overallPassed') is True else 'FAIL')
+except (ValueError, AttributeError):
+    print('FAIL')
+" 2>/dev/null) || TESSL_VALIDATION=FAIL
     TESSL_SCORE=$(echo "$TESSL_JSON" | python3 -c "
 import sys, json
 try:
@@ -120,10 +131,10 @@ except:
     print(0)
 " 2>/dev/null || echo "0")
 
-    if [ "$TESSL_SCORE" -ge "$THRESHOLD" ]; then
+    if [ "$TESSL_EXIT" -eq 0 ] && [ "$TESSL_VALIDATION" = "PASS" ] && [ "$TESSL_SCORE" -ge "$THRESHOLD" ]; then
       echo "  ✅ Tessl:    ${TESSL_SCORE}/100 (desc: ${TESSL_DESC}%, content: ${TESSL_CONTENT}%)"
     else
-      echo "  ⚠️  Tessl:    ${TESSL_SCORE}/100 (desc: ${TESSL_DESC}%, content: ${TESSL_CONTENT}%) — BELOW THRESHOLD"
+      echo "  ⚠️  Tessl:    ${TESSL_SCORE}/100 (desc: ${TESSL_DESC}%, content: ${TESSL_CONTENT}%) — review failed or below threshold"
     fi
   else
     echo "  ⏭  Tessl:    not installed (npm install -g tessl)"
@@ -136,12 +147,12 @@ except:
   echo "  🔒 Security: $SEC_RESULT"
 
   # Verdict
-  if [ "$TESSL_SCORE" -ge "$THRESHOLD" ] && [ "$CHECK_RESULT" = "PASS" ]; then
+  if [ "$TESSL_EXIT" -eq 0 ] && [ "$TESSL_VALIDATION" = "PASS" ] && [ "$TESSL_SCORE" -ge "$THRESHOLD" ] && [ "$CHECK_RESULT" = "PASS" ]; then
     PASS_COUNT=$((PASS_COUNT + 1))
     RESULTS+=("✅ $skill_dir: ${TESSL_SCORE}/100")
   else
     FAIL_COUNT=$((FAIL_COUNT + 1))
-    RESULTS+=("⚠️  $skill_dir: ${TESSL_SCORE}/100 — score below ${THRESHOLD} or required check failed")
+    RESULTS+=("⚠️  $skill_dir: ${TESSL_SCORE}/100 — review failed, score below ${THRESHOLD}, or required check failed")
   fi
 
   echo ""

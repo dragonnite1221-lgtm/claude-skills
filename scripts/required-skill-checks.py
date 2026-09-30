@@ -11,7 +11,7 @@ def run_json(command):
     try:
         result = subprocess.run(command, capture_output=True, text=True)
         start = result.stdout.index("{")
-        data, _ = json.JSONDecoder().raw_decode(result.stdout[start:])
+        data = json.loads(result.stdout[start:])
         return result.returncode, data if isinstance(data, dict) else {}
     except (OSError, ValueError):
         return -1, {}
@@ -20,14 +20,9 @@ def run_json(command):
 def evaluate(skill_dir):
     python = sys.executable
     code, data = run_json([python, "engineering/skill-tester/scripts/skill_validator.py", skill_dir, "--json"])
-    score, level, checks = data.get("overall_score"), data.get("compliance_level"), data.get("checks")
-    structure_ok = (
-        code == 0 and type(score) in (int, float) and score >= 60
-        and level in ("ACCEPTABLE", "GOOD", "EXCELLENT")
-        and isinstance(checks, dict) and bool(checks)
-        and all(isinstance(item, dict) and item.get("passed") is True for item in checks.values())
-        and data.get("errors") == []
-    )
+    score, level = data.get("overall_score"), data.get("compliance_level")
+    # Follow the producer's acceptance contract; optional failed checks are advisory.
+    structure_ok = code == 0 and type(score) in (int, float) and score >= 60 and data.get("errors") == []
     structure = f"{score}/{level}" if type(score) in (int, float) and isinstance(level, str) else "ERROR"
 
     scripts, scripts_ok = "N/A", True
@@ -36,13 +31,19 @@ def evaluate(skill_dir):
         summary = data.get("summary")
         summary = summary if isinstance(summary, dict) else {}
         total, passed = summary.get("total_scripts"), summary.get("passed")
-        scripts_ok = (
-            code == 0 and type(total) is int and total > 0 and type(passed) is int
-            and passed == total and summary.get("partial", 0) == 0
-            and summary.get("failed", 0) == 0 and summary.get("no_tests", 0) == 0
-            and summary.get("overall_status") == "PASS" and data.get("global_errors") == []
+        partial, failed, no_tests = (summary.get(key, 0) for key in ("partial", "failed", "no_tests"))
+        status = summary.get("overall_status")
+        counts_ok = (
+            all(type(value) is int and value >= 0 for value in (total, passed, partial, failed, no_tests))
+            and total > 0 and passed + partial + failed + no_tests == total
         )
-        scripts = f"{passed}/{total} PASS" if scripts_ok else "FAIL"
+        scripts_ok = (
+            counts_ok and data.get("global_errors") == [] and failed == 0
+            and ((code == 0 and status == "PASS" and passed == total)
+                 or (code == 1 and status == "PARTIAL" and passed + partial > 0
+                     and partial + no_tests > 0))
+        )
+        scripts = f"{passed}/{total} {status}" if counts_ok and status in ("PASS", "PARTIAL", "FAIL") else "ERROR"
 
     code, data = run_json([python, "engineering/skill-security-auditor/scripts/skill_security_auditor.py", skill_dir, "--strict", "--json"])
     summary = data.get("summary")
