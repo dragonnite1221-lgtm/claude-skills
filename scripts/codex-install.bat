@@ -90,6 +90,12 @@ if "%TARGET%"=="" (
     exit /b 1
 )
 
+echo(!TARGET!| findstr /R /C:"^[A-Za-z0-9][A-Za-z0-9_-]*$" >nul
+if errorlevel 1 (
+    echo [ERROR] Invalid skill name
+    exit /b 1
+)
+
 set "SKILL_SRC=%CODEX_SKILLS_SRC%\%TARGET%"
 set "SKILL_DEST=%CODEX_SKILLS_DIR%\%TARGET%"
 
@@ -107,6 +113,13 @@ echo [INFO] Installing skill: %TARGET%
 
 REM Create destination directory
 if not exist "%CODEX_SKILLS_DIR%" mkdir "%CODEX_SKILLS_DIR%"
+
+REM Never recursively delete a junction or symlink target.
+powershell -NoProfile -Command "$item=Get-Item -LiteralPath $env:SKILL_DEST -Force -ErrorAction SilentlyContinue; if ($item -and ($item.Attributes -band [IO.FileAttributes]::ReparsePoint)) { exit 1 }"
+if errorlevel 1 (
+    echo [ERROR] Refusing linked destination: %SKILL_DEST%
+    exit /b 1
+)
 
 REM Remove existing
 if exist "%SKILL_DEST%" rmdir /s /q "%SKILL_DEST%"
@@ -133,15 +146,21 @@ for /d %%i in ("%CODEX_SKILLS_SRC%\*") do (
 
         echo [INFO] Installing: %%~ni
 
-        if exist "!SKILL_DEST!" rmdir /s /q "!SKILL_DEST!"
-
-        xcopy /e /i /q "%%i" "!SKILL_DEST!" >nul
-
+        powershell -NoProfile -Command "$item=Get-Item -LiteralPath $env:SKILL_DEST -Force -ErrorAction SilentlyContinue; if ($item -and ($item.Attributes -band [IO.FileAttributes]::ReparsePoint)) { exit 1 }"
         if errorlevel 1 (
-            echo [ERROR] Failed to install: %%~ni
+            echo [ERROR] Refusing linked destination: !SKILL_DEST!
             set /a FAILED+=1
         ) else (
-            set /a INSTALLED+=1
+            if exist "!SKILL_DEST!" rmdir /s /q "!SKILL_DEST!"
+
+            xcopy /e /i /q "%%i" "!SKILL_DEST!" >nul
+
+            if errorlevel 1 (
+                echo [ERROR] Failed to install: %%~ni
+                set /a FAILED+=1
+            ) else (
+                set /a INSTALLED+=1
+            )
         )
     )
 )
