@@ -130,7 +130,7 @@ class ReleasePlanner:
         
         # Load features
         self.features = []
-        for feature_data in data.get('features', []):
+        for index, feature_data in enumerate(data.get('features', [])):
             try:
                 status = ComponentStatus(feature_data.get('status', 'pending'))
                 risk_level = RiskLevel(feature_data.get('risk_level', 'medium'))
@@ -157,12 +157,11 @@ class ReleasePlanner:
                 )
                 self.features.append(feature)
             except Exception as e:
-                print(f"Warning: Error parsing feature {feature_data.get('id', 'unknown')}: {e}", 
-                      file=sys.stderr)
+                raise ValueError(f"Error parsing feature at index {index}: {e}") from e
         
         # Load quality gates
         self.quality_gates = []
-        for gate_data in data.get('quality_gates', []):
+        for index, gate_data in enumerate(data.get('quality_gates', [])):
             try:
                 status = ComponentStatus(gate_data.get('status', 'pending'))
                 gate = QualityGate(
@@ -175,8 +174,7 @@ class ReleasePlanner:
                 )
                 self.quality_gates.append(gate)
             except Exception as e:
-                print(f"Warning: Error parsing quality gate {gate_data.get('name', 'unknown')}: {e}", 
-                      file=sys.stderr)
+                raise ValueError(f"Error parsing quality gate at index {index}: {e}") from e
         
         # Load stakeholders
         self.stakeholders = []
