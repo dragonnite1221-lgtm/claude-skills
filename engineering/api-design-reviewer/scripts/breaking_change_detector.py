@@ -256,7 +256,6 @@ class BreakingChangeDetector:
         """Compare operations within a specific path."""
         old_operations = set(self._extract_operations(old_path_obj))
         new_operations = set(self._extract_operations(new_path_obj))
-        
         # Removed operations
         removed_ops = old_operations - new_operations
         for method in removed_ops:
@@ -271,7 +270,6 @@ class BreakingChangeDetector:
                 migration_guide=self._generate_method_removal_migration(path, method, new_operations),
                 impact_description="Clients using this method will receive 405 Method Not Allowed errors"
             ))
-        
         # Added operations
         added_ops = new_operations - old_operations
         for method in added_ops:
@@ -285,22 +283,24 @@ class BreakingChangeDetector:
                 new_value=f"{method.upper()} {path}",
                 impact_description="New method provides additional functionality for this resource"
             ))
-        
         # Modified operations
         common_ops = old_operations & new_operations
+        old_shared = {(p.get('name'), p.get('in')): p for p in old_path_obj.get('parameters', [])}
+        new_shared = {(p.get('name'), p.get('in')): p for p in new_path_obj.get('parameters', [])}
         for method in common_ops:
-            self._compare_operation_details(path, method, old_path_obj[method], new_path_obj[method])
+            old_op, new_op = old_path_obj[method], new_path_obj[method]
+            old_params = {**old_shared, **{(p.get('name'), p.get('in')): p for p in old_op.get('parameters', [])}}
+            new_params = {**new_shared, **{(p.get('name'), p.get('in')): p for p in new_op.get('parameters', [])}}
+            self._compare_operation_details(path, method, dict(old_op, parameters=list(old_params.values())),
+                                            dict(new_op, parameters=list(new_params.values())))
     
     def _compare_operation_details(self, path: str, method: str, old_op: Dict, new_op: Dict) -> None:
         """Compare details of individual operations."""
         operation_path = f"/paths{path}/{method}"
-        
         # Compare parameters
         self._compare_parameters(operation_path, old_op.get('parameters', []), new_op.get('parameters', []))
-        
         # Compare request body
         self._compare_request_body(operation_path, old_op.get('requestBody'), new_op.get('requestBody'))
-        
         # Compare responses
         self._compare_responses(operation_path, old_op.get('responses', {}), new_op.get('responses', {}))
         
