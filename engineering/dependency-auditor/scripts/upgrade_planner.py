@@ -342,7 +342,7 @@ class UpgradePlanner:
     def _parse_version(self, version_string: str) -> Optional[VersionInfo]:
         """Parse semantic version string."""
         # Clean version string
-        version = re.sub(r'[^0-9a-zA-Z.-]', '', version_string)
+        version = re.sub(r'[^0-9a-zA-Z.+-]', '', version_string)
         
         # Basic semver pattern
         pattern = r'^(\d+)\.(\d+)\.(\d+)(?:-([0-9A-Za-z.-]+))?(?:\+([0-9A-Za-z.-]+))?$'
@@ -384,9 +384,11 @@ class UpgradePlanner:
             elif not v1.prerelease and v2.prerelease:
                 return 1
             elif v1.prerelease and v2.prerelease:
-                if v1.prerelease < v2.prerelease:
+                key1 = tuple((0, int(p)) if p.isdigit() else (1, p) for p in v1.prerelease.split('.'))
+                key2 = tuple((0, int(p)) if p.isdigit() else (1, p) for p in v2.prerelease.split('.'))
+                if key1 < key2:
                     return -1
-                elif v1.prerelease > v2.prerelease:
+                elif key1 > key2:
                     return 1
             
             return 0
@@ -490,16 +492,14 @@ class UpgradePlanner:
         return security_updates
     
     def _is_version_greater(self, v1: str, v2: str) -> bool:
-        """Simple version comparison."""
-        v1_parts = [int(x) for x in v1.split('.')]
-        v2_parts = [int(x) for x in v2.split('.')]
-        
-        # Pad shorter version
-        max_len = max(len(v1_parts), len(v2_parts))
-        v1_parts.extend([0] * (max_len - len(v1_parts)))
-        v2_parts.extend([0] * (max_len - len(v2_parts)))
-        
-        return v1_parts > v2_parts
+        """Compare parsed versions using the same precedence as upgrade selection.
+
+        Build metadata does not affect precedence; prerelease identifiers do.
+        """
+        first, second = self._parse_version(v1), self._parse_version(v2)
+        if first is None or second is None:
+            raise ValueError("Cannot compare invalid dependency versions")
+        return self._compare_versions(first, second) > 0
     
     def _analyze_breaking_changes(self, package_name: str, current: VersionInfo, 
                                  latest: VersionInfo, ecosystem: str) -> List[str]:
