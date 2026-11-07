@@ -601,7 +601,8 @@ class IndexOptimizer:
         seen_signatures = {}
         
         for index in indexes:
-            signature = (tuple(index.columns), index.unique, index.partial_condition)
+            signature = (tuple(index.columns), index.unique, index.index_type,
+                         index.partial_condition, tuple(index.include_columns or []))
             if signature in seen_signatures:
                 existing_index = seen_signatures[signature]
                 issues.append(RedundancyIssue(
@@ -648,17 +649,16 @@ class IndexOptimizer:
         return issues
     
     def _calculate_overlap_ratio(self, index1: Index, index2: Index) -> float:
-        """Calculate overlap ratio between two indexes."""
-        cols1 = set(index1.columns)
-        cols2 = set(index2.columns)
-        
-        if not cols1 or not cols2:
+        """Return full coverage only for compatible, strict B-tree prefixes."""
+        shorter, longer = sorted((index1, index2), key=lambda index: len(index.columns))
+        if (not shorter.columns or len(shorter.columns) == len(longer.columns)
+                or shorter.unique or shorter.index_type != "btree" or longer.index_type != "btree"
+                or shorter.partial_condition != longer.partial_condition):
             return 0.0
-        
-        intersection = len(cols1.intersection(cols2))
-        union = len(cols1.union(cols2))
-        
-        return intersection / union if union > 0 else 0.0
+        if longer.columns[:len(shorter.columns)] != shorter.columns:
+            return 0.0
+        covered = set(longer.columns + (longer.include_columns or []))
+        return 1.0 if set(shorter.include_columns or []).issubset(covered) else 0.0
     
     def _find_unused_indexes(self, table_name: str, indexes: List[Index]) -> List[RedundancyIssue]:
         """Find potentially unused indexes based on query patterns."""
