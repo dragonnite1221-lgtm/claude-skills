@@ -27,7 +27,7 @@ def load_csv(filepath: str) -> tuple[list[str], list[dict]]:
 
 
 def is_null(val: str) -> bool:
-    return val.strip().lower() in NULL_STRINGS
+    return val is None or val.strip().lower() in NULL_STRINGS
 
 
 def compute_null_mask(headers: list[str], rows: list[dict]) -> dict[str, list[bool]]:
