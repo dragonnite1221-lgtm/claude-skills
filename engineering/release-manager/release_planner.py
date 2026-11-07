@@ -419,9 +419,9 @@ class ReleasePlanner:
             else:
                 gate_stats['pending'] += 1
                 if gate.required:
-                    assessment['warnings'].append(
-                        f"Required quality gate '{gate.name}' is pending"
-                    )
+                    status = 'blocked' if gate.status == ComponentStatus.BLOCKED else 'pending'
+                    assessment['blocking_issues' if status == 'blocked' else 'warnings'].append(
+                        f"Required quality gate '{gate.name}' is {status}")
         
         assessment['quality_gate_summary'] = gate_stats
         
