@@ -328,17 +328,17 @@ def _regularized_gamma(a: float, x: float) -> float:
                 break
         return 1 - math.exp(-x + a * math.log(x) - math.lgamma(a)) * f
 
-
 # ---------------------------------------------------------------------------
 # Reporting
 # ---------------------------------------------------------------------------
-
 DIRECTION = {True: "statistically significant", False: "NOT statistically significant"}
 
 
 def verdict(result: dict) -> str:
     if "error" in result:
         return f"ERROR: {result['error']}"
+    if "warning" in result:
+        return f"WARNING: {result['warning']}" + (f"\n{result['suggestion']}" if result.get("suggestion") else "")
     sig = result.get("significant", False)
     p = result.get("p_value", 1.0)
     alpha = result.get("alpha", 0.05)
