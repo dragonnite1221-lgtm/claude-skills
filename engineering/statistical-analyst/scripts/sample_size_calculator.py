@@ -58,7 +58,6 @@ def sample_size_proportion(baseline: float, mde: float, alpha: float, power: flo
     """
     p1 = baseline
     p2 = baseline * (1 + mde)
-
     if not (0 < p1 < 1) or not (0 < p2 < 1):
         raise ValueError(f"Rates must be between 0 and 1. Got baseline={p1}, treatment={p2:.4f}")
 
@@ -67,7 +66,8 @@ def sample_size_proportion(baseline: float, mde: float, alpha: float, power: flo
 
     numerator = (z_alpha + z_beta) ** 2 * (p1 * (1 - p1) + p2 * (1 - p2))
     denominator = (p2 - p1) ** 2
-
+    if denominator == 0:
+        raise ValueError("MDE produces zero effect. Cannot size experiment with zero effect.")
     return math.ceil(numerator / denominator)
 
 
