@@ -126,19 +126,27 @@ class SchemaAnalyzer:
         ddl_content = re.sub(r'/\*.*?\*/', '', ddl_content, flags=re.DOTALL)
         ddl_content = re.sub(r'\s+', ' ', ddl_content.strip())
         
-        # Extract CREATE TABLE statements
-        create_table_pattern = re.compile(
-            r'CREATE\s+TABLE\s+(\w+)\s*\(\s*(.*?)\s*\)',
-            re.IGNORECASE | re.DOTALL
-        )
-        
+        # Extract complete table bodies, ignoring parentheses in quoted tokens.
+        create_table_pattern = re.compile(r'CREATE\s+TABLE\s+(\w+)\s*\(', re.IGNORECASE)
+        tokens = re.compile(r"'(?:(?:'')|[^'])*'|\"(?:(?:\"\")|[^\"])*\"|[()]")
+        table_end = 0
         for match in create_table_pattern.finditer(ddl_content):
+            if match.start() < table_end:
+                continue
+            depth = 1
+            for token in tokens.finditer(ddl_content, match.end()):
+                if token.group() == '(':
+                    depth += 1
+                elif token.group() == ')':
+                    depth -= 1
+                if depth == 0:
+                    table_end = token.end()
+                    break
+            else:
+                raise ValueError(f"Unclosed table definition: {match.group(1)}")
             table_name = match.group(1).lower()
-            table_definition = match.group(2)
-            
-            table = self._parse_table_definition(table_name, table_definition)
-            self.tables[table_name] = table
-            
+            table_definition = ddl_content[match.end():table_end - 1]
+            self.tables[table_name] = self._parse_table_definition(table_name, table_definition)
         # Extract CREATE INDEX statements
         self._parse_indexes(ddl_content)
         
@@ -149,15 +157,12 @@ class SchemaAnalyzer:
         foreign_keys = []
         unique_constraints = []
         check_constraints = {}
-        
         # Split by commas, but handle nested parentheses
         parts = self._split_table_parts(definition)
-        
         for part in parts:
             part = part.strip()
             if not part:
                 continue
-                
             if part.upper().startswith('PRIMARY KEY'):
                 primary_key = self._parse_primary_key(part)
             elif part.upper().startswith('FOREIGN KEY'):
@@ -179,7 +184,6 @@ class SchemaAnalyzer:
                     columns.append(column)
                     if column.primary_key:
                         primary_key.append(column.name)
-        
         return Table(
             name=table_name,
             columns=columns,
@@ -189,14 +193,13 @@ class SchemaAnalyzer:
             check_constraints=check_constraints,
             indexes=[]
         )
-    
     def _split_table_parts(self, definition: str) -> List[str]:
         """Split table definition by commas, respecting nested parentheses."""
         parts = []
         current_part = ""
         paren_count = 0
-        
-        for char in definition:
+        for token in re.finditer(r"'(?:(?:'')|[^'])*'|\"(?:(?:\"\")|[^\"])*\"|.", definition):
+            char = token.group()
             if char == '(':
                 paren_count += 1
             elif char == ')':
@@ -205,12 +208,9 @@ class SchemaAnalyzer:
                 parts.append(current_part.strip())
                 current_part = ""
                 continue
-            
             current_part += char
-        
         if current_part.strip():
             parts.append(current_part.strip())
-            
         return parts
     
     def _parse_column_definition(self, definition: str) -> Optional[Column]:
