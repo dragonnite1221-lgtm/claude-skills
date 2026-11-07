@@ -267,8 +267,8 @@ class SchemaCompatibilityChecker:
         
         # Check for removed endpoints
         for path in before_paths:
-            if path not in after_paths:
-                for method in before_paths[path]:
+            for method in before_paths[path]:
+                if method in ('get', 'put', 'post', 'delete', 'options', 'head', 'patch', 'trace') and method not in after_paths.get(path, {}):
                     issues.append(CompatibilityIssue(
                         type="endpoint_removed",
                         severity="breaking",
@@ -276,7 +276,7 @@ class SchemaCompatibilityChecker:
                         field_path=f"paths.{path}.{method}",
                         old_value=before_paths[path][method],
                         new_value=None,
-                        impact="Client requests to this endpoint will fail with 404",
+                        impact="Client requests to this operation will fail",
                         suggested_migration=f"Implement redirect to replacement endpoint or maintain backward compatibility stub",
                         affected_operations=[f"{method.upper()} {path}"]
                     ))
@@ -537,7 +537,7 @@ class SchemaCompatibilityChecker:
         issues = []
         scripts = []
         
-        for method in set(before_endpoint.keys()) & set(after_endpoint.keys()):
+        for method in set(before_endpoint.keys()) & set(after_endpoint.keys()) & {'get', 'put', 'post', 'delete', 'options', 'head', 'patch', 'trace'}:
             before_method = before_endpoint[method]
             after_method = after_endpoint[method]
             
