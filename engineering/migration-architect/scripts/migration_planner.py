@@ -253,10 +253,10 @@ class MigrationPlanner:
         
         phases = []
         total_duration = self._estimate_duration(migration_type, migration_pattern, complexity)
-        phase_duration = total_duration // len(phase_names)
+        phase_duration, extra_hours = divmod(total_duration, len(phase_names))
         
         for i, phase_name in enumerate(phase_names):
-            phase = self._create_phase(phase_name, phase_duration, complexity, i, phase_names)
+            phase = self._create_phase(phase_name, phase_duration + (i < extra_hours), complexity, i, phase_names)
             phases.append(phase)
         
         return phases
