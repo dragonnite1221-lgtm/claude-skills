@@ -175,9 +175,9 @@ _Track unresolved questions here. Each must be resolved before status moves to "
 def generate_context_prompt(description: str) -> str:
     """Generate a context section prompt based on the provided description."""
     if description:
-        return textwrap.dedent(f"""\
-            {description}
-
+        # Keep user Markdown indentation separate from template indentation.
+        # Dedent only the guidance, never the supplied description.
+        return description + "\n\n" + textwrap.dedent("""\
             _Expand this context section to include:_
             _- Why does this feature exist? What problem does it solve?_
             _- What is the business motivation? (link to user research, support tickets, metrics)_
