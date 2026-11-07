@@ -112,7 +112,7 @@ class Version:
         new_prerelease_number = None
         
         # Handle pre-release versions
-        if prerelease_type:
+        if prerelease_type and not self.prerelease_type:
             if bump_type == BumpType.MAJOR:
                 new_major += 1
                 new_minor = 0
