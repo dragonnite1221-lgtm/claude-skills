@@ -103,7 +103,7 @@ def read_lines_from_git(args: argparse.Namespace) -> List[str]:
     range_spec = f"{start}..{end}" if start else end
     try:
         proc = subprocess.run(
-            ["git", "log", range_spec, "--pretty=format:%s", "--no-merges"],
+            ["git", "log", range_spec, "--pretty=format:%B%x00", "--no-merges"],
             text=True,
             capture_output=True,
             check=True,
@@ -111,7 +111,7 @@ def read_lines_from_git(args: argparse.Namespace) -> List[str]:
     except subprocess.CalledProcessError as exc:
         raise CLIError(f"git log failed for range '{range_spec}': {exc.stderr.strip()}") from exc
 
-    return [line.strip() for line in proc.stdout.splitlines() if line.strip()]
+    return [message.strip() for message in proc.stdout.split("\0") if message.strip()]
 
 
 def load_commits(args: argparse.Namespace) -> List[str]:
@@ -132,13 +132,13 @@ def load_commits(args: argparse.Namespace) -> List[str]:
 def parse_commits(lines: List[str]) -> List[ParsedCommit]:
     parsed: List[ParsedCommit] = []
     for line in lines:
-        match = COMMIT_RE.match(line)
+        match = COMMIT_RE.match(line.partition("\n")[0])
         if not match:
             continue
         ctype = match.group("type")
         scope = match.group("scope")
         summary = match.group("summary")
-        breaking = bool(match.group("breaking")) or "BREAKING CHANGE" in line
+        breaking = bool(match.group("breaking")) or bool(re.search(r"(?m)^BREAKING[ -]CHANGE:\s+\S", line))
         parsed.append(ParsedCommit(raw=line, ctype=ctype, scope=scope, summary=summary, breaking=breaking))
     return parsed
 
