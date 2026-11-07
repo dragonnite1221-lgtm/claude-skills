@@ -111,13 +111,13 @@ def detect(repo: Path) -> StackReport:
     lint_commands: List[str] = []
     test_commands: List[str] = []
     build_commands: List[str] = []
-
+    node_manager = next((pm for pm in package_managers if pm in {"npm", "yarn", "pnpm"}), "npm")
     if "lint" in scripts:
-        lint_commands.append("npm run lint")
+        lint_commands.append(f"{node_manager} run lint")
     if "test" in scripts:
-        test_commands.append("npm test")
+        test_commands.append(f"{node_manager} test")
     if "build" in scripts:
-        build_commands.append("npm run build")
+        build_commands.append(f"{node_manager} run build")
 
     if "python" in languages:
         lint_commands.append("python3 -m ruff check .")
