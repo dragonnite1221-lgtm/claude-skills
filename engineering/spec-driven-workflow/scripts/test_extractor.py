@@ -227,14 +227,14 @@ class JestGenerator:
             f" * All tests are stubs — implement the test body to make them pass.",
             f" */",
             "",
-            f'describe("{title}", () => {{',
+            f'describe({json.dumps(title)}, () => {{',
         ]
 
         for ac in criteria:
             ref_str = f" [{', '.join(ac['references'])}]" if ac["references"] else ""
             test_name = f"{ac['id']}: {ac['name']}{ref_str}"
 
-            lines.append(f'  it("{test_name}", () => {{')
+            lines.append(f'  it({json.dumps(test_name)}, () => {{')
             if ac["given"]:
                 lines.append(f"    // Given {ac['given']}")
             if ac["when"]:
@@ -252,7 +252,7 @@ class JestGenerator:
 
         for ec in edge_cases:
             test_name = f"{ec['id']}: {ec['condition']}"
-            lines.append(f'  it("{test_name}", () => {{')
+            lines.append(f'  it({json.dumps(test_name)}, () => {{')
             lines.append(f"    // Condition: {ec['condition']}")
             lines.append(f"    // Expected: {ec['behavior']}")
             lines.append("")
