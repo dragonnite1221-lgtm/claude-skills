@@ -1078,10 +1078,10 @@ def main():
                 print(f"Rollback runbook saved to {args.output}")
             else:
                 print(json.dumps(runbook_dict, indent=2))
-        
         if args.format in ["text", "both"]:
             human_runbook = generator.generate_human_readable_runbook(runbook)
-            text_output = args.output.replace('.json', '.txt') if args.output else None
+            text_output = args.output[:-5] + '.txt' if args.output and args.output.endswith('.json') else args.output
+            if args.format == 'both' and text_output == args.output and text_output: text_output += '.txt'
             if text_output:
                 with open(text_output, 'w') as f:
                     f.write(human_runbook)
