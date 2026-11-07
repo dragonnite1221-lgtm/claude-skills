@@ -19,9 +19,12 @@ EXT_WEIGHTS = {
 }
 
 
-def iter_files(root: Path) -> Iterable[Path]:
+def iter_files(root: Path, include_build: bool = False) -> Iterable[Path]:
+    excluded = {".git", "node_modules", "coverage", "__pycache__"}
+    if not include_build:
+        excluded.update({".next", "dist", "build"})
     for dirpath, dirnames, filenames in os.walk(root):
-        dirnames[:] = [d for d in dirnames if d not in {".git", "node_modules", ".next", "dist", "build", "coverage", "__pycache__"}]
+        dirnames[:] = [d for d in dirnames if d not in excluded]
         for filename in filenames:
             path = Path(dirpath) / filename
             if path.is_file():
@@ -89,7 +92,7 @@ def bundle_indicators(root: Path) -> Dict[str, object]:
 
     bundle_files = 0
     weight = 0.0
-    for path in iter_files(root):
+    for path in iter_files(root, include_build=True):
         ext = path.suffix.lower()
         if ext in EXT_WEIGHTS:
             bundle_files += 1
