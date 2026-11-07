@@ -472,8 +472,8 @@ class APILinter:
         has_issues = False
         
         # Check for success response
-        success_codes = {'200', '201', '202', '204'}
-        has_success = any(code in responses for code in success_codes)
+        # OpenAPI response ranges use uppercase XX; all 2xx codes are successful.
+        has_success = any(re.fullmatch(r'2(?:[0-9]{2}|XX)', code) for code in responses)
         
         if not has_success:
             self.report.add_issue(LintIssue(
@@ -481,7 +481,7 @@ class APILinter:
                 category='responses',
                 message=f"Missing success response for {method} {path}",
                 path=f"/paths/{path}/{method.lower()}/responses",
-                suggestion="Define at least one success response (200, 201, 202, or 204)"
+                suggestion="Define at least one success response (200-299 or 2XX)"
             ))
             has_issues = True
         
@@ -500,7 +500,7 @@ class APILinter:
         
         # Validate individual response codes
         for status_code, response in responses.items():
-            if status_code == 'default':
+            if status_code == 'default' or re.fullmatch(r'[1-5]XX', status_code):
                 continue
                 
             try:
