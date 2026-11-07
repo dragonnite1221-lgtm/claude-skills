@@ -526,10 +526,10 @@ class LicenseChecker:
         
         license_string = license_string.strip()
         
-        # Direct SPDX ID match
-        if license_string in self.license_database:
-            return self.license_database[license_string]
-        
+        # Exact canonical ID match, ignoring case.
+        for license_id, info in self.license_database.items():
+            if license_string.lower() == license_id.lower():
+                return info
         # Common variations and mappings
         license_mappings = {
             'mit': 'MIT',
@@ -553,7 +553,7 @@ class LicenseChecker:
         
         license_lower = license_string.lower()
         for pattern, mapped_license in license_mappings.items():
-            if pattern in license_lower:
+            if pattern == license_lower:
                 return self.license_database.get(mapped_license)
         
         return None
