@@ -41,6 +41,8 @@ def wilson_interval(n: int, x: int, confidence: float) -> dict:
     if x < 0 or x > n:
         return {"error": "x must be between 0 and n"}
 
+    if not 0 < confidence < 1:
+        return {"error": "confidence must be between 0 and 1 (exclusive)"}
     p_hat = x / n
     z = normal_ppf(1 - (1 - confidence) / 2)
     z2 = z ** 2
@@ -84,13 +86,13 @@ def mean_interval(n: int, mean: float, std: float, confidence: float) -> dict:
     if std < 0:
         return {"error": "std must be non-negative"}
 
+    if not 0 < confidence < 1:
+        return {"error": "confidence must be between 0 and 1 (exclusive)"}
     se = std / math.sqrt(n)
     z = normal_ppf(1 - (1 - confidence) / 2)
-
     lo = mean - z * se
     hi = mean + z * se
     moe = z * se
-
     rel_moe = moe / abs(mean) * 100 if mean != 0 else None
 
     precision_note = ""
