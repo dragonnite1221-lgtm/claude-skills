@@ -949,12 +949,12 @@ class MigrationGenerator:
     
     def _generate_migration_id(self, changes: Dict[str, List[Dict[str, Any]]]) -> str:
         """Generate unique migration ID."""
-        content = json.dumps(changes, sort_keys=True)
+        content = json.dumps(changes, sort_keys=True, default=asdict)
         return hashlib.md5(content.encode()).hexdigest()[:8]
     
     def _calculate_changes_hash(self, changes: Dict[str, List[Dict[str, Any]]]) -> str:
         """Calculate hash of changes for versioning."""
-        content = json.dumps(changes, sort_keys=True)
+        content = json.dumps(changes, sort_keys=True, default=asdict)
         return hashlib.md5(content.encode()).hexdigest()
     
     def _generate_summary(self, changes: Dict[str, List[Dict[str, Any]]]) -> Dict[str, Any]:
