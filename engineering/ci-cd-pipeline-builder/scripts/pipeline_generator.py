@@ -149,7 +149,7 @@ def github_yaml(stack: Dict[str, Any]) -> str:
                 "          python-version: '3.12'",
                 "      - run: python3 -m pip install -U pip",
                 "      - run: python3 -m pip install -r requirements.txt || true",
-                "      - run: python3 -m pytest || true",
+                "      - run: python3 -m pytest",
             ]
         )
 
@@ -234,7 +234,7 @@ def gitlab_yaml(stack: Dict[str, Any]) -> str:
                 "  script:",
                 "    - python3 -m pip install -U pip",
                 "    - python3 -m pip install -r requirements.txt || true",
-                "    - python3 -m pytest || true",
+                "    - python3 -m pytest",
             ]
         )
 
