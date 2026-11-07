@@ -343,7 +343,7 @@ class DependencyScanner:
                     if path == '':  # Skip root package
                         continue
                     
-                    name = path.split('/')[-1] if '/' in path else path
+                    name = pkg_info.get('name') or path.rsplit('node_modules/', 1)[-1]
                     version = pkg_info.get('version', '')
                     
                     dep = Dependency(
