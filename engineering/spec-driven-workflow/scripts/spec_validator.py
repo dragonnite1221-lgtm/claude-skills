@@ -77,6 +77,8 @@ class SpecValidator:
 
     def validate(self) -> Dict[str, Any]:
         """Run all validation checks and return results."""
+        self.findings = []
+        self.section_scores = {}
         self._check_sections_present()
         self._check_functional_requirements()
         self._check_acceptance_criteria()
@@ -87,9 +89,7 @@ class SpecValidator:
         self._check_out_of_scope()
         self._check_placeholders()
         self._check_traceability()
-
         total_score = self._calculate_score()
-
         return {
             "file": self.file_path,
             "score": total_score,
