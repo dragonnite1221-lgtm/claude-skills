@@ -668,8 +668,8 @@ class APIScoringEngine:
                     doc_elements += 1
             
             # Examples
-            if schema.get('example') or any(
-                isinstance(prop, dict) and prop.get('example') 
+            if 'example' in schema or any(
+                isinstance(prop, dict) and 'example' in prop 
                 for prop in properties.values()
             ):
                 doc_elements += 1
@@ -704,7 +704,7 @@ class APIScoringEngine:
                     doc_score = 0
                     if param.get('description'):
                         doc_score += 1
-                    if param.get('example') or (param.get('schema', {}).get('example')):
+                    if 'example' in param or 'example' in param.get('schema', {}):
                         doc_score += 1
                     
                     if doc_score >= 1:  # At least description
@@ -793,18 +793,18 @@ class APIScoringEngine:
         """Check if content has examples."""
         for media_type, media_obj in content.items():
             if isinstance(media_obj, dict):
-                if media_obj.get('example') or media_obj.get('examples'):
+                if 'example' in media_obj or media_obj.get('examples'):
                     return True
         return False
     
     def _schema_has_examples(self, schema: Dict[str, Any]) -> bool:
         """Check if schema has examples."""
-        if schema.get('example'):
+        if 'example' in schema:
             return True
         
         properties = schema.get('properties', {})
         for prop in properties.values():
-            if isinstance(prop, dict) and prop.get('example'):
+            if isinstance(prop, dict) and 'example' in prop:
                 return True
         
         return False
