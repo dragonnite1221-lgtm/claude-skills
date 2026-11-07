@@ -72,13 +72,13 @@ class ConventionalCommit:
                     continue
                     
                 # Check if this is a footer (KEY: value or KEY #value format)
-                footer_pattern = r'^([A-Z-]+):\s*(.+)$|^([A-Z-]+)\s+#(\d+)$'
+                footer_pattern = r'^([A-Z-]+|BREAKING CHANGE):\s*(.+)$|^([A-Z-]+)\s+#(\d+)$'
                 if re.match(footer_pattern, line):
                     in_footer = True
                     footer_lines.append(line)
                     
                     # Check for breaking change
-                    if line.startswith('BREAKING CHANGE:'):
+                    if line.startswith(('BREAKING CHANGE:', 'BREAKING-CHANGE:')):
                         self.is_breaking = True
                         self.breaking_change_description = line[16:].strip()
                 else:
@@ -167,7 +167,7 @@ class ChangelogGenerator:
         commit_buffer = []
         
         for line in lines:
-            line = line.strip()
+            line = line.rstrip()
             if not line:
                 continue
                 
