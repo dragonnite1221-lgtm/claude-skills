@@ -107,7 +107,7 @@ class TechDebtAnalyzer:
         )
         
         # Generate recommendations
-        results['recommendations'] = self._generate_recommendations(results)
+        results['recommendations'] = self._generate_recommendations(results, system_data.get('team_size', 5))
         
         return results
     
@@ -322,7 +322,7 @@ class TechDebtAnalyzer:
         
         return risks
     
-    def _generate_recommendations(self, results: Dict) -> List[str]:
+    def _generate_recommendations(self, results: Dict, team_size: int = 5) -> List[str]:
         """Generate strategic recommendations"""
         recommendations = []
         
@@ -352,7 +352,7 @@ class TechDebtAnalyzer:
         
         # Team recommendations
         effort = results.get('estimated_effort', {})
-        if effort.get('recommended_team_size', 0) > effort.get('total_story_points', 0) / 200:
+        if effort.get('recommended_team_size', 0) > team_size:
             recommendations.append(f"Scale team to {effort['recommended_team_size']} engineers")
         
         return recommendations
