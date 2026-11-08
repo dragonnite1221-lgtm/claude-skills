@@ -159,7 +159,7 @@ def main() -> int:
         (tc_dir / "records").mkdir(exist_ok=True)
         (tc_dir / "evidence").mkdir(exist_ok=True)
         write_json_atomic(config_path, build_config(project_name))
-        if not registry_path.exists() or args.force:
+        if not registry_path.exists():
             write_json_atomic(registry_path, build_registry(project_name))
     except OSError as e:
         msg = f"Failed to create TC directories or files: {e}"
