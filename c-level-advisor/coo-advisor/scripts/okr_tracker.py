@@ -738,7 +738,7 @@ def main():
             print(f"Error: Invalid JSON: {e}", file=sys.stderr)
             sys.exit(1)
     else:
-        print("No input file specified — running with sample data.\n")
+        print("No input file specified — running with sample data.\n", file=sys.stderr if args.format == "json" else sys.stdout)
         data = SAMPLE_DATA
 
     # Determine quarter progress
