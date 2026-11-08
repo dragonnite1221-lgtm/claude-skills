@@ -132,8 +132,8 @@ class TFIDFRetriever:
         
         # Cosine similarity
         dot_product = sum(q * d for q, d in zip(query_vector, doc_vector))
-        query_norm = math.sqrt(sum(q * q for q in query_vector))
-        doc_norm = math.sqrt(sum(d * d for d in doc_vector))
+        query_norm = math.sqrt(sum((count / query_length * self.idf_scores.get(term, 0)) ** 2 for term, count in query_tf.items()))
+        doc_norm = math.sqrt(sum((tf * self.idf_scores.get(term, 0)) ** 2 for term, tf in doc_tf.items()))
         
         if query_norm == 0 or doc_norm == 0:
             return 0.0
