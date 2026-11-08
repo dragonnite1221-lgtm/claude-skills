@@ -85,7 +85,7 @@ def validate_schema(tool_name: str, schema: Dict[str, Any]) -> Tuple[List[str], 
 
     prop_keys = set(props.keys())
     for req in required:
-        if req not in prop_keys:
+        if not isinstance(req, str) or req not in prop_keys:
             errors.append(f"{tool_name}: required field '{req}' is not defined in properties.")
 
     if not props:
