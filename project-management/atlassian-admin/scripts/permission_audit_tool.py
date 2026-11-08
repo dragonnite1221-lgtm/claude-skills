@@ -22,7 +22,7 @@ from typing import Any, Dict, List, Optional, Set
 # ---------------------------------------------------------------------------
 
 SENSITIVE_PERMISSIONS = {
-    "administer_project",
+    "administer_project", "administer_projects",
     "administer_jira",
     "delete_issues",
     "delete_all_comments",
@@ -79,7 +79,7 @@ def check_over_permissioned_groups(
                 group_permissions[group].add(permission)
 
         for group, perms in group_permissions.items():
-            admin_perms = perms & SENSITIVE_PERMISSIONS
+            admin_perms = {"administer_project" if p == "administer_projects" else p for p in perms} & SENSITIVE_PERMISSIONS
             if len(admin_perms) >= 3:
                 findings.append({
                     "rule": "over_permissioned_group",
@@ -166,7 +166,7 @@ def check_missing_restrictions(
                     })
 
         # Check if admin permissions exist
-        admin_perms = {"administer_project", "administer_jira", "system_admin"}
+        admin_perms = {"administer_project", "administer_projects", "administer_jira", "system_admin"}
         if not (admin_perms & granted_permissions):
             findings.append({
                 "rule": "no_admin_defined",
