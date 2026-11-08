@@ -28,12 +28,12 @@ def find_record_path(tc_dir: Path, tc_id: str) -> Path | None:
     direct = tc_dir / "records" / tc_id / "tc_record.json"
     if direct.exists():
         return direct
-    for entry in (tc_dir / "records").glob("*"):
-        if entry.is_dir() and entry.name.startswith(tc_id):
-            candidate = entry / "tc_record.json"
-            if candidate.exists():
-                return candidate
-    return None
+    matches = [
+        entry / "tc_record.json" for entry in (tc_dir / "records").glob("*")
+        if entry.is_dir() and entry.name.startswith(tc_id)
+        and (entry / "tc_record.json").exists()
+    ]
+    return matches[0] if len(matches) == 1 else None
 
 
 def render_single(record: dict) -> str:
@@ -177,7 +177,7 @@ def main() -> int:
 
     record_path = find_record_path(tc_dir, args.tc_id)
     if record_path is None:
-        msg = f"TC not found: {args.tc_id}"
+        msg = f"TC not found or ambiguous: {args.tc_id}"
         print(json.dumps({"status": "error", "error": msg}) if args.json else f"ERROR: {msg}")
         return 2
 
