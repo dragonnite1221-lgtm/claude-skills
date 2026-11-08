@@ -173,7 +173,7 @@ def main():
         with open(args[0]) as f:
             config = json.load(f)
     else:
-        if not args:
+        if not args and not use_json:
             print("[Demo mode — using sample comparison page config]")
         config = SAMPLE_CONFIG
 
