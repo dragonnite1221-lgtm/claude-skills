@@ -15,6 +15,7 @@ Usage:
 import json
 import sys
 import argparse
+import math
 
 
 def calculate_quick_ratio(new_mrr, expansion_mrr, churned_mrr, contraction_mrr):
@@ -159,6 +160,10 @@ if __name__ == "__main__":
     parser.add_argument("--json", action="store_true", help="Output JSON format")
     
     args = parser.parse_args()
+    if not all(math.isfinite(value) for value in (
+        args.new_mrr, args.expansion, args.churned, args.contraction
+    )):
+        parser.error("MRR inputs must be finite numbers")
     
     results = calculate_quick_ratio(
         new_mrr=args.new_mrr,
