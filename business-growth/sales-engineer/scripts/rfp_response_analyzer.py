@@ -228,8 +228,8 @@ def determine_bid_recommendation(
         reasons.append(f"Coverage score {overall_coverage:.1f}% exceeds {BID_THRESHOLD*100:.0f}% threshold")
         if must_have_gaps > 0:
             reasons.append(f"{must_have_gaps} must-have gap(s) within acceptable range (max {MAX_MUST_HAVE_GAPS_FOR_BID})")
-    elif coverage_ratio >= CONDITIONAL_THRESHOLD or (
-        must_have_gaps <= MAX_MUST_HAVE_GAPS_FOR_BID and coverage_ratio >= 0.4
+    elif must_have_gaps <= MAX_MUST_HAVE_GAPS_FOR_BID and (
+        coverage_ratio >= CONDITIONAL_THRESHOLD or coverage_ratio >= 0.4
     ):
         decision = "CONDITIONAL BID"
         reasons.append(f"Coverage score {overall_coverage:.1f}% in conditional range ({CONDITIONAL_THRESHOLD*100:.0f}%-{BID_THRESHOLD*100:.0f}%)")
