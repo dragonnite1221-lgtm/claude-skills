@@ -361,15 +361,10 @@ def generate_recommendations(
 
 
 def track_forecast_accuracy(data: dict) -> dict[str, Any]:
-    """Run complete forecast accuracy analysis.
-
-    Args:
-        data: Forecast data with periods and optional category breakdowns.
-
-    Returns:
-        Complete forecast accuracy analysis results.
-    """
+    """Analyze at least one forecast period and optional category breakdowns."""
     periods = data["forecast_periods"]
+    if not periods:
+        raise ValueError("forecast_periods must contain at least one period")
 
     mape = calculate_mape(periods)
     weighted_mape = calculate_weighted_mape(periods)
@@ -519,7 +514,11 @@ def main() -> None:
         print("Error: Missing required field 'forecast_periods' in input data", file=sys.stderr)
         sys.exit(1)
 
-    results = track_forecast_accuracy(data)
+    try:
+        results = track_forecast_accuracy(data)
+    except ValueError as exc:
+        print(f"Error: {exc}", file=sys.stderr)
+        sys.exit(1)
 
     if args.format == "json":
         print(json.dumps(results, indent=2))
