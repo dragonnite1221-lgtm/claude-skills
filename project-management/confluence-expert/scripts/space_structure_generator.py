@@ -289,7 +289,7 @@ def generate_space_structure(team_info: Dict[str, Any]) -> Dict[str, Any]:
         page_tree.append(project_section)
 
     # Get permissions
-    permissions = PERMISSION_TEMPLATES.get(team_type, PERMISSION_TEMPLATES["project"])
+    permissions = {key: list(value) for key, value in PERMISSION_TEMPLATES[team_type].items()}
 
     # Generate label taxonomy
     all_labels = set()
