@@ -256,7 +256,7 @@ def validate_registry(registry):
     errors.extend(_required(registry, ["project_name", "created", "updated", "next_tc_number", "records", "statistics"]))
     if "next_tc_number" in registry:
         v = registry["next_tc_number"]
-        if not isinstance(v, int) or v < 1:
+        if isinstance(v, bool) or not isinstance(v, int) or v < 1:
             errors.append(f"next_tc_number must be a positive integer, got {v}")
     if isinstance(registry.get("records"), list):
         for i, rec in enumerate(registry["records"]):
