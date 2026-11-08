@@ -538,7 +538,7 @@ def estimate_roadmap(controls: list[dict], target_frameworks: list[str]) -> list
     Generate an ordered implementation roadmap for target frameworks.
     Prioritize: (1) controls blocking most frameworks, (2) quick wins (low effort).
     """
-    applicable = [c for c in controls
+    applicable = [c.copy() for c in controls
                   if any(fw in c["frameworks_applicable"] for fw in target_frameworks)
                   and c["status"] not in ("Implemented", "Verified")]
 
