@@ -68,11 +68,12 @@ class SocialMediaMetricsCalculator:
         total_likes = sum(post.get('likes', 0) for post in self.posts)
         total_comments = sum(post.get('comments', 0) for post in self.posts)
         total_shares = sum(post.get('shares', 0) for post in self.posts)
+        total_saves = sum(post.get('saves', 0) for post in self.posts)
         total_reach = sum(post.get('reach', 0) for post in self.posts)
         total_impressions = sum(post.get('impressions', 0) for post in self.posts)
         total_clicks = sum(post.get('clicks', 0) for post in self.posts)
 
-        total_engagements = total_likes + total_comments + total_shares
+        total_engagements = total_likes + total_comments + total_shares + total_saves
 
         return {
             'platform': self.platform,
