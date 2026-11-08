@@ -62,7 +62,7 @@ def build_scraping_script(url, selectors, paginate=False, output_format="script"
     # Build Python script
     fields_dict_str = "{\n"
     for name, sel in field_map.items():
-        fields_dict_str += f'        "{name}": "{sel}",\n'
+        fields_dict_str += f"        {name!r}: {sel!r},\n"
     fields_dict_str += "    }"
 
     pagination_block = ""
