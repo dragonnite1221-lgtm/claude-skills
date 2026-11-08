@@ -112,15 +112,14 @@ def scan(vault: Path, stale_days: int, log_gap_days: int) -> dict:
 
     # Log gap check
     log_path = wiki / "log.md"
-    log_gap = None
+    log_gap = {"last_entry": None, "days_ago": None}
     if log_path.exists():
         log_text = log_path.read_text(encoding="utf-8", errors="replace")
         dates = [dt.date.fromisoformat(m) for m in LOG_ENTRY_RE.findall(log_text)]
         if dates:
             last = max(dates)
             gap = (today - last).days
-            if gap > log_gap_days:
-                log_gap = {"last_entry": last.isoformat(), "days_ago": gap}
+            log_gap = {"last_entry": last.isoformat(), "days_ago": gap} if gap > log_gap_days else None
         else:
             log_gap = {"last_entry": None, "days_ago": None}
 
