@@ -406,13 +406,13 @@ def print_report(engine, quota=None, current_quarter=None):
     # ── Red flags
     print_section("FORECAST HEALTH FLAGS")
     flags = []
-    if total_pipeline > 0:
-        coverage = total_pipeline / quota if quota else None
-        if coverage and coverage < 2.0:
-            flags.append("🔴 Pipeline coverage below 2x — serious shortfall risk this quarter")
-        elif coverage and coverage < 3.0:
-            flags.append("⚠️  Pipeline coverage below 3x — limited buffer for slippage")
+    coverage = engine.coverage_ratio(quota, period_filter=current_quarter) if quota else None
+    if coverage is not None and coverage < 2.0:
+        flags.append("🔴 Pipeline coverage below 2x — serious shortfall risk this quarter")
+    elif coverage is not None and coverage < 3.0:
+        flags.append("⚠️  Pipeline coverage below 3x — limited buffer for slippage")
 
+    if total_pipeline > 0:
         # Stage concentration risk
         early_stage_pct = sum(
             d.arr_value for d in open_deals
