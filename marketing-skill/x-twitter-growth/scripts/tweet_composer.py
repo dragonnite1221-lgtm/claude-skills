@@ -155,9 +155,9 @@ def generate_hooks(topic: str, count: int = 10) -> list:
                 "{common_mistake}", f"ignore {topic}").replace(
                 "{do_one_thing}", "change one thing").replace(
                 "{common_action}", f"overthinking {topic}")
-            hooks.append({"type": pattern_type, "hook": hook, "chars": len(hook)})
             if len(hooks) >= count:
                 return hooks
+            hooks.append({"type": pattern_type, "hook": hook, "chars": len(hook)})
     return hooks[:count]
 
 
