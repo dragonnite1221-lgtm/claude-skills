@@ -98,7 +98,7 @@ class BrandVoiceAnalyzer:
         sentences = [s.strip() for s in sentences if s.strip()]
         
         if not sentences:
-            return {'average_length': 0, 'variety': 'low'}
+            return {'average_length': 0, 'variety': 'low', 'count': 0}
         
         lengths = [len(s.split()) for s in sentences]
         avg_length = sum(lengths) / len(lengths) if lengths else 0
