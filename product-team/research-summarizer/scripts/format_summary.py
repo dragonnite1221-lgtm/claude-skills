@@ -227,7 +227,7 @@ def main():
     )
     args = parser.parse_args()
 
-    if args.list_templates:
+    if args.list_templates or (not args.template and args.output == "json"):
         print(list_templates(args.output))
         return
 
