@@ -383,8 +383,8 @@ def main():
         print("No compose file provided. Running demo validation...\n")
         content = DEMO_COMPOSE
 
-    generate_report(content, args.output, args.strict)
-
+    result = generate_report(content, args.output, args.strict)
+    sys.exit((2 if result["finding_counts"]["critical"] else 1) if args.strict and result["findings"] else 0)
 
 if __name__ == "__main__":
     main()
