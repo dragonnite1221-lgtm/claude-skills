@@ -110,12 +110,12 @@ def init_vault(vault_path, topic, tool, force, as_json=False):
             installed_files.append(dest_name)
 
     # Index + log seeds
-    for spec in [
-        ("index.md.template", vault_path / "wiki" / "index.md"),
-        ("log.md.template", vault_path / "wiki" / "log.md"),
-    ]:
-        if render_template(ASSETS_DIR / spec[0], spec[1], variables):
-            installed_files.append(str(spec[1].relative_to(vault_path)))
+    for name in ["index", "log"]:
+        dest = vault_path / "wiki" / f"{name}.md"
+        if render_template(ASSETS_DIR / f"{name}.md.template", dest, variables):
+            installed_files.append(str(dest.relative_to(vault_path)))
+    if len(installed_files) != len(TOOL_FILES.get(tool, TOOL_FILES["claude-code"])) + 2:
+        _error("failed to install required vault templates; see warnings above", as_json)
 
     # Page templates (reference copies inside the vault)
     tmpl_dest = vault_path / "wiki" / ".templates"
