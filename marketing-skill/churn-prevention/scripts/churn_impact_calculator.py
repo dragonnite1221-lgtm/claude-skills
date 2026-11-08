@@ -183,16 +183,17 @@ def main():
         with open(args.input_file) as f:
             inputs = json.load(f)
     else:
-        print("No input file provided. Running with sample data...\n")
-        print("Sample input:")
-        print(json.dumps(SAMPLE_INPUT, indent=2))
+        if not args.json:
+            print("No input file provided. Running with sample data...\n")
+            print("Sample input:")
+            print(json.dumps(SAMPLE_INPUT, indent=2))
         inputs = SAMPLE_INPUT
 
     result = calculate(inputs)
-    print_report(result)
-
     if args.json:
         print(json.dumps(result, indent=2))
+    else:
+        print_report(result)
 
 
 if __name__ == "__main__":
