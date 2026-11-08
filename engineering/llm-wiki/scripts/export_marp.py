@@ -34,13 +34,25 @@ def strip_frontmatter(text: str) -> str:
 
 
 def to_marp(text: str, theme: str) -> str:
-    body = strip_frontmatter(text).strip()
+    body = strip_frontmatter(text)
     # Turn each "## " into a new slide separator.
     # First H1 → title slide. Subsequent H2 → slide breaks.
-    lines = body.splitlines()
+    lines = body.strip().splitlines()
+    first_line = next((line for line in body.splitlines() if line.strip()), "")
     out: list[str] = []
     seen_h1 = False
-    for line in lines:
+    fence = None
+    for index, line in enumerate(lines):
+        marker = re.match(r"^ {0,3}(`{3,}|~{3,})(.*)$", first_line if index == 0 else line)
+        if fence:
+            out.append(line)
+            if marker and marker[1][0] == fence[0] and len(marker[1]) >= fence[1] and not marker[2].strip(" \t"):
+                fence = None
+            continue
+        if marker and (marker[1][0] == "~" or "`" not in marker[2]):
+            fence = (marker[1][0], len(marker[1]))
+            out.append(line)
+            continue
         if line.startswith("# ") and not seen_h1:
             out.append(line)
             out.append("")
