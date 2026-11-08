@@ -39,7 +39,7 @@ def calculate_coverage_ratio(deals: list[dict], quota: float) -> dict[str, Any]:
 
     Target: 3-4x pipeline coverage for healthy pipeline.
     """
-    total_pipeline = sum(d["value"] for d in deals if d["stage"] != "Closed Won")
+    total_pipeline = sum(d["value"] for d in deals if d["stage"] not in ("Closed Won", "Closed Lost"))
     ratio = safe_divide(total_pipeline, quota)
 
     if ratio >= 4.0:
@@ -63,10 +63,8 @@ def calculate_coverage_ratio(deals: list[dict], quota: float) -> dict[str, Any]:
 def calculate_stage_conversion_rates(
     deals: list[dict], stages: list[str]
 ) -> list[dict[str, Any]]:
-    """Calculate stage-to-stage conversion rates.
-
-    Measures the percentage of deals that progress from one stage to the next.
-    """
+    """Calculate conversion along successful stages, excluding Closed Lost."""
+    stages = [stage for stage in stages if stage != "Closed Lost"]
     stage_order = {stage: i for i, stage in enumerate(stages)}
     stage_counts: dict[str, int] = {stage: 0 for stage in stages}
 
@@ -149,13 +147,13 @@ def analyze_deal_aging(
     Uses stage-specific thresholds based on position in the pipeline.
     """
     aging_threshold = average_cycle_days * 2
+    stages = [stage for stage in stages if stage != "Closed Lost"]
     num_stages = len(stages)
-    stage_order = {stage: i for i, stage in enumerate(stages)}
 
     # Stage-specific thresholds: early stages get more time, later stages less
     stage_thresholds: dict[str, int] = {}
     for i, stage in enumerate(stages):
-        if stage == "Closed Won":
+        if stage in ("Closed Won", "Closed Lost"):
             continue
         # Progressive thresholds: first stage gets full cycle, last open stage gets 50%
         progress = safe_divide(i, num_stages - 1)
@@ -167,7 +165,7 @@ def analyze_deal_aging(
     at_risk_deals = 0
 
     for deal in deals:
-        if deal["stage"] == "Closed Won":
+        if deal["stage"] in ("Closed Won", "Closed Lost"):
             continue
 
         stage = deal["stage"]
@@ -210,7 +208,7 @@ def assess_pipeline_risk(
     - Stage distribution health
     - Coverage gap by quarter
     """
-    open_deals = [d for d in deals if d["stage"] != "Closed Won"]
+    open_deals = [d for d in deals if d["stage"] not in ("Closed Won", "Closed Lost")]
     total_pipeline = sum(d["value"] for d in open_deals)
 
     # Concentration risk
@@ -241,7 +239,7 @@ def assess_pipeline_risk(
     # Stage distribution
     stage_distribution: dict[str, dict] = {}
     for stage in stages:
-        if stage == "Closed Won":
+        if stage in ("Closed Won", "Closed Lost"):
             continue
         stage_deals = [d for d in open_deals if d["stage"] == stage]
         count = len(stage_deals)
