@@ -223,19 +223,19 @@ class InterviewAnalyzer:
         metrics = []
         
         # Find percentages
-        percentages = re.findall(r'\d+%', text)
+        percentages = re.findall(r'\d+(?:\.\d+)?%', text)
         metrics.extend(percentages)
         
         # Find time metrics
-        time_metrics = re.findall(r'\d+\s*(?:hours?|minutes?|days?|weeks?|months?)', text, re.IGNORECASE)
+        time_metrics = re.findall(r'\d+(?:\.\d+)?\s*(?:hours?|minutes?|days?|weeks?|months?)', text, re.IGNORECASE)
         metrics.extend(time_metrics)
         
         # Find money metrics
-        money_metrics = re.findall(r'\$[\d,]+', text)
+        money_metrics = re.findall(r'\$[\d,]+(?:\.\d+)?', text)
         metrics.extend(money_metrics)
         
         # Find general numbers with context
-        number_contexts = re.findall(r'(\d+)\s+(\w+)', text)
+        number_contexts = re.findall(r'(\d+(?:\.\d+)?)\s+(\w+)', text)
         for num, context in number_contexts:
             if context.lower() not in ['the', 'a', 'an', 'and', 'or', 'of']:
                 metrics.append(f"{num} {context}")
