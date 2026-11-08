@@ -22,7 +22,7 @@ def required_sample_size_per_group(
     if delta <= 0:
         raise ValueError("MDE resolves to zero; target and baseline must differ.")
 
-    z_alpha = statistics.NormalDist().inv_cdf(1 - alpha / 2)
+    z_alpha = -statistics.NormalDist().inv_cdf(alpha / 2)
     z_beta = statistics.NormalDist().inv_cdf(power)
     pooled = (baseline_rate + target_rate) / 2
 
