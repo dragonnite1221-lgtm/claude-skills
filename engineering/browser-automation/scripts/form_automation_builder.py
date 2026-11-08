@@ -124,7 +124,7 @@ def build_form_script(url, fields, output_format="script"):
     step_functions = []
     for step_num in sorted(steps.keys()):
         step_fields = steps[step_num]
-        actions = "\n".join(generate_field_action(f) for f in step_fields)
+        actions = "\n".join(generate_field_action(f, indent=4) for f in step_fields)
 
         if multi_step:
             fn = textwrap.dedent(f"""\
@@ -162,13 +162,13 @@ async def fill_form(page):
 
     submit_block = ""
     if submit_selector:
-        submit_block = textwrap.dedent(f"""\
+        submit_block = f"""\
 
         # Submit
-        await page.click("{submit_selector}")
+        # The submit click already runs in the generated step.
         await page.wait_for_load_state("networkidle")
         print("Form submitted.")
-""")
+"""
 
     script = textwrap.dedent(f'''\
 #!/usr/bin/env python3
