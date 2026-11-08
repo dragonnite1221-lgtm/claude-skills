@@ -136,9 +136,9 @@ def renewal_urgency_multiplier(days_remaining: Optional[int]) -> float:
 
 
 def get_risk_tier(score: float) -> Dict[str, Any]:
-    """Return the risk tier dict matching the score."""
+    """Select descending lower bounds without gaps between fractional scores."""
     for tier in RISK_TIERS:
-        if tier["min"] <= score <= tier["max"]:
+        if tier["min"] <= score <= RISK_TIERS[0]["max"]:
             return tier
     return RISK_TIERS[-1]  # default to low
 
