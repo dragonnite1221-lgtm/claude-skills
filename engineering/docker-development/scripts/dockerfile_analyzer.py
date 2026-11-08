@@ -234,12 +234,11 @@ def analyze_base_image(instructions):
     tag = parts[1] if len(parts) > 1 else "latest"
 
     # Estimate size
-    size = 0
     image_base = image.split("/")[-1]
-    for key, val in BASE_IMAGE_SIZES.items():
-        if key in f"{image_base}-{tag}" or key == image_base:
-            size = val
-            break
+    variant = next((v for v in ("alpine", "slim") if v in tag), "")
+    size = BASE_IMAGE_SIZES.get(
+        f"{image_base}-{variant}", BASE_IMAGE_SIZES.get(image_base, 0)
+    )
 
     return {
         "image": image,
