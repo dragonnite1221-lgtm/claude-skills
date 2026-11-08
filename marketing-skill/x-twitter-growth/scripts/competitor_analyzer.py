@@ -194,7 +194,7 @@ Examples:
                 handle = f"@{handle}"
             competitors.append(CompetitorProfile(handle=handle))
 
-        if all(c.followers == 0 for c in competitors):
+        if not args.json and all(c.followers == 0 for c in competitors):
             print(f"\n  ℹ️  Handles registered: {', '.join(c.handle for c in competitors)}")
             print(f"  To get full analysis, provide data via JSON import:")
             print(f"  1. Research each profile on X")
