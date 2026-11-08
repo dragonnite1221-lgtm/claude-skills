@@ -51,9 +51,9 @@ def get_diff(args):
     diff_range = args.diff or "--staged"
     cmd = ["git", "diff", diff_range] if diff_range != "--staged" else ["git", "diff", "--staged"]
     try:
-        result = subprocess.run(cmd, capture_output=True, text=True, timeout=30)
+        result = subprocess.run(cmd, capture_output=True, text=True, timeout=30, check=True)
         return result.stdout
-    except (subprocess.TimeoutExpired, FileNotFoundError) as e:
+    except (subprocess.TimeoutExpired, FileNotFoundError, subprocess.CalledProcessError) as e:
         print(f"[error] git diff failed: {e}", file=sys.stderr)
         sys.exit(1)
 
@@ -187,7 +187,7 @@ def main():
 
     if args.json:
         print(json.dumps(result, indent=2))
-        return
+        sys.exit(1 if verdict != "CLEAN" else 0)
 
     print(f"Diff Surgeon — {len(file_diffs)} files, {total_changes} changed lines")
     print(f"Noise ratio: {noise_ratio:.0%} ({total_noise} noise lines)")
