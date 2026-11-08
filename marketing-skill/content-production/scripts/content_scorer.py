@@ -134,7 +134,7 @@ def score_seo(text: str, title: str = "", keyword: str = "") -> dict:
     """Score SEO signals 0-25 (25% of total)."""
     text_lower = text.lower()
     title_lower = title.lower()
-    keyword_lower = keyword.lower()
+    keyword_lower = keyword.lower() if keyword.strip() else ""
 
     points = 0
     signals = {}
@@ -160,7 +160,7 @@ def score_seo(text: str, title: str = "", keyword: str = "") -> dict:
     kw_words = keyword_lower.split()
     kw_count = 0
     for i in range(len(words) - len(kw_words) + 1):
-        if words[i:i+len(kw_words)] == kw_words:
+        if kw_words and words[i:i+len(kw_words)] == kw_words:
             kw_count += 1
     density = (kw_count * len(kw_words)) / n_words * 100
     signals["keyword_density_pct"] = round(density, 2)
