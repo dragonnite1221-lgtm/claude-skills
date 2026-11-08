@@ -569,7 +569,7 @@ def main():
             print(f"Error: invalid JSON: {e}", file=sys.stderr)
             sys.exit(1)
     else:
-        print("No input file provided — running with sample data.\n")
+        print("No input file provided — running with sample data.\n", file=sys.stderr if args.json else sys.stdout)
         data = sample_data()
 
     result = run(data)
