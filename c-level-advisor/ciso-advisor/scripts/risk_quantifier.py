@@ -663,7 +663,7 @@ def main():
         for i, risk in enumerate(risks_sorted, 1):
             print_risk_detail(risk, i)
 
-    if args.budget:
+    if args.budget is not None:
         recommended = prioritize_risks(risks_sorted, args.budget)
         print(f"\n💰 BUDGET ALLOCATION — ${args.budget:,.0f}")
         print(f"   Recommended mitigations (sorted by ROI):")
