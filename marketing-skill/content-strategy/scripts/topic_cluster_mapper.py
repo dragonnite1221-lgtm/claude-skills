@@ -119,7 +119,8 @@ def build_clusters(topics: list, threshold: float = 0.15) -> list:
 def build_output(topics: list, clusters: list) -> dict:
     cluster_output = []
     for i, c in enumerate(clusters, 1):
-        supporting = [t for t in c["topics"] if t != c["pillar"]]
+        supporting = list(c["topics"])
+        supporting.remove(c["pillar"])
         cluster_output.append({
             "cluster_id": i,
             "pillar_topic": c["pillar"],
@@ -127,7 +128,6 @@ def build_output(topics: list, clusters: list) -> dict:
             "supporting_topics": supporting,
             "suggested_url_slug": re.sub(r"[^a-z0-9]+", "-", c["pillar"].lower()).strip("-"),
         })
-
     # Sort by cluster size desc
     cluster_output.sort(key=lambda x: -x["size"])
 
