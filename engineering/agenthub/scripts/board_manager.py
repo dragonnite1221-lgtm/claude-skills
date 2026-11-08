@@ -93,7 +93,11 @@ def read_channel(channel, output_format="text"):
         print(f"Error: Channel '{channel}' not found", file=sys.stderr)
         sys.exit(1)
 
-    files = sorted([f for f in os.listdir(ch_path) if f.endswith(".md")])
+    def post_order(filename):
+        sequence = filename.partition("-")[0]
+        return (int(sequence) if sequence.isdecimal() else float("inf"), filename)
+
+    files = sorted((f for f in os.listdir(ch_path) if f.endswith(".md")), key=post_order)
     posts = []
 
     for fname in files:
@@ -101,11 +105,7 @@ def read_channel(channel, output_format="text"):
         with open(filepath) as f:
             content = f.read()
         metadata, body = parse_post_frontmatter(content)
-        posts.append({
-            "file": fname,
-            "metadata": metadata,
-            "body": body,
-        })
+        posts.append({"file": fname, "metadata": metadata, "body": body})
 
     if output_format == "json":
         print(json.dumps({"channel": channel, "posts": posts}, indent=2))
