@@ -86,7 +86,7 @@ def group_commits(subjects: list[str]) -> dict[str, list[str]]:
     for subject in subjects:
         commit_type = "other"
         for prefix in SECTIONS:
-            if subject.startswith(f"{prefix}:") or subject.startswith(f"{prefix}("):
+            if subject.startswith((f"{prefix}:", f"{prefix}(", f"{prefix}!:")):
                 commit_type = prefix
                 break
         grouped[commit_type].append(subject)
