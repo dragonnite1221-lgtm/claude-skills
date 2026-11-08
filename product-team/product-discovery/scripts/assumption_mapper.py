@@ -3,6 +3,7 @@
 
 import argparse
 import csv
+import sys
 from dataclasses import dataclass
 
 
@@ -108,13 +109,14 @@ def main() -> int:
     assumptions.sort(key=lambda item: item.priority_score, reverse=True)
 
     print("prioritized_assumption_test_plan")
-    print("rank,priority_score,category,risk,certainty,test,assumption")
+    writer = csv.writer(sys.stdout)
+    writer.writerow(["rank", "priority_score", "category", "risk", "certainty", "test", "assumption"])
     for rank, item in enumerate(assumptions[: args.top], start=1):
         test = suggest_test(item.category)
-        print(
-            f"{rank},{item.priority_score:.4f},{item.category},{item.risk:.2f},"
-            f"{item.certainty:.2f},{test},{item.statement}"
-        )
+        writer.writerow([
+            rank, f"{item.priority_score:.4f}", item.category, f"{item.risk:.2f}",
+            f"{item.certainty:.2f}", test, item.statement,
+        ])
 
     return 0
 
