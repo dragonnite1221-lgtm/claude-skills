@@ -284,7 +284,7 @@ class TeamScalingCalculator:
             structure['teams'] = [
                 {
                     'name': f'Team {i+1}',
-                    'size': team_size,
+                    'size': min(team_size, target_headcount - i * team_size),
                     'focus': ['Platform', 'Product', 'Infrastructure', 'Growth'][i % 4]
                 }
                 for i in range(num_teams)
