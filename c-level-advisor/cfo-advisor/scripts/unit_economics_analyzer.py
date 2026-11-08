@@ -146,8 +146,8 @@ def analyze_cohort(cohort: CohortData) -> UnitEconomicsResult:
     m12 = rev_at(11)
     m24 = rev_at(23)
 
-    # Realized LTV through observed months (actual gross profit)
-    m12_ltv = sum(cohort.monthly_revenue[:12]) * cohort.gross_margin_pct if months_available >= 12 else None
+    # Realized per-customer LTV through month 12 (actual gross profit)
+    m12_ltv = sum(cohort.monthly_revenue[:12]) * cohort.gross_margin_pct / n if months_available >= 12 else None
 
     # Retention rates
     ret_m6 = (m6 / m1_rev) if (m6 is not None and m1_rev > 0) else None
