@@ -423,7 +423,7 @@ class ForecastBuilder:
             f"  Minimum Balance: {fmt_money(cf['minimum_balance'])} "
             f"(Week {cf['minimum_balance_week']})"
         )
-        if cf.get("cash_runway_weeks"):
+        if cf.get("cash_runway_weeks") is not None:
             lines.append(f"  Cash Runway:     {cf['cash_runway_weeks']:.0f} weeks")
 
         lines.append(f"\n  Weekly Detail:")
