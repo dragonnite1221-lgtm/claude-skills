@@ -195,7 +195,7 @@ def main():
     parser.add_argument("--metric", type=str,
                         help="Metric name to extract from eval output")
     parser.add_argument("--direction", choices=["lower", "higher"],
-                        default="lower",
+                        default=None,
                         help="Whether lower or higher metric is better")
     parser.add_argument("--baseline", type=float,
                         help="Baseline metric value for delta calculation")
