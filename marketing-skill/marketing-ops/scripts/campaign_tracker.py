@@ -29,13 +29,14 @@ SAMPLE_CAMPAIGN = {
 def analyze_campaign(campaign: dict) -> dict:
     """Analyze campaign status and generate report."""
     tasks = campaign["tasks"]
-    today = datetime.now().strftime("%Y-%m-%d")
+    now = datetime.now()
+    today = now.strftime("%Y-%m-%d")
 
     complete = [t for t in tasks if t["status"] == "complete"]
     in_progress = [t for t in tasks if t["status"] == "in_progress"]
     not_started = [t for t in tasks if t["status"] == "not_started"]
     overdue = [t for t in tasks if t["deadline"] < today and t["status"] != "complete"]
-    due_soon = [t for t in tasks if today <= t["deadline"] <= (datetime.now() + timedelta(days=3)).strftime("%Y-%m-%d") and t["status"] != "complete"]
+    due_soon = [t for t in tasks if today <= t["deadline"] <= (now + timedelta(days=3)).strftime("%Y-%m-%d") and t["status"] != "complete"]
 
     total = len(tasks)
     progress = round((len(complete) / total) * 100) if total > 0 else 0
