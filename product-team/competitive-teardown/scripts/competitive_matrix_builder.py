@@ -248,7 +248,7 @@ def build_matrix(data: Dict[str, Any], weight_overrides: Optional[Dict[str, floa
 
     if your_product:
         result["gap_analysis"] = gap_analysis(
-            your_product.get("scores", {}), scored, dimensions
+            your_product.get("scores", {}), calculate_weighted_scores(competitors, dimensions, weights), dimensions
         )
 
     return result
