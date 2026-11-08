@@ -66,7 +66,7 @@ PATTERN_LIBRARY = {
     },
     "blocked_issues": {
         "phrases": ["blocked", "blocked issues", "impediments"],
-        "jql": 'status = Blocked OR status = Impediment',
+        "jql": '(status = Blocked OR status = Impediment)',
         "description": "Issues in blocked or impediment status",
     },
     "in_progress": {
