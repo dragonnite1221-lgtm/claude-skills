@@ -208,8 +208,8 @@ class CapTable:
         Simple exit analysis: all preferred converts to common, proceeds split pro-rata.
         (Does not model liquidation preferences — see fundraising_playbook.md for that.)
         """
-        total = self.total_shares()
-        price_per_share = exit_valuation / total
+        total = sum(s.shares for s in self.shareholders if not s.is_option_pool)
+        price_per_share = exit_valuation / total if total else 0.0
         results = []
         for s in self.shareholders:
             if s.is_option_pool:
@@ -220,7 +220,7 @@ class CapTable:
                 exit_valuation=exit_valuation,
                 shareholder=s.name,
                 shares=s.shares,
-                ownership_pct=s.shares / total,
+                ownership_pct=s.shares / total if total else 0.0,
                 proceeds_common=proceeds,
                 invested=s.invested,
                 moic=moic,
