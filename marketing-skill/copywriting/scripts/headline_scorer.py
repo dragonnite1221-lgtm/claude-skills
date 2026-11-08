@@ -105,7 +105,7 @@ def score_specificity(headline: str, tokens: list) -> tuple:
         signals.append("timeframe")
     if re.search(r"\b(how to|step|guide|checklist|strategy|system|framework|formula)\b", headline, re.I):
         signals.append("concrete format")
-    if re.search(r"\b\d+%\b", headline):
+    if re.search(r"\b\d+%", headline):
         signals.append("percentage")
     score = min(100, len(signals) * 34)
     return score, signals
