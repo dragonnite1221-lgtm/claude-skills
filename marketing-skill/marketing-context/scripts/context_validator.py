@@ -32,7 +32,7 @@ def validate_context(content: str) -> dict:
     earned = 0
 
     for name, config in SECTIONS.items():
-        section_present = name.lower().replace("& ", "").replace("  ", " ") in content_lower or any(
+        section_present = name.lower() in content_lower or name.lower().replace("& ", "").replace("  ", " ") in content_lower or any(
             m in content_lower for m in config["markers"][:2]
         )
 
