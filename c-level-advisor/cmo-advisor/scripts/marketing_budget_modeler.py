@@ -205,7 +205,7 @@ def allocate_mqls(
         capacity = int(ch.max_mqls_per_month * 12 * budget_multiplier)
         allocated = min(remaining, capacity)
         channel_mqls[ch.name] = allocated
-        channel_budget[ch.name] = allocated * ch.cac
+        channel_budget[ch.name] = allocated * ch.mql_to_close_rate * ch.cac
         remaining -= allocated
 
     return channel_mqls, channel_budget
