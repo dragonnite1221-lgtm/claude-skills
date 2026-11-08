@@ -44,7 +44,7 @@ def calculate(
         missing.append("ARPA — need MRR + customer count")
 
     # ── Growth ────────────────────────────────────────────────────────────────
-    if mrr and mrr_last and mrr_last > 0:
+    if mrr is not None and mrr_last and mrr_last > 0:
         r["MoM_Growth_Pct"] = round(((mrr - mrr_last) / mrr_last) * 100, 2)
     else:
         missing.append("MoM Growth — need last month MRR")
@@ -90,7 +90,7 @@ def calculate(
         missing.append("NRR (accurate) — using churn-only estimate; provide expansion MRR for full NRR")
 
     # ── Rule of 40 ────────────────────────────────────────────────────────────
-    if r.get("MoM_Growth_Pct") and profit_margin is not None:
+    if "MoM_Growth_Pct" in r and profit_margin is not None:
         r["Rule_of_40"] = round(r["MoM_Growth_Pct"] * 12 + profit_margin, 1)
 
     r["_missing"] = missing
