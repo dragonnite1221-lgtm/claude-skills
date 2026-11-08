@@ -111,7 +111,7 @@ def estimate_tier_upgrade_revenue(
             base_arr = safe_divide(arr, current_mult)
             upgrade_arr = base_arr * tier_mult
             incremental = upgrade_arr - arr
-            if incremental > best_revenue:
+            if incremental > 0:
                 # Pick the next tier up (not skip tiers)
                 if best_tier is None or tier_mult < TIER_UPLIFT.get(best_tier.lower(), 999):
                     best_revenue = round(incremental, 0)
