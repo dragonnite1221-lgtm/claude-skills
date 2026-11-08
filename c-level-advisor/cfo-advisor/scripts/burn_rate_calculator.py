@@ -19,7 +19,7 @@ import io
 import json
 import sys
 from dataclasses import dataclass, field
-from datetime import date, timedelta
+from datetime import date
 from typing import Optional
 
 
@@ -154,12 +154,12 @@ class RunwayCalculator:
 
             # Label
             if cfg.start_date:
+                month_index = cfg.start_date.month - 1 + m - 1
                 month_date = date(
-                    cfg.start_date.year,
-                    cfg.start_date.month,
+                    cfg.start_date.year + month_index // 12,
+                    month_index % 12 + 1,
                     1,
-                ) + timedelta(days=32 * (m - 1))
-                month_date = month_date.replace(day=1)
+                )
                 label = f"Month {m:02d} ({month_date.strftime('%b %Y')})"
             else:
                 label = f"Month {m:02d}"
