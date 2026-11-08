@@ -212,7 +212,7 @@ class ProjectMetrics:
         if effective_planned <= 0:
             return 1.0
         
-        return self.completed_features / effective_planned
+        return min(1.0, self.completed_features / effective_planned)
     
     def _calculate_quality_score(self) -> float:
         """Calculate quality score based on defects and test coverage."""
