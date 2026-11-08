@@ -94,7 +94,7 @@ def generate_plan(niche: str, posts_per_day: int, weeks: int, start_date: dateti
         for day in range(7):
             current = week_start + timedelta(days=day)
             day_name = current.strftime("%A")
-            is_weekend = day >= 5
+            is_weekend = current.weekday() >= 5
 
             times = OPTIMAL_TIMES["weekend" if is_weekend else "weekday"]
             actual_posts = max(1, posts_per_day - (1 if is_weekend else 0))
@@ -106,12 +106,12 @@ def generate_plan(niche: str, posts_per_day: int, weeks: int, start_date: dateti
             )
 
             for p in range(actual_posts):
-                # Determine format based on day position
-                if day in [1, 3] and p == 0:  # Tue/Thu first slot = thread
+                # Determine format based on the calendar weekday
+                if current.weekday() in [1, 3] and p == 0:  # Tue/Thu first slot = thread
                     fmt = "thread"
                 elif p == actual_posts - 1 and not is_weekend:
                     fmt = "question"  # Last post = engagement driver
-                elif day == 4 and p == 0:  # Friday first = quote tweet
+                elif current.weekday() == 4 and p == 0:  # Friday first = quote tweet
                     fmt = "quote_tweet"
                 else:
                     fmt = "atomic_tweet"
