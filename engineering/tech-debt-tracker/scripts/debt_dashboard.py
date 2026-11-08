@@ -182,7 +182,7 @@ class DebtDashboard:
                 try:
                     if len(date_str) == 8:  # YYYYMMDD
                         date_str = f"{date_str[:4]}-{date_str[4:6]}-{date_str[6:]}"
-                    datetime.strptime(date_str, "%Y-%m-%d")
+                    date_str = datetime.strptime(date_str, "%m-%d-%Y" if pattern == date_patterns[2] else "%Y-%m-%d").date().isoformat()
                     return date_str + "T12:00:00"
                 except ValueError:
                     continue
