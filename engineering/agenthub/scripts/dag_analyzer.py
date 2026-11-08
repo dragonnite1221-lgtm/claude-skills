@@ -94,7 +94,7 @@ def detect_frontier(session_id=None):
     for branch, commit in branch_commits.items():
         is_ancestor = False
         for other_branch, other_commit in branch_commits.items():
-            if other_branch == branch:
+            if other_commit == commit:
                 continue
             # Check if commit is ancestor of other_commit
             result = subprocess.run(
