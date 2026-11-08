@@ -203,7 +203,7 @@ def score_commitment_reliability(sprints: List[SprintHealthData]) -> Dict[str, A
     
     # Penalty for inconsistency
     consistency_bonus = min(10, consistency * 10)
-    final_score = min(100, base_score + consistency_bonus)
+    final_score = min(100, max(0, base_score + consistency_bonus))
     
     return {
         "score": final_score,
