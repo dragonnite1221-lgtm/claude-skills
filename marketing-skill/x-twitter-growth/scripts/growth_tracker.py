@@ -83,7 +83,6 @@ def generate_report(handle: str, entries: list) -> dict:
         "last_record": entries[-1]["timestamp"],
         "current_followers": entries[-1]["followers"],
     }
-
     if len(entries) >= 2:
         first = entries[0]
         last = entries[-1]
@@ -102,14 +101,15 @@ def generate_report(handle: str, entries: list) -> dict:
         if first["followers"] > 0:
             pct_change = ((last["followers"] - first["followers"]) / first["followers"]) * 100
             report["growth_percent"] = round(pct_change, 1)
-
         # Engagement trend
         eng_rates = [e["engagement_rate"] for e in entries if e.get("engagement_rate", 0) > 0]
         if len(eng_rates) >= 2:
             mid = len(eng_rates) // 2
             first_half_avg = sum(eng_rates[:mid]) / mid
             second_half_avg = sum(eng_rates[mid:]) / (len(eng_rates) - mid)
-            report["engagement_trend"] = "improving" if second_half_avg > first_half_avg else "declining"
+            report["engagement_trend"] = ("improving" if second_half_avg > first_half_avg else
+                                      "declining" if second_half_avg < first_half_avg else
+                                      "flat")
             report["avg_engagement_rate"] = round(sum(eng_rates) / len(eng_rates), 2)
 
     return report
@@ -176,7 +176,7 @@ def print_report(report: dict):
             print(f"  Growth rate:         {report['growth_percent']:+.1f}%")
 
         if "engagement_trend" in report:
-            trend_icon = "📈" if report["engagement_trend"] == "improving" else "📉"
+            trend_icon = {"improving": "📈", "flat": "➡️"}.get(report["engagement_trend"], "📉")
             print(f"  Engagement:          {trend_icon} {report['engagement_trend']} (avg {report['avg_engagement_rate']}%)")
 
     print(f"\n{'='*60}\n")
