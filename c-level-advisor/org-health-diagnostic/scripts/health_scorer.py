@@ -6,11 +6,11 @@ Stdlib only. Run with: python health_scorer.py
 """
 
 import json
+from contextlib import redirect_stdout
 import sys
 from dataclasses import dataclass, field
 from typing import Dict, List, Optional, Tuple
 from enum import Enum
-
 
 class Stage(Enum):
     SEED = "seed"
@@ -18,19 +18,16 @@ class Stage(Enum):
     SERIES_B = "series_b"
     SERIES_C = "series_c"
 
-
 class Trend(Enum):
     IMPROVING = "improving"
     STABLE = "stable"
     DECLINING = "declining"
     UNKNOWN = "unknown"
 
-
 class TrafficLight(Enum):
     GREEN = "green"
     YELLOW = "yellow"
     RED = "red"
-
 
 # Stage weights: how much each dimension contributes to overall score
 STAGE_WEIGHTS = {
@@ -55,7 +52,6 @@ STAGE_WEIGHTS = {
         "market": 0.05, "security": 0.02
     },
 }
-
 
 @dataclass
 class Metric:
@@ -113,7 +109,6 @@ class Metric:
             return TrafficLight.YELLOW
         return TrafficLight.RED
 
-
 @dataclass
 class Dimension:
     key: str
@@ -149,7 +144,6 @@ class Dimension:
     def missing_metrics(self) -> List[str]:
         return [m.name for m in self.metrics if m.value is None]
 
-
 def build_financial_dimension(stage: Stage, **kwargs) -> Dimension:
     # Thresholds vary by stage
     runway_green = {Stage.SEED: 18, Stage.SERIES_A: 12, Stage.SERIES_B: 12, Stage.SERIES_C: 18}
@@ -176,7 +170,6 @@ def build_financial_dimension(stage: Stage, **kwargs) -> Dimension:
         ],
         trend=kwargs.get("financial_trend", Trend.UNKNOWN),
     )
-
 
 def build_revenue_dimension(stage: Stage, **kwargs) -> Dimension:
     nrr_green = {Stage.SEED: 100, Stage.SERIES_A: 110, Stage.SERIES_B: 115, Stage.SERIES_C: 120}
@@ -538,7 +531,7 @@ def interactive_mode(stage: Stage) -> Dict:
     return data
 
 
-def main():
+def _run():
     print("\n🏥 ORG HEALTH DIAGNOSTIC")
     print("Multi-dimension organizational health scorer\n")
 
@@ -578,7 +571,14 @@ def main():
     print_dashboard(dimensions, overall, stage, company)
 
     if "--json" in sys.argv:
-        print(json.dumps(to_json(dimensions, overall, stage), indent=2))
+        return to_json(dimensions, overall, stage)
+
+
+def main():
+    with redirect_stdout(sys.stderr if "--json" in sys.argv else sys.stdout):
+        result = _run()
+    if result is not None:
+        print(json.dumps(result, indent=2))
 
 
 if __name__ == "__main__":
