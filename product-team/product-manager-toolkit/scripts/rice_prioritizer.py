@@ -321,9 +321,9 @@ def main():
         # Output prioritized features as CSV
         if prioritized:
             keys = prioritized[0].keys()
-            print(','.join(keys))
-            for feature in prioritized:
-                print(','.join(str(feature.get(k, '')) for k in keys))
+            writer = csv.DictWriter(sys.stdout, fieldnames=keys)
+            writer.writeheader()
+            writer.writerows(prioritized)
     else:
         print(format_output(prioritized, analysis, roadmap))
 
