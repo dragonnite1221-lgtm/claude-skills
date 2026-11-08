@@ -197,7 +197,7 @@ def cleanup_session(session_id):
                 current_path = line[len("worktree "):]
             elif line.startswith("branch ") and current_path:
                 ref = line[len("branch "):]
-                if f"hub/{session_id}/" in ref:
+                if ref.startswith(f"refs/heads/hub/{session_id}/"):
                     result = subprocess.run(
                         ["git", "worktree", "remove", "--force", current_path],
                         capture_output=True, text=True
