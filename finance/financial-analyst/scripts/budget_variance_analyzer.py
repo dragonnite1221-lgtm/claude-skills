@@ -60,6 +60,8 @@ class BudgetVarianceAnalyzer:
         Revenue: over budget = favorable
         Expense: under budget = favorable
         """
+        if variance_amount == 0:
+            return "Neutral"
         if line_type.lower() in ("revenue", "income", "sales"):
             return "Favorable" if variance_amount > 0 else "Unfavorable"
         else:
@@ -126,7 +128,6 @@ class BudgetVarianceAnalyzer:
     def department_summary(self) -> Dict[str, Dict[str, Any]]:
         """Summarize variances by department."""
         departments: Dict[str, Dict[str, float]] = {}
-
         for v in self.variances:
             dept = v["department"]
             if dept not in departments:
@@ -136,18 +137,19 @@ class BudgetVarianceAnalyzer:
                     "total_variance": 0.0,
                     "favorable_count": 0,
                     "unfavorable_count": 0,
+                    "neutral_count": 0,
                     "line_count": 0,
                 }
-
             departments[dept]["total_actual"] += v["actual"]
             departments[dept]["total_budget"] += v["budget"]
             departments[dept]["total_variance"] += v["budget_variance_amount"]
             departments[dept]["line_count"] += 1
             if v["favorability"] == "Favorable":
                 departments[dept]["favorable_count"] += 1
-            else:
+            elif v["favorability"] == "Unfavorable":
                 departments[dept]["unfavorable_count"] += 1
-
+            else:
+                departments[dept]["neutral_count"] += 1
         # Add variance percentage
         for dept_data in departments.values():
             dept_data["variance_pct"] = round(
@@ -159,7 +161,6 @@ class BudgetVarianceAnalyzer:
             )
 
         return departments
-
     def category_summary(self) -> Dict[str, Dict[str, Any]]:
         """Summarize variances by category."""
         categories: Dict[str, Dict[str, float]] = {}
@@ -207,7 +208,6 @@ class BudgetVarianceAnalyzer:
 
         revenue_variance = total_actual - total_budget
         expense_variance = total_expense_actual - total_expense_budget
-
         favorable_count = sum(
             1 for v in self.variances if v["favorability"] == "Favorable"
         )
@@ -222,6 +222,7 @@ class BudgetVarianceAnalyzer:
             "material_variances_count": len(self.material_variances),
             "favorable_count": favorable_count,
             "unfavorable_count": unfavorable_count,
+            "neutral_count": sum(v["favorability"] == "Neutral" for v in self.variances),
             "revenue": {
                 "actual": total_actual,
                 "budget": total_budget,
@@ -246,7 +247,6 @@ class BudgetVarianceAnalyzer:
         }
 
         return self.summary
-
     def run_analysis(self) -> Dict[str, Any]:
         """Run the complete variance analysis."""
         self.calculate_variances()
@@ -268,11 +268,9 @@ class BudgetVarianceAnalyzer:
         lines.append("=" * 70)
         lines.append("BUDGET VARIANCE ANALYSIS")
         lines.append("=" * 70)
-
         summary = results["executive_summary"]
         lines.append(f"\n  Company: {summary['company']}")
         lines.append(f"  Period:  {summary['period']}")
-
         def fmt_money(val: float) -> str:
             sign = "+" if val > 0 else ""
             if abs(val) >= 1e6:
@@ -299,7 +297,8 @@ class BudgetVarianceAnalyzer:
             f"  Total Items: {summary['total_line_items']}  |  "
             f"Material: {summary['material_variances_count']}  |  "
             f"Favorable: {summary['favorable_count']}  |  "
-            f"Unfavorable: {summary['unfavorable_count']}"
+            f"Unfavorable: {summary['unfavorable_count']}  |  "
+            f"Neutral: {summary['neutral_count']}"
         )
 
         # Material variances
@@ -331,7 +330,8 @@ class BudgetVarianceAnalyzer:
                 lines.append(
                     f"  {dept_name}: Variance {fmt_money(d['total_variance'])} "
                     f"({d['variance_pct']:+.1f}%) | "
-                    f"Fav: {d['favorable_count']} / Unfav: {d['unfavorable_count']}"
+                    f"Fav: {d['favorable_count']} / Unfav: {d['unfavorable_count']} / "
+                    f"Neutral: {d['neutral_count']}"
                 )
 
         # Category summary
