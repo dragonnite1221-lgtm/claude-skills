@@ -43,7 +43,7 @@ CODE_EXTENSIONS = {
 }
 
 TEST_PATTERNS = [
-    r"test_.*\.py$",
+    r"test_[^/]*\.py$",
     r".*_test\.py$",
     r".*\.test\.[jt]sx?$",
     r".*\.spec\.[jt]sx?$",
@@ -150,7 +150,7 @@ def check_tests(all_files, root):
     for filepath in all_files:
         rel = os.path.relpath(filepath, root)
         for pattern in TEST_PATTERNS:
-            if re.search(pattern, rel):
+            if re.search(r"(?:^|/)" + pattern, rel.replace(os.sep, "/")):
                 return {"name": "tests", "status": "PASS", "message": f"Test file found: {rel}"}
     return {"name": "tests", "status": "FAIL", "message": "No test files found"}
 
