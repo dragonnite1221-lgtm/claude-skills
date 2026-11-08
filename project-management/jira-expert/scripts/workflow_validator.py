@@ -286,11 +286,11 @@ def validate_workflow(data: Dict[str, Any]) -> Dict[str, Any]:
     penalty = 0
     for finding in all_findings:
         severity = finding["severity"]
-        summary[severity] = summary.get(severity, 0) + 1
+        summary_key = {"error": "errors", "warning": "warnings"}.get(severity, severity)
+        summary[summary_key] = summary.get(summary_key, 0) + 1
         penalty += SEVERITY_WEIGHTS.get(severity, 0)
 
     health_score = max(0, 100 - penalty)
-
     if health_score >= 90:
         grade = "excellent"
     elif health_score >= 75:
