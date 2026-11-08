@@ -85,10 +85,8 @@ def analyze_funnel(data):
     if worst_step is not None:
         worst = analysis[worst_step]
         # What if we halved the drop-off at the worst step?
-        current_drop_rate = worst["drop_rate"] / 100
-        improved_drop_rate = current_drop_rate / 2
-        prev_users = steps[worst_step - 1]["users"]
-        gained_users = int(prev_users * (current_drop_rate - improved_drop_rate))
+        # Calculate from counts, not the rounded display percentage.
+        gained_users = int(worst["dropped_users"] // 2)
 
         # Propagate improvement through remaining steps
         cascade_rate = 1.0
