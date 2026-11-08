@@ -31,7 +31,7 @@ def check_contrast(fg, bg):
         l1, l2 = l2, l1
         
     ratio = (l1 + 0.05) / (l2 + 0.05)
-    return round(ratio, 2)
+    return ratio
 
 def main():
     parser = argparse.ArgumentParser(description="Apple HIG Compliance Checker")
@@ -58,7 +58,7 @@ def main():
     if args.command == "contrast":
         ratio = check_contrast(args.fg, args.bg)
         status = "PASSED" if ratio >= 4.5 else "FAILED"
-        print(f"Contrast Ratio: {ratio} [{status}]")
+        print(f"Contrast Ratio: {round(ratio, 2)} [{status}]")
         if status == "FAILED":
             print("Recommendation: Increase contrast to at least 4.5:1 for accessibility.")
             
@@ -78,7 +78,7 @@ def main():
                     if item['type'] == 'contrast':
                         r = check_contrast(item['fg'], item['bg'])
                         if r < 4.5:
-                            results["violations"].append(f"Contrast {r} fails for {item.get('name', 'element')}")
+                            results["violations"].append(f"Contrast {round(r, 2)} fails for {item.get('name', 'element')}")
                             results["score"] -= 10
                     elif item['type'] == 'target':
                         if item['w'] < 44 or item['h'] < 44:
