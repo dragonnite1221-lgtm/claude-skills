@@ -194,7 +194,7 @@ class RetentionAnalyzer:
             c.arr for c in opening
             if c.churn_date and period_start < c.churn_date <= period_end
         )
-        contraction = sum(c.contraction_arr for c in opening)
+        contraction = sum(c.contraction_arr for c in opening if c.is_active(period_end))
         return (churned_arr + contraction) / opening_arr if opening_arr else 0.0
 
 
