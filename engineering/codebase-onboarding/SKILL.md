@@ -31,7 +31,7 @@ python3 scripts/codebase_analyzer.py /path/to/repo --json
 ```
 
 `--json` emits `{ root, file_count, languages, key_config_files, top_extensions,
-largest_files, structure }`. The analyzer detects languages by extension (Python, JS/TS,
+largest_files, directory_structure }`. The analyzer detects languages by extension (Python, JS/TS,
 Go, Rust, Java, etc.) and checks for known manifests (package.json, requirements.txt,
 pyproject.toml, go.mod, Cargo.toml, Dockerfile, and more).
 
