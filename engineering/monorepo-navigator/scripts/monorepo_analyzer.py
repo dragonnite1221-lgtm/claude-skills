@@ -68,12 +68,15 @@ def parse_package_workspaces(root: Path) -> List[str]:
 
 def expand_workspace_patterns(root: Path, patterns: List[str]) -> List[Path]:
     paths: Set[Path] = set()
+    excluded: Set[Path] = set()
     for pattern in patterns:
+        is_exclusion = pattern.startswith("!")
+        pattern = pattern[1:] if is_exclusion else pattern
         for match in glob.glob(str(root / pattern)):
             p = Path(match)
             if p.is_dir() and (p / "package.json").exists():
-                paths.add(p.resolve())
-    return sorted(paths)
+                (excluded if is_exclusion else paths).add(p.resolve())
+    return sorted(paths - excluded)
 
 
 def load_workspace_packages(workspaces: List[Path]) -> Dict[str, Dict]:
