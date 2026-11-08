@@ -385,7 +385,7 @@ def generate_risk_recommendations(risks: List[Risk], analysis_results: Dict[str,
     if critical_risks:
         recommendations.append(f"URGENT: Address {len(critical_risks)} critical risks immediately. These require executive attention and dedicated resources.")
         
-        for risk in critical_risks[:3]:  # Top 3 critical risks
+        for risk in sorted(critical_risks, key=lambda r: r.risk_score, reverse=True)[:3]:  # Top 3 critical risks
             recommendations.append(f"Critical Risk - {risk.title}: Implement {risk.suggested_approach} strategy within 48 hours.")
     
     # High-concentration category recommendations
