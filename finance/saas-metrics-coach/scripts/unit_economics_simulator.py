@@ -153,7 +153,7 @@ def format_report(results):
     if len(projs) > 6:
         lines.append("  ...")
     
-    for p in projs[-3:]:
+    for p in projs[max(3, len(projs) - 3):]:
         lines.append(
             f"{p['month']:<8} ${p['mrr']:<11,.0f} ${p['arr']:<11,.0f} "
             f"${p['monthly_revenue']:<11,.0f} ${p['net_profit']:<11,.0f}"
