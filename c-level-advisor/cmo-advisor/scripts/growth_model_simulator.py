@@ -285,7 +285,7 @@ def print_model_detail(proj: ModelProjection) -> None:
     print()
 
     # Print monthly snapshot (every 3 months + final)
-    milestones = set(range(3, SIMULATION_MONTHS + 1, 3)) | {SIMULATION_MONTHS}
+    milestones = set(range(3, proj.snapshots[-1].month + 1, 3)) | {proj.snapshots[-1].month}
     print(f"  {'Month':<7} {'MRR':>10} {'New MRR':>9} {'Churned':>9} {'Expand':>8} {'Net New':>9}")
     print("  " + "-" * 56)
     for snap in proj.snapshots:
@@ -300,10 +300,10 @@ def print_model_detail(proj: ModelProjection) -> None:
     growth_x = final.mrr / STARTING_MRR
     arr_final = final.mrr * 12
     weighted_cac = _weighted_cac(model.channel_mix)
-    be = f"Month {proj.break_even_month}" if proj.break_even_month else f"> {SIMULATION_MONTHS}mo"
+    be = f"Month {proj.break_even_month}" if proj.break_even_month else f"> {final.month}mo"
 
     print()
-    print(f"  Final MRR ({SIMULATION_MONTHS}mo):    {fmt_mrr(final.mrr)}")
+    print(f"  Final MRR ({final.month}mo):    {fmt_mrr(final.mrr)}")
     print(f"  Final ARR:             {fmt_currency(arr_final)}")
     print(f"  Growth multiple:       {growth_x:.1f}x from starting MRR")
     print(f"  Weighted blended CAC:  {fmt_currency(weighted_cac)}")
