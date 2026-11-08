@@ -226,12 +226,12 @@ def detect_coverage_gaps(data, company_ids):
     over_indexed = []
     for company_okr in data["company"]["okrs"]:
         cid = company_okr["id"]
-        supporting = coverage.get(cid, [])
+        supporting = list(dict.fromkeys(s["team"] for s in coverage.get(cid, [])))
         entry = {
             "company_okr_id": cid,
             "objective": company_okr["objective"],
             "supporting_team_count": len(supporting),
-            "supporting_teams": [s["team"] for s in supporting]
+            "supporting_teams": supporting
         }
         if len(supporting) == 0:
             gaps.append(entry)
