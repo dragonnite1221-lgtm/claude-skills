@@ -172,7 +172,7 @@ def python_scaffold(server_name: str, tools: List[Dict[str, Any]]) -> str:
         fname = sanitize_tool_name(tool["name"])
         handlers.append(
             f"@mcp.tool()\ndef {fname}(input: dict) -> dict:\n"
-            f"    \"\"\"{tool['description']}\"\"\"\n"
+            f"    {tool['description']!r}\n"
             f"    return {{\"tool\": \"{tool['name']}\", \"status\": \"todo\", \"input\": input}}\n"
         )
 
