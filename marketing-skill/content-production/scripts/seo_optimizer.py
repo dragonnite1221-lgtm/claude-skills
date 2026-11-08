@@ -167,7 +167,7 @@ class SEOOptimizer:
         words = content.split()
         
         if not sentences or not words:
-            return {'score': 0, 'level': 'Unknown'}
+            return {'score': 0, 'level': 'Unknown', 'avg_sentence_length': 0}
         
         avg_sentence_length = len(words) / len(sentences)
         
