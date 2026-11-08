@@ -60,12 +60,12 @@ class UserStoryGenerator:
         
         # Generate stories for each persona and scope item
         for persona in personas:
-            for i, scope_item in enumerate(scope):
+            for scope_item in scope:
                 story = self.generate_story(
                     persona=persona,
                     feature=scope_item,
                     epic=epic_name,
-                    index=i+1
+                    index=len(stories)+1
                 )
                 stories.append(story)
         
