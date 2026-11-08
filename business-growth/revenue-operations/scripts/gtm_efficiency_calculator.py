@@ -225,27 +225,20 @@ def calculate_ltv_cac(
 def calculate_cac_payback(
     cac: float, arpa_monthly: float, gross_margin_pct: float
 ) -> dict[str, Any]:
-    """Calculate CAC Payback Period.
-
-    Formula: CAC / (ARPA_monthly x Gross Margin) in months
-    Target: <18 months
-
-    Args:
-        cac: Customer acquisition cost.
-        arpa_monthly: Average revenue per account per month.
-        gross_margin_pct: Gross margin as percentage.
-
-    Returns:
-        CAC payback months with rating and benchmark.
-    """
+    """Return CAC payback months, or None for nonpositive monthly contribution."""
     gross_margin = gross_margin_pct / 100
     monthly_contribution = arpa_monthly * gross_margin
-    payback_months = safe_divide(cac, monthly_contribution)
-
-    benchmark = rate_metric("cac_payback_months", payback_months)
+    payback_months = cac / monthly_contribution if monthly_contribution > 0 else None
+    benchmark = (
+        rate_metric("cac_payback_months", payback_months)
+        if payback_months is not None else {
+            "rating": "N/A", "label": "Positive monthly contribution required",
+            "percentile": "N/A",
+        }
+    )
 
     return {
-        "months": round(payback_months, 1),
+        "months": round(payback_months, 1) if payback_months is not None else None,
         "cac": cac,
         "arpa_monthly": arpa_monthly,
         "gross_margin_pct": gross_margin_pct,
@@ -389,7 +382,12 @@ def generate_recommendations(metrics: dict) -> list[str]:
 
     # CAC Payback
     cp = metrics["cac_payback"]
-    if cp["rating"] == "Red":
+    if cp["months"] is None:
+        recs.append(
+            "CAC payback is unavailable without positive monthly contribution. "
+            "Improve gross margin or ARPA before assessing recovery time."
+        )
+    elif cp["rating"] == "Red":
         recs.append(
             f"CAC payback is {cp['months']} months (target <18). Capital recovery is too slow. "
             "Reduce acquisition costs or increase gross-margin-weighted ARPA."
@@ -514,7 +512,8 @@ def format_text_report(results: dict) -> str:
     metrics_order = [
         ("magic_number", "Magic Number", lambda m: f"{m['value']}"),
         ("ltv_cac", "LTV:CAC Ratio", lambda m: f"{m['ratio']}:1"),
-        ("cac_payback", "CAC Payback", lambda m: f"{m['months']} months"),
+        ("cac_payback", "CAC Payback",
+         lambda m: f"{m['months']} months" if m["months"] is not None else "N/A"),
         ("burn_multiple", "Burn Multiple", lambda m: f"{m['value']}x"),
         ("rule_of_40", "Rule of 40", lambda m: f"{m['value']}%"),
         ("ndr", "Net Dollar Retention", lambda m: f"{m['ndr_pct']}%"),
@@ -561,7 +560,8 @@ def format_text_report(results: dict) -> str:
     # CAC Payback
     cp = results["cac_payback"]
     lines.append("")
-    lines.append(f"  CAC PAYBACK: {cp['months']} months")
+    payback_text = f"{cp['months']} months" if cp["months"] is not None else "N/A"
+    lines.append(f"  CAC PAYBACK: {payback_text}")
     lines.append(f"    CAC:                 {format_currency(cp['cac'])}")
     lines.append(f"    Monthly Contribution:{format_currency(cp['monthly_contribution'])}")
     lines.append(f"    Rating:              {cp['rating']} - {cp['label']}")
