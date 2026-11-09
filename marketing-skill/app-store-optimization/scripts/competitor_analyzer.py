@@ -86,7 +86,7 @@ class CompetitorAnalyzer:
         # Extract common keywords across competitors
         all_keywords = []
         for analysis in analyses:
-            all_keywords.extend(analysis['keyword_strategy']['primary_keywords'])
+            all_keywords.extend(dict.fromkeys(analysis['keyword_strategy']['primary_keywords']))
 
         common_keywords = self._find_common_keywords(all_keywords)
 
