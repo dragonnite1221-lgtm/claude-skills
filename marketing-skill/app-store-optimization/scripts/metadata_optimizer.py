@@ -214,8 +214,8 @@ class MetadataOptimizer:
             'keyword_field': keyword_field,
             'length': len(keyword_field),
             'remaining_chars': max_length - len(keyword_field),
-            'keywords_included': keyword_field.split(','),
-            'keywords_count': len(keyword_field.split(',')),
+            'keywords_included': keyword_field.split(',') if keyword_field else [],
+            'keywords_count': len(keyword_field.split(',')) if keyword_field else 0,
             'keywords_excluded': [kw for kw in target_keywords if kw.lower() not in keyword_field],
             'description_coverage': density,
             'optimization_tips': [
