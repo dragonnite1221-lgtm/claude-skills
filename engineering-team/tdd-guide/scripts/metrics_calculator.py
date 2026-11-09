@@ -216,7 +216,7 @@ class MetricsCalculator:
             r'\bit\(',  # Jest/Mocha: it()
             r'\btest\(',  # Jest: test()
             r'@Test',  # JUnit: @Test
-            r'\bdef test_',  # Python def test_
+            # Python test names are already counted by the first pattern.
         ]
 
         count = 0
