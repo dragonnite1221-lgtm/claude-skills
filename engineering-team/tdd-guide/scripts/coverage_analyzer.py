@@ -177,7 +177,7 @@ class CoverageAnalyzer:
                             if '(' in condition_coverage:
                                 branch_info = condition_coverage.split('(')[1].split(')')[0]
                                 covered, total = map(int, branch_info.split('/'))
-                                branches[f"{line_num}:branch"] = covered
+                                branches.update({f"{line_num}:branch:{i}": int(i < covered) for i in range(total)})
 
                     files[filename] = {
                         'lines': lines,
