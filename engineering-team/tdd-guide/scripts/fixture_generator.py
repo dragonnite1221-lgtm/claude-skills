@@ -414,10 +414,11 @@ class FixtureGenerator:
             return str(data)
 
     def _dict_to_yaml(self, data: Any, indent: int = 0) -> str:
-        """Simple YAML generator."""
+        """Simple YAML generator; preserve empty collection types."""
         lines = []
         indent_str = "  " * indent
-
+        if isinstance(data, (dict, list)) and not data:
+            return indent_str + ("{}" if isinstance(data, dict) else "[]")
         if isinstance(data, dict):
             for key, value in data.items():
                 if isinstance(value, (dict, list)):
@@ -436,5 +437,4 @@ class FixtureGenerator:
 
         else:
             return str(data)
-
         return "\n".join(lines)
